@@ -1,11 +1,15 @@
 # Frontier brief: sailpsd2shell — CVE-2026-54627 (SAIL PSD Bitmap depth mismatch)
 
-**Status: STAGED 2026-11-27 W315; not yet admitted.** Target slug
-`sailpsd2shell`; distinct from the admitted `sailtga2shell` lane (different
-CVE, codec and sink). Dedicated inner-socket window 209 is live with panes
-%424/%425 (`dead=0`); registry now has 210/210 unique names. Staged commit
-`ef370299` replayed clean: 42/0 base and 12/0 probe. This author report is not
-independent acceptance.
+**Status: ADMITTED 2026-11-27 W317 under standing #6 as the 201st declared
+target mind.** Target slug `sailpsd2shell`; distinct from the admitted
+`sailtga2shell` lane (different CVE, codec and sink). Dedicated inner-socket
+window 209 is live with panes %424/%425 (`dead=0`); registry has 210/210
+unique names. Operator clean-archive replay at 05:34Z: unmodified
+`bash run-probe.sh` rc 0, 12 PASS / 0 FAIL with inner 42 PASS / 0 FAIL;
+archive SHA-256 `54dd5d8b13510881224d7acdb384435e897b23647020fd17d7a9d7e048672445`,
+replay log `61d43c7639b6d52dad30cf978f26d3bf00d60bb3d57a4f15a4d461f385855502`.
+Author reports are not independent acceptance; witness replay of the staged
+scope was requested in tape #6112.
 
 ## Verified ground truth (sources read 2026-11-27)
 

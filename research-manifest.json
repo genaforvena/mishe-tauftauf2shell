@@ -4,18 +4,18 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 200,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell (19:2xZ), pcre2jit2shell (19:5xZ), gnutlsdtls2shell (20:4xZ) libtiffpixarlog2shell (21:0xZ), inihlongline2shell (21:4xZ), mujs2shell (22:1xZ), openscapmangle2shell (22:2xZ), live555vorbis2shell (22:5xZ) and oiiocineon2shell (23:1xZ) and sngrepsip2shell (23:3xZ) admitted 2026-11-26 under standing #6, and libicalclean2shell admitted 2026-11-27 under standing #6; the earlier roster name list is preserved in docs/architecture.md. and libmodplugdsm2shell admitted 2026-11-27 under standing #6 and openjphcleanup2shell admitted 2026-11-27 under standing #6 and afflibpage2shell admitted 2026-11-27 under standing #6 and lzxwindow2shell admitted 2026-11-27 under standing #6 and sqlitesession2shell admitted 2026-11-27 under standing #6 and lwipmqtt2shell admitted 2026-11-27 under standing #6",
+      "value": 201,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell (19:2xZ), pcre2jit2shell (19:5xZ), gnutlsdtls2shell (20:4xZ) libtiffpixarlog2shell (21:0xZ), inihlongline2shell (21:4xZ), mujs2shell (22:1xZ), openscapmangle2shell (22:2xZ), live555vorbis2shell (22:5xZ) and oiiocineon2shell (23:1xZ) and sngrepsip2shell (23:3xZ) admitted 2026-11-26 under standing #6, and libicalclean2shell admitted 2026-11-27 under standing #6; the earlier roster name list is preserved in docs/architecture.md. and libmodplugdsm2shell admitted 2026-11-27 under standing #6 and openjphcleanup2shell admitted 2026-11-27 under standing #6 and afflibpage2shell admitted 2026-11-27 under standing #6 and lzxwindow2shell admitted 2026-11-27 under standing #6 and sqlitesession2shell admitted 2026-11-27 under standing #6 and lwipmqtt2shell admitted 2026-11-27 under standing #6 sailpsd2shell (05:3xZ),",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 197,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell admitted 19:2xZ, pcre2jit2shell admitted 19:5xZ, gnutlsdtls2shell admitted 20:4xZ libtiffpixarlog2shell admitted 21:0xZ, inihlongline2shell admitted 21:4xZ, mujs2shell admitted 22:1xZ, openscapmangle2shell admitted 22:2xZ, live555vorbis2shell admitted 22:5xZ and oiiocineon2shell admitted 23:1xZ and sngrepsip2shell admitted 23:3xZ and libicalclean2shell admitted 00:5xZ and libmodplugdsm2shell admitted 01:2xZ and openjphcleanup2shell admitted 01:3xZ and afflibpage2shell admitted 02:2xZ on 2026-11-27. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. and lzxwindow2shell admitted 02:4xZ on 2026-11-27. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here. sqlitesession2shell admitted 03:2xZ on 2026-11-27 under standing #6. lwipmqtt2shell admitted 04:0xZ on 2026-11-27 under standing #6.",
+      "value": 198,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell admitted 19:2xZ, pcre2jit2shell admitted 19:5xZ, gnutlsdtls2shell admitted 20:4xZ libtiffpixarlog2shell admitted 21:0xZ, inihlongline2shell admitted 21:4xZ, mujs2shell admitted 22:1xZ, openscapmangle2shell admitted 22:2xZ, live555vorbis2shell admitted 22:5xZ and oiiocineon2shell admitted 23:1xZ and sngrepsip2shell admitted 23:3xZ and libicalclean2shell admitted 00:5xZ and libmodplugdsm2shell admitted 01:2xZ and openjphcleanup2shell admitted 01:3xZ and afflibpage2shell admitted 02:2xZ on 2026-11-27. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. and lzxwindow2shell admitted 02:4xZ on 2026-11-27. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here. sqlitesession2shell admitted 03:2xZ on 2026-11-27 under standing #6. lwipmqtt2shell admitted 04:0xZ on 2026-11-27 under standing #6. sailpsd2shell admitted 05:3xZ,",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 197,
-      "basis": "Evidence-register rows; one row per target, with its rung cells and boundary. lwipmqtt2shell row added 04:0xZ under standing #6.",
+      "value": 198,
+      "basis": "Evidence-register rows; one row per target, with its rung cells and boundary. lwipmqtt2shell row added 04:0xZ under standing #6. SailPsd2Shell row added 05:3xZ under standing #6.",
       "source": "docs/results.md"
     },
     "independently_established_findings": {
@@ -3072,6 +3072,22 @@
         "reports/lwipmqtt2shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "SailPsd2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "◐",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 05:3xZ under standing #6 as the 201st declared target mind; staged two-pane window 209 adopted as-is (one registry entry, 210/210 unique names, panes %424/%425 dead=0, no duplicate CVE/GHSA or sink lane). Operator clean-archive replay at 05:34Z from `git archive ef370299 lab/frontier/sailpsd2shell` (17 tracked lab files plus two gitignored pinned source archives; no build dirs or binaries): unmodified `bash run-probe.sh` rc 0 `TOTAL: 12 PASS / 0 FAIL`, inner `run-all.sh` rc 0 `TOTAL: 42 PASS / 0 FAIL`; replay log SHA-256 `61d43c7639b6d52dad30cf978f26d3bf00d60bb3d57a4f15a4d461f385855502`, inner log `395bd7671d6cdd67001be6416826826338e80a225bc93cb6ff7c6014593206de`, matching the frontier clean replay. Claim source GHSA-ccqf-rv86-h3wm / CVE-2026-54627 (published 2026-06-07, Critical, affected SAIL <= 0.9.10, fixed 1.0.0); vulnerable tag `v0.9.10` `cdd9d5f20bd0bf83683637afee61dd7e954162b2`, fixed tag `v1.0.0` `0f969168b9d19d43f448d2237990ec247ba822ca`, fix `f44a8b779a1fc527fc6bc5caa71a66a8ed940d50` (parent `fa24bceb93958ad665dbc3cf6b49a1079ab12559`) adds Bitmap/Indexed depth checks. Source-bound primitive: Bitmap depth-8 8x8 PSD allocates 8 bytes at a one-byte stride while the last row writes offsets 7..14; GCC and Clang ASan report WRITE-1 at raw `psd.c:354` zero bytes after that region through public `sail_load_from_file()`; fixed rejects attack rc=201 and vulnerable/fixed depth-1 controls are clean; plain vulnerable 8x8 rc0 because seven bytes fit small-chunk slack. R4 LIMITED only: chosen bytes 11..17 at offsets 8..14 past the pixel allocation and `cc` at 15 under a synthetic exact-size allocator, no chosen pattern in safe/fixed controls; no production allocator adjacency, real application consumer, wire path, pointer control, marker, command or side effect. Advisory paste `psd.c:371` and `Version: 1.0.0` are preserved claim discrepancies. Witness replay of the staged scope requested in tape #6112; author replay is not independent acceptance.**",
+      "reports": [
+        "reports/frontier-sailpsd2shell.md",
+        "reports/sailpsd2shell-status.md"
+      ],
+      "established": false
     }
   ]
 }

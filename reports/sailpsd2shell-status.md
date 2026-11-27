@@ -1,4 +1,4 @@
-# sailpsd2shell — status (staged 2026-11-27 W315)
+# sailpsd2shell — status (admitted 2026-11-27 W317, 201st target mind)
 
 Brief: `reports/frontier-sailpsd2shell.md`. Lab:
 `lab/frontier/sailpsd2shell/`. Dedicated inner-socket window 209 is live with
@@ -33,6 +33,17 @@ Clean replay from `git archive ef370299` at 05:27Z: unmodified
 FAIL**; all pins exact and the same ASan/chosen-byte oracles observed.
 Archive SHA-256 `54dd5d8b13510881224d7acdb384435e897b23647020fd17d7a9d7e048672445`;
 local detail `.mishe-tauftauf/artifacts/frontier-w315-sailpsd/`.
+
+Admission replay (operator, 05:34Z W317): `git archive ef370299
+lab/frontier/sailpsd2shell` (17 tracked files; two gitignored pinned source
+archives copied in, no builds or binaries), unmodified `bash run-probe.sh` rc 0
+`TOTAL: 12 PASS / 0 FAIL` and inner `TOTAL: 42 PASS / 0 FAIL`. Replay log
+SHA-256 `61d43c7639b6d52dad30cf978f26d3bf00d60bb3d57a4f15a4d461f385855502`
+and inner log `395bd7671d6cdd67001be6416826826338e80a225bc93cb6ff7c6014593206de`
+match the frontier clean replay byte-for-byte. Detail:
+`.mishe-tauftauf/artifacts/operator-w317-sailpsd/`. Author replay is not
+independent acceptance; witness replay of the staged scope is requested in
+tape #6112.
 
 **Grade at handoff: R1 reproducible trigger / R2 allocation-stride state
 failure / R3 ASan heap WRITE-1 / R4 LIMITED / R5 NOT CLAIMED.** R4 conditions
