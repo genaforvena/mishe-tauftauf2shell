@@ -6,6 +6,42 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 22:0x–22:2xZ — Ruby W363/W364 close the encoding-gate questions; TDengine staged
+
+Docs-only fold of `7187842f` (argument-side `casecmp?`), `b3b3ae9a`
+(cross-encoding gate falsified), `d8898ea9` (TDengine stage) and `7caba585`
+(window 231). Commit `d6d0ef3c` already moved the generated established count
+152 → 153 for W375. No grade, rung cell, count or lab evidence moved here;
+explanations and recipes are in `docs/task.md` and `docs/reproducibility.md`
+§22:0x–22:2xZ.
+
+- **W363 — the argument folds too** (`7187842f`). Valgrind 18/18 gives one
+  `case_map (iso_8859_1.c:277)` write at the successor size LSB on each of
+  nine vulnerable arms (three builds × N=27/43/59) and zero accesses on nine
+  patched arms. All 83 fresh-plain reps were observed with the same
+  layout-dependent abort family; 15 even-N and 18 patched controls rc 0.
+  GDB saw the `capa=48` argument's slot change `0x81` → `0x73` with the size
+  byte unchanged and the inferior exiting normally. No wire request, chosen
+  address, marker or command; grade unchanged, NO r5 beyond the labeled
+  harness scope.
+- **W364 — the cross-encoding gate hypothesis is false** (`b3b3ae9a`).
+  `rb_enc_compatible` is only a gate; each operand is folded with its own
+  encoding, so a 7-bit ASCII-8BIT partner still lets an ISO-8859-1 sharp-s
+  operand reach `case_map` in either order. Valgrind 54/54: 18 vulnerable
+  mixed arms write once, 18 patched arms clean, and `both_b` / `b_non7_l_arg`
+  give zero writes on all builds. Plain 45/45: 11/30 vulnerable positive
+  reps aborted; negatives and patched reps rc 0. A request value left as
+  ASCII-8BIT or UTF-8 does not supply the needed Latin-1 tag. Grade unchanged.
+- **Tdengineescape2shell staged** (`d8898ea9`, W371). Pinned GHSA-4v5h-fxjw-vrmq
+  / TD-SEC-2026-004 (`<= v3.4.1.6`; fixed by commit `64ff9a8f…`, no
+  `v3.4.1.14` tag), with six input and five stable-evidence pins. The pinned
+  `trimString()` off-by-one at `parUtil.c:459-461` gives GCC/Clang ASan
+  `WRITE of size 1` at `:461`, fixed/safe arms clean and a plain adjacent
+  `victim` of `0x25`/`0x5f`/`0x78` for the three escapes; `RUN_ALL_OK 28 PASS
+  / 0 FAIL` twice. Window 231 is live (registry 232/232). Grade R3 in the
+  harness, R4 LIMITED to a three-value byte, R5 NOT CLAIMED; admission and
+  witness replay owed, and the vendor's RCE claim remains untested.
+
 ## 2026-11-27 21:2x–21:3xZ — Ruby W362 reaches the size LSB via `casecmp?`; Rufus correction witnessed
 
 Docs-only fold of `2372fdcb` (W362 harness/report) and `ad47ae3f` (register
@@ -34,8 +70,8 @@ count stays 152 and the register flag still names stage `0415fa78`.
   600 s matrix timed out before four arms, run later in `matrix-tail.txt`.
   Grade unchanged: wire-only rung 3 CONFIRMED, witness-COMPLETE rung 4,
   harness-condition rung 5 witness-ESTABLISHED at its labeled scope, full
-  stock/oracle-free/persistent r5 NOT ACHIEVED. W363 tests argument-side
-  `casecmp?`.
+  stock/oracle-free/persistent r5 NOT ACHIEVED. W363 and W364 are folded in
+  §22:0x–22:2xZ.
 - **Rufus correction `553bfad5` independently witnessed** (W373, artifact
   above). From clean TAR `d8ec9e29…`: 16/16 pins before and after, 11/0
   under GCC and Clang, exact ASan/marker assertion lines, re-fetched
@@ -47,10 +83,10 @@ count stays 152 and the register flag still names stage `0415fa78`.
   process, wire, service, shell or command. This verdict is for the
   correction, not a regrade of W372's stage scope.
 
-Next: W363's argument-side `casecmp?` comparison; the real Windows
-post-allocation consumer under ASLR/CFG before any loopback trusted-response
-probe for Rufus; an `idx`-independent gimpjif map. A fixed-arm store, a
-witness failure or a chosen-address transfer changes the plan.
+Next: W365's UTF-8 tag boundary in Ruby; the real Windows post-allocation
+consumer under ASLR/CFG before any loopback trusted-response probe for Rufus;
+an `idx`-independent gimpjif map. A fixed-arm store, a witness failure or a
+chosen-address transfer changes the plan.
 
 ## 2026-11-27 21:2x–21:4xZ — Screen CVE-2026-71409 staged (W370)
 
@@ -123,12 +159,12 @@ verified, not duplicated. No rung cell changes here; the register flag and
   JIF `133b4c67…`. That arm armed watchers before `base` was assigned, so
   only `total_out` is used; the cause stays UNKNOWN.
 
-Next: the Ruby size-LSB lane has moved to W363's argument-side `casecmp?`
-after W362 closed the receiver entry point; the real Windows post-allocation
-consumer under ASLR/CFG still precedes any loopback trusted-response probe
-for Rufus; gimpjif needs an `idx`-independent map, not another phase retune.
-A fixed-arm store, a witness failure or a chosen-address transfer changes
-the plan.
+Next: the Ruby size-LSB lane has moved past the argument-side and
+cross-encoding gates to W365's UTF-8 tag boundary; the real Windows
+post-allocation consumer under ASLR/CFG still precedes any loopback
+trusted-response probe for Rufus; gimpjif needs an `idx`-independent map, not
+another phase retune. A fixed-arm store, a witness failure or a chosen-address
+transfer changes the plan.
 
 ## 2026-11-27 20:5x–21:0xZ — Rufus SBAT heap overflow staged (W369)
 

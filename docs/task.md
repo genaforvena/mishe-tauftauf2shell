@@ -16456,10 +16456,64 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 22:0x–22:2xZ — Ruby W363/W364 close the encoding-gate questions; TDengine staged
+
+Current limb for a reader arriving now; it supersedes §21:4x–21:5xZ's open
+items. Docs-only fold of `7187842f` (W363 argument-side `casecmp?`),
+`b3b3ae9a` (W364 cross-encoding gate falsified), `d8898ea9` (TDengine stage)
+and `7caba585` (inner-socket window 231). Commit `d6d0ef3c` already moved the
+generated established count 152 → 153 for W375; no grade, rung cell, count or
+lab evidence moved by this docs edit. Recipes in
+`docs/reproducibility.md` §22:0x–22:2xZ.
+
+- **Ruby W363 folds the argument too** (`7187842f`). `str_casecmp_p`
+  (`string.c:4363-4377`) folds the receiver then the argument, so
+  `known.casecmp?(user_string)` reaches `rb_str_casemap` when the ISO-8859-1
+  sharp-s string is the second operand. Valgrind 18/18: nine vulnerable arms
+  (three builds × N=27/43/59) each have one `case_map (iso_8859_1.c:277)`
+  write at the successor size LSB plus the known copy-out read, nine patched
+  arms are clean. All 83 fresh-plain reps were observed (one interrupted rep
+  preserved separately); 3.4.12 match aborted 4/5, 2/5 and 5/5, with 15 even-N
+  and 18 patched controls rc 0. GDB saw the `capa=48` argument and a `0x81` →
+  `0x73` change in the successor slot while the process exited normally — one
+  layout observation. Grade unchanged; no wire request, chosen address, marker
+  or command.
+- **Ruby W364 falsifies the cross-encoding gate hypothesis** (`b3b3ae9a`).
+  The prediction was that Puma's ASCII-8BIT request values would close the
+  `casecmp?` route. It did not: `rb_enc_compatible` is only a gate, and each
+  operand is folded with its own encoding (`string.c:4374-4375`), so a 7-bit
+  ASCII-8BIT partner opens the gate for an ISO-8859-1 sharp-s operand in
+  either order. Valgrind 54/54: all 18 vulnerable mixed-encoding arms write
+  once at `case_map (iso_8859_1.c:277)`, all 18 patched arms are clean;
+  `both_b` and `b_non7_l_arg` write nothing on any build (`result=false` and
+  `result=nil`). Fresh plain 45/45: 11/30 vulnerable positive reps aborted
+  with glibc diagnostics, all nine vulnerable negative reps and all six
+  patched positive reps rc 0. The measured scope still needs an ISO-8859-1
+  tag on the sharp-s operand; a stock ASCII-8BIT or UTF-8 request value does
+  not supply it. Grades and the NO-r5 ceiling are unchanged.
+- **Tdengineescape2shell staged** (`d8898ea9`, `7caba585`). Frontier pinned
+  GHSA-4v5h-fxjw-vrmq / TD-SEC-2026-004 (`<= v3.4.1.6`, fixed by commit
+  `64ff9a8f…`, with no `v3.4.1.14` tag) and reproduced `trimString()`'s
+  escape off-by-one at pinned `parUtil.c:459-461` in caller-shaped frames:
+  GCC and Clang ASan `WRITE of size 1` at `:461`, fixed and safe arms clean,
+  and a plain adjacent `victim` holding `0x25`/`0x5f`/`0x78` for `\%`/`\_`/`\x`.
+  Six input pins, five stable-evidence pins, `RUN_ALL_OK 28 PASS / 0 FAIL`
+  twice; inner-socket window 231 is live (registry 232/232). Grade R3 in the
+  pinned harness, R4 LIMITED to a byte from a three-value set, R5 NOT
+  CLAIMED; the full `taosd` SQL/wire path was not built. Operator admission
+  and independent witness replay are owed, not assumed.
+
+Next: W365's UTF-8 tag boundary on the default wire encodings; the Screen
+witness replay; TDengine admission and witness replay; a real Windows
+post-allocation consumer under ASLR/CFG before any loopback trusted-response
+probe for Rufus; an `idx`-independent gimpjif map. A witness failure or a
+chosen-address transfer changes the plan.
+
+
 ## 2026-11-27 21:4x–21:5xZ — Screen 222nd admitted on clean replay; Rufus report wording discharged
 
-Current limb for a reader arriving now; it supersedes §21:2x–21:3xZ's open
-items. Docs-only fold of `95161177` (clean-archive evidence), `fdcc1b89`
+Historical limb, superseded by §22:0x–22:2xZ; its open items are folded there.
+Docs-only fold of `95161177` (clean-archive evidence), `fdcc1b89`
 (operator 222nd admission) and `25c19ef8` (archive-hash resolution), plus
 witness W373's already-folded verdicts for Rufus. The operator re-rendered
 README, results.md, manifest and the SVG;
@@ -16492,11 +16546,10 @@ cell, count or lab evidence moved by this docs edit. Recipes in
   still said replay was owed or `established:false` are updated; no new
   replay is due.
 
-Next: an independent witness replay of the Screen harness; the target mind's
-FindSocket/SendCreateMsg siblings and pointer-bearing-layout follow-up; W363
-argument-side `casecmp?`; a real Windows Rufus consumer under ASLR/CFG before
-any loopback trusted-response probe. A witness failure or a chosen-address
-transfer changes the plan.
+Next: the target mind's FindSocket/SendCreateMsg siblings, a real Windows
+consumer under ASLR/CFG before any loopback trusted-response probe for Rufus,
+or a gimpjif `idx`-independent map. W363 and W364 are folded in
+§22:0x–22:2xZ. A witness failure or a chosen-address transfer changes the plan.
 
 
 ## 2026-11-27 21:2x–21:3xZ — Ruby W362 `casecmp?` reaches the size LSB; Rufus correction witnessed
@@ -16528,8 +16581,8 @@ and the register flag still names stage `0415fa78`. Recipes in
   4.0.9 2/5, 2/5, 4/5; mismatch gave two SIGSEGV, one glibc abort, two clean;
   15 even-N=28 and 18 patched reps rc 0. Four arms timed out at 600 s and
   were run later, not reported as passes from missing observations. Grade
-  unchanged, r5 NOT ACHIEVED beyond the labeled harness scope; W363 tests
-  the argument-side comparison.
+  unchanged, r5 NOT ACHIEVED beyond the labeled harness scope; W363 and W364
+  are folded in §22:0x–22:2xZ.
 - **Witness W373 established the `553bfad5` correction** (receipt `285c0dea`).
   From clean TAR `d8ec9e29…`: 16/16 pins before and after, 11/0 under GCC and
   Clang, exact ASan and marker assertions, re-fetched pinned upstream blobs
@@ -16540,10 +16593,10 @@ and the register flag still names stage `0415fa78`. Recipes in
   service, shell or command. The register flag still names stage `0415fa78`;
   this verdict does not regrade that scope.
 
-Next: W363's argument-side `casecmp?`, a real Windows post-allocation
-consumer under ASLR/CFG before any loopback trusted-response probe for Rufus,
-or an `idx`-independent gimpjif map. A fixed-arm store, a witness failure or
-a chosen-address transfer changes the plan.
+Next: discharged in §22:0x–22:2xZ (W363 argument-side and W364 cross-encoding
+gates); the Windows Rufus consumer and gimpjif `idx`-independent map remain
+open there. A fixed-arm store, a witness failure or a chosen-address transfer
+changes the plan.
 
 
 ## 2026-11-27 21:0x–21:1xZ — Rufus 221st admitted and witnessed; Ruby W361; gimpjif W358 negatives
