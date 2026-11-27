@@ -1,6 +1,66 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 01:3x–01:4xZ — libmodplug 195th/W302, openjph 196th, gimpjif fault, Ruby negatives
+
+This fold covers `1cfc1ddb..0f909c43` (seven commits) and adds explanation
+only: no generated cell, register row, grade, count, manifest, SVG, report or
+lab evidence moved. Recipes are in `docs/reproducibility.md` § 01:3xZ and
+§ 01:4xZ. The staged briefs below are kept verbatim; their admission and
+witness-owed wording is the pre-admission state.
+
+- `1cfc1ddb` admitted libmodplugdsm2shell under standing #6 as the 195th
+  declared target mind (window 203, panes %412/%413). Counts moved
+  194/191/191/130 → 195/192/192/131; the operator regenerated the README,
+  results row, SVG and manifest and folded W302 into `established=true`.
+  Witness W302 (`.mishe-tauftauf/artifacts/witness-w302-libmodplug/detail.md`)
+  returned ESTABLISHED AS LABELED from the clean `8b3db561` archive: 2/2
+  tarball pins and 2/2 sink pins OK, runner `508c6dd0…`, rc 0 `PASS=11 FAIL=0`,
+  five fresh plain vulnerable runs with identical
+  `ORDER[0..7]=4000ffffffffffff`, fixed and 240-chunk controls clean, and the
+  clang ASan field-padding intra-object negative confirmed. Grade stays
+  R1 — / R2 ✓ / R3 ✓ (UBSan, not an ASan redzone) / R4 — / R5 —: no chosen-byte
+  readback, pointer control, wire path or command.
+- `bbedbe5b` staged openjphcleanup2shell W302 (brief below): CVE-2026-111151
+  / GHSA-5g7q-q9vm-h587, affected `<= 0.32.0`, pinned `0.32.0` `23c4228`
+  and `0.33.0` `345a8bc` with a byte-identical decoder body and a one-file
+  even-row allocation fix. `d0f0b970` recorded the clean-archive replay from
+  `bbedbe5b`: rc 0 `PASS=27 FAIL=0` with the same runner hash
+  `2c02c8be…`. `1f9b4faf` admitted it as the 196th mind (window 204, panes
+  %414/%415); counts 195/192/192/131 → 196/193/193/131, register row
+  R1 — / R2 ✓ / R3 ✓ / R4 — / R5 — with `established=false`. R3 rests on the
+  direct sink's `WRITE of size 4` at raw `ojph_block_decoder32.cpp:1155`;
+  full vulnerable ASan stays clean because the library slab keeps 5% slack
+  (negative preserved), and gdb observes the real decoder reaching that sink.
+  No chosen offset, readback, wire or command; independent witness replay is
+  still owed.
+- `91e73a99` measured gimpjif's larger *natural* overflow without a repaired
+  word, arranged neighbour or synthetic consumer. A read-only shim on the
+  real GIMP 3.2.8 AppImage logged `total_out=1024`, `usable=264` and
+  `chosen_run_after_usable=760`; unshimmed 8 KiB and 64 KiB JIFs faulted the
+  real `file-gif-load` plug-in (`malloc(): unaligned tcache chunk detected`
+  in one run, `Error reading inflate failed` then SIGSEGV in a later replay,
+  and a plug-in crash for 64 KiB — the fault site is layout-sensitive).
+  The 1 KiB case did not fault in its 90 s window and safe inputs stayed
+  clean. No natural code path reads past `data_size`, so this is a crash on
+  corrupt allocator metadata, not a named victim or chosen-address write;
+  no fixed AppImage is published (BLOCKED) and no fixed differential is
+  claimed. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL, NO r5.
+- `49ab8231` recorded the clean replay at `91e73a99`: `run-witness.sh` 6/0
+  with core 29/0 and `live/run-appimage-span.sh` 12/0, using the cached
+  SHA-verified 3.2.8 AppImage.
+- `0f909c43` closed Ruby's negative repeat-ID steering lane. Its author had
+  already committed the changelog and reproducibility limbs; this fold adds
+  the task-log explanation only. Eleven completed gated gdb trials at wrapped
+  IDs `−2..−16` (`units = 65534 − k`) on pinned 3.4.11 put writes at
+  `alloca_base − 8k` for stack pads 0/8/32; each target held ASCII pattern
+  bytes before the write and a small repeat-stack index (3–113) after, read
+  at `regexec.c:3877` and `string.c:645`, never a pointer or chosen byte. The
+  watcher trials' terminal SIGSEGV is UNKNOWN because a write-breakpoint-only
+  control did not fault. Grade unchanged, lane CLOSED; recipe in
+  `docs/reproducibility.md` § 01:4xZ and report § 01:4xZ.
+
+
 ## 2026-11-27 01:2xZ — openjphcleanup2shell staged (W302)
 
 Four read-only scouts screened the W301 backup list; OpenJPH ranked first on

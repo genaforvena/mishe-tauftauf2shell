@@ -15258,3 +15258,62 @@ Every count above is an operator, author, clean-archive or witness
 observation as labeled; none moves a generated grade cell here. What would
 change this fold: a later verdict contradicting one of these exact scopes,
 a report misquoting these receipts, or a checker RED on committed HEAD.
+
+## 2026-11-27 01:3x–01:4xZ — libmodplug 195th/W302, openjph 196th, gimpjif live fault, Ruby negatives
+
+This fold covers `1cfc1ddb..0f909c43` and adds explanation only: no generated
+cell, register row, grade, manifest, SVG, report or lab evidence moved. The
+authors of `bbedbe5b` and `0f909c43` had already committed their changelog
+briefs and the Ruby reproducibility limb; the operator's admissions
+(`1cfc1ddb`, `1f9b4faf`) generated their README/results/SVG/manifest cells
+and status reports. Recipes are in `docs/reproducibility.md` § 01:3xZ and
+§ 01:4xZ.
+
+- `1cfc1ddb` admitted libmodplugdsm2shell as the 195th declared target mind
+  under standing #6 (window 203, panes %412/%413); counts
+  194/191/191/130 → 195/192/192/131 and `established=true` were regenerated
+  by the operator. Witness W302
+  (`.mishe-tauftauf/artifacts/witness-w302-libmodplug/detail.md`) returned
+  ESTABLISHED AS LABELED from the clean `8b3db561` archive: 2/2 tarball pins
+  and 2/2 sink pins OK, runner `508c6dd0…`, rc 0 `PASS=11 FAIL=0`, five fresh
+  plain runs with identical `ORDER[0..7]=4000ffffffffffff`, fixed and
+  240-chunk controls clean, and the clang ASan field-padding intra-object
+  negative confirmed. Grade R1 — / R2 ✓ / R3 ✓ (UBSan, not an ASan redzone)
+  / R4 — / R5 —: no chosen-byte readback, pointer control, wire, command or
+  grade change.
+- `bbedbe5b` staged openjphcleanup2shell W302 from CVE-2026-111151 /
+  GHSA-5g7q-q9vm-h587 (affected `<= 0.32.0`), pinned `0.32.0` `23c4228` and
+  `0.33.0` `345a8bc` with byte-identical decoder bodies and a one-file
+  even-row allocation fix. `d0f0b970` recorded the clean-archive replay
+  (`PASS=27 FAIL=0`, runner `2c02c8be…`). `1f9b4faf` admitted it as the 196th
+  mind (window 204, panes %414/%415); counts 195/192/192/131 →
+  196/193/193/131, row R1 — / R2 ✓ / R3 ✓ / R4 — / R5 — with
+  `established=false`. R3 is GCC ASan `WRITE of size 4` at raw
+  `ojph_block_decoder32.cpp:1155` in a direct sink with an exact 32-byte
+  buffer; full-program ASan is clean because the slab keeps 5% slack
+  (negative preserved), while gdb sees the real decoder reach the sink. No
+  chosen offset, readback, wire path or command; witness replay still owed.
+- `91e73a99` enlarged gimpjif's natural overflow: a read-only shim logged
+  `total_out=1024`, `usable=264` and 760 chosen bytes past the allocation,
+  and unshimmed 8 KiB / 64 KiB JIFs faulted the real GIMP 3.2.8 plug-in with
+  no word repair, arranged neighbour or synthetic consumer. One 8 KiB replay
+  aborted in glibc tcache metadata, a later one segfaulted after
+  `Error reading inflate failed`; the fault site is layout-sensitive, so
+  only the fault is asserted. The 1 KiB case did not fault in 90 s and safe
+  inputs stayed clean. No natural read past `data_size`, no named victim,
+  chosen-address write, marker or command; fixed AppImage BLOCKED, so no
+  fixed differential. Grade stays rung 3 pinned verbatim / rung 4 PARTIAL,
+  NO r5. `49ab8231` recorded the clean-archive replay: `run-witness.sh` 6/0
+  with core 29/0 and `run-appimage-span.sh` 12/0.
+- `0f909c43` closed Ruby's negative repeat-ID steering at the measured
+  scope: eleven gated gdb trials at IDs `−2..−16` and stack pads 0/8/32 put
+  writes at `alloca_base − 8k`; ASCII bytes before and small repeat-stack
+  indices (3–113) after were read at `regexec.c:3877` and `string.c:645`,
+  never a pointer or chosen byte. The terminal SIGSEGV is UNKNOWN because a
+  write-breakpoint-only control did not fault. Grade unchanged, full rung 5
+  NOT ACHIEVED.
+
+Every count above is an operator, author, clean-archive or witness
+observation as labeled; none moves a generated grade cell here. What would
+change this fold: a verdict contradicting one of these exact scopes, a
+report misquoting these receipts, or a checker RED on committed HEAD.
