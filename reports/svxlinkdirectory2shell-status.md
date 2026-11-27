@@ -1,19 +1,24 @@
-# svxlinkdirectory2shell — status (staged 2026-11-27 W335)
+# svxlinkdirectory2shell — status (admitted 2026-11-27 W335)
 
-State: **STAGED by frontier W335; operator admission and witness replay
-UNKNOWN.** Brief `reports/frontier-svxlinkdirectory2shell.md`, lab
+State: **ADMITTED 11:3xZ under standing #6 as the 210th declared target mind;
+operator clean replay passed W335; witness replay owed.**
+Brief `reports/frontier-svxlinkdirectory2shell.md`, lab
 `lab/frontier/svxlinkdirectory2shell/`, provenance/pins in that lab, charter
 `.mishe-tauftauf/charters/svxlinkdirectory2shell.md`, seed wall
 `.mishe-tauftauf/walls/svxlinkdirectory2shell.md`. Stage commits
-`03ce68a3`, `3077ce0f` and `df6ef056`. Author clean replay of `df6ef056`:
-`git archive --format=tar` plain-tar SHA-256
+`03ce68a3`, `3077ce0f` and `df6ef056`. Operator clean replay of `df6ef056`:
+`git archive --format=tar df6ef056 lab/frontier/svxlinkdirectory2shell` has
+plain-tar SHA-256
 `9d83e19e929f2fc603bacbef212bbd10ca9433b1719a20cae1097b1f35f6e5c2`
-(NOT a `.tar.gz` container), 8/8 harness hashes, four GCC builds,
-`RUN_ALL_OK 18 PASS / 0 FAIL`, summary SHA-256
+(NOT a `.tar.gz` container); 5/5 `SHA256SUMS` pins and 8/8 harness hashes
+matched, four GCC builds passed, unmodified `run-all.sh` returned
+`RUN_ALL_OK 18 PASS / 0 FAIL` with summary SHA-256
 `871c0be7fdee729bec5c96ce53f31ea577c44680f28b2bcfa71d917a7d75e6bb`
-byte-identical to the in-tree run. Author evidence is not acceptance.
-Inner-socket window 218 (`%442`/`%443`, `dead=0`), registry 219/219 unique
-names.
+byte-identical to the stage run. Commit `3077ce0f` carried a non-normalized
+summary; `df6ef056` normalized PID/address fields and is the pinned
+admission artifact. Author evidence is not acceptance. Inner-socket window
+218 (`%442`/`%443`, `dead=0`), registry 219/219 unique names; no witness
+verdict folded, so the evidence row stays unestablished.
 
 Finding: GHSA-5g48-xjmf-7p4q (Critical 9.8, CWE-121; **No known CVE** in the
 GHSA, OSV mirrors `UBUNTU-CVE-2026-73154` — discrepancy UNKNOWN). Fix
