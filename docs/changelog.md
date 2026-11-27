@@ -2,6 +2,67 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 08:4x–09:0xZ — Berry admitted 205th, live bzfs, OpenSIPS witness
+
+Explanation and recipes only, except for the OpenSIPS witness flag explicitly
+authorized in #6256: no rung/grade cell, report or lab evidence moved here.
+This fold covers `ab8ae9c4`, `a8f8a029`, `2ea85df9`, `efdf5419`, `375d0622`,
+`809d6fc8`, `c235017a`, `7166c217`, `6e1538b3`, `b006a5ab` and `0965736d`
+past `cbb6fb06`. The operator folded the live OpenSIPS rung into the
+presentation (`ab8ae9c4`); Ruby W328's own docs fold (`a8f8a029`) was
+verified, not repeated here.
+
+- **BerryFormat2Shell admitted 205th** under standing #6 at 09:0xZ, adopting
+  window 213 (%432/%433, registry 214/214). The operator's clean-archive
+  replay of stage `c235017a` (archive SHA-256 `2cbd8cb5…f9cd3`) matched all 14
+  harness pins and returned rc 0 with `TOTAL: 59 PASS / 0 FAIL`, summary log
+  `e8ebb940…f432` byte-identical to the stage replay. Pinned 1.1.0 tarball
+  `b8eb94a4…69a7`, fix `7149c59a` (`96afb4d8…6439`); the advisory claims only
+  a one-byte lexer read, while the local `get_mode` unbounded `strncpy` into
+  `mode[32]` gives ASan `WRITE of size 225` and, in an unprotected O0 build,
+  all eight saved-RIP bytes overwritten (`0x2d30232b2d30232b`, noncanonical,
+  no controlled branch). The exact fix leaves a distinct three-byte
+  `mode_fixlen` write. Grade R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; witness
+  replay #6261/#6265 UNKNOWN. Next: find a real consumer of attacker format
+  text, then measure production hardening.
+- **Bzfs2Shell live stock layout closed.** Stock v2.4.30 and fixed v2.4.32
+  servers on 127.0.0.1 need the 10-byte `BZFLAG\r\n\r\n` handshake before the
+  1028-byte packet reaches `tcpReceive()`. In the live process `tcpmsg` is at
+  object offset 96 and `tcplen` at 1120 of a 2384-byte `NetHandler`, so the
+  first overrun is intra-object and stock ASan does not flag it; a second
+  packet with tail `00 f8 ff ff` gives `tcplen=-1024` and
+  `recv(fd, tcpmsg-1024, 1028)` (object offset -928). ASan reports a real
+  `heap-use-after-free WRITE of size 1024` through `recv` →
+  `NetHandler::receive` → `NetHandler::tcpReceive`; the plain build reads
+  chosen wire bytes back at `ares`, `info`, `fd`, `playerIndex` and
+  `dotNotation` offsets before segfaulting. Fixed 2.4.32 rejects at the
+  first bound with no body `recv`. Rungs 1/2/3 now have live stock-process
+  evidence, rung 4 is chosen-value control at real member offsets, not
+  chosen-target pointer control or execution; R5 stays UNKNOWN and a fresh
+  witness replay is owed for the live scope.
+- **OpenSIPS W328 closed the replay question, not rung 5.** The witness's
+  clean `git archive` of `9f01094a`, hash-matched builds, harness 26/0 and
+  fresh 401-asan `WRITE of size 304` / 401-plain 900-byte SIGSEGV / 402-asan
+  clean control graded the live rung-4 label ESTABLISHED AS LABELED. Error-
+  est: changing only `from[804:808]` from `YZAB` to `CDEF` moved the stock
+  `fm_malloc` need from 1111579232 to 1178944584, so chosen wire bytes drive
+  the overwritten length in the stock build too. A raw-NUL gate probe put
+  four NULs at offsets 804–807; the XML parser emitted no callback, no
+  allocation and no crash, so a small overwritten length does not reach this
+  sink. No RIP, marker, command or off-loopback traffic: R5 UNKNOWN. The
+  operator folded the presentation row (`ab8ae9c4`); under #6256 this fold
+  set the manifest `established` flag, moved the count 138 → 139 and
+  re-rendered `README.md`, `docs/results.md` and the ladder SVG. No grade or
+  rung cell changed.
+- **ExpatParseBuf2Shell W326** (#6231) independently replayed the clean
+  `17d186f0…` archive: pins, runner and 41/0 matched, ASan READ-1 and
+  4096/4096 chosen-byte readback repeated for two seeds. ESTABLISHED AS
+  LABELED, no grade change; R4 LIMITED and R5 NOT CLAIMED unchanged.
+
+What would change this fold: a Berry consumer reachability measurement, a
+bzfs live-scope witness verdict or pointer-control result, a measured OpenSIPS
+stock-frame slot, or a checker RED on committed HEAD.
+
 
 ## 2026-11-27 08:2x–08:4xZ — W328 adjacent Ruby `setbyte` stale-length write
 
@@ -43,7 +104,8 @@ live-wire work on two branches, reconciled by `51a9f216`.
   live chosen-field/allocation scope with the instrumented frame explicitly
   labeled, not as control-flow diversion. The saved RIP slot received only
   a NUL in that frame, and no marker, pointer execution, ASLR/NX
-  measurement or witness replay exists: rung 5 UNKNOWN. The harness-era
+  measurement exists; the W328 replay below established this label: rung 5
+  UNKNOWN. The harness-era
   "rung 4 INSTRUMENTED only" line in the status is now labeled superseded
   for the live receiver. Full pins, wire bytes, hashes and negatives in
   `reports/opensips2shell-live-wire.md`.
@@ -64,8 +126,8 @@ live-wire work on two branches, reconciled by `51a9f216`.
   build/layout, not a consumer in a completed load. Grade unchanged: rung 3
   pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
 
-What would change this fold: an independent OpenSIPS replay or measured
-stock-frame RIP control, a mapped chosen pointer word in gimpjif, guest
+What would change this fold: a measured stock-frame RIP control,
+a mapped chosen pointer word in gimpjif, guest
 readback in WAMR, or a checker RED on committed HEAD.
 
 ## 2026-11-27 08:0x–08:1xZ — W323 dynamic coercion closure CLOSED (Ruby)

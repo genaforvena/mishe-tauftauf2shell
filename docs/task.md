@@ -15979,10 +15979,10 @@ author (`c5ce62ae`) and verified here; no docs action remains for it.
   `fromstr.s`/`fromstr.len`; 4.0.2 ignores the stanza. Rung 3 is confirmed
   live and rung 4 is demonstrated at the labeled chosen-field scope, not as
   control-flow diversion: the RIP slot got only a NUL, and there is no
-  marker, ASLR/NX measurement or witness replay, so R5 stays UNKNOWN. Next
-  experiment: hand the loopback replay to an independent witness; only if
-  a measured stock frame slot exists, test a longer chosen JID for saved-RIP
-  control before any marker attempt. Preserve the 299-byte survival,
+  marker or ASLR/NX measurement, so R5 stays UNKNOWN; W328's replay in the
+  next limb settled the rung-4 label. Only if a measured stock frame slot
+  exists, test a longer chosen JID for saved-RIP control before any marker
+  attempt. Preserve the 299-byte survival,
   instrumented-layout and 4.0.2 negatives. The adjacent `parse_isup`
   `memcpy` candidate (GHSA-qc7q-vrx3-3j4h) is recorded, not worked.
 - **Gimpjif (W326 verdict, W327 refutation).** #6233 replayed W325's
@@ -16002,7 +16002,25 @@ author (`c5ce62ae`) and verified here; no docs action remains for it.
   W325 closes the replay question, not that gap.
 
 Pins, commands, expected bytes and gitignored-evidence regeneration are in
-`docs/reproducibility.md` §08:1x–08:3xZ. What would change these limbs: an
-independent OpenSIPS replay or measured stock-frame control, a mapped and
-read chosen pointer in gimpjif, guest readback in WAMR, or a checker RED on
-committed HEAD.
+`docs/reproducibility.md` §08:1x–08:3xZ. What would change these limbs: a
+measured OpenSIPS stock-frame control, a mapped and read chosen pointer in
+gimpjif, guest readback in WAMR, or a checker RED on committed HEAD.
+
+
+## 2026-11-27 08:4x–09:0xZ — 205th admission, live bzfs, closed OpenSIPS replay
+
+This limb updates the 08:1x–08:3xZ section above for a reader arriving now.
+It records evidence and next experiments; no rung or grade cell moved here.
+Under #6256 the OpenSIPS `established` flag was folded into the manifest
+(count 139) and the three generated presentation files were re-rendered;
+`docs/results.md` and the manifest remain otherwise operator-owned.
+
+- **BerryFormat2Shell (new mind, witness UNKNOWN).** CVE-2026-3285 / GHSA-92ph-pr79-cv5g, admitted 205th at 09:0xZ. The public advisory claims a one-byte lexer read; the local finding is an unbounded `strncpy` into `mode[32]` with ASan `WRITE of size 225` and all eight saved-RIP bytes overwritten in an unprotected O0 build. The bytes are noncanonical and default hardening aborts, so R4 stays LIMITED and R5 NOT CLAIMED. Next experiment: find a real Berry consumer accepting attacker-influenced format text, name the API/configuration and reproduce locally; only then measure a production stack layout that survives the corrupted locals. Preserve the exact-fix `mode_fixlen` WRITE-3 residual.
+- **Bzfs2Shell (live layout closed, live-scope witness owed).** The stock v2.4.30 process on loopback needs the `BZFLAG` handshake, has `tcpmsg@96`/`tcplen@1120` in a 2384-byte object, and the second packet writes chosen bytes into real `ares`/`info`/`fd`/`playerIndex`/`dotNotation` members; ASan reports a real `WRITE of size 1024` and fixed 2.4.32 rejects. Next experiment: seek a chosen target address or function-pointer write without breaking the members needed to reach a return, then offer the live scope for independent replay. No execution or rung 5 without that measurement.
+- **Opensips2Shell (W328 ESTABLISHED AS LABELED, rung 5 still UNKNOWN).** The witness reproduced the live harness and all four cases from a clean archive; a single chosen-byte change moved the stock allocation need, while raw NULs at offsets 804–807 never reached the parser sink. Next experiment needs both a measured stock saved-RIP slot and a way to survive `tm`; do not re-offer the already-settled rung-4 label and do not claim a marker. The `parse_isup` candidate stays recorded, not worked.
+- **ExpatParseBuf2Shell (W326 ESTABLISHED AS LABELED).** The clean-archive replay matched 41/0, ASan READ-1 and 4096/4096 chosen-byte readback; R4 LIMITED and R5 NOT CLAIMED unchanged. Next experiment: find a real caller forwarding attacker-influenced `len` into `XML_ParseBuffer` after `XML_GetBuffer`, or prove two legitimate chunked calls cross capacity; then seek stock-glibc pointer bytes. Preserve the small-`CAP` and adjacent-`malloc` negatives.
+
+Pins, commands, expected bytes and gitignored-evidence regeneration are in
+`docs/reproducibility.md` §08:4x–09:0xZ. What would change these limbs: a
+Berry consumer, a bzfs stock pointer-control measurement or witness verdict,
+an OpenSIPS stock-frame slot, or a checker RED on committed HEAD.

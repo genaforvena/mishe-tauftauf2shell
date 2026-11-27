@@ -44,9 +44,11 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, R5 UNKNOWN; witness owed. Full recipe at the tail |
+| Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, W328 ESTABLISHED AS LABELED with a stock-build chosen-length counterexample, R5 UNKNOWN, raw-NUL gate negative. Full recipe in §08:1x–08:3xZ and §08:4x–09:0xZ |
+| Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; chosen-value control only, no r5, witness owed. Full recipe in §08:4x–09:0xZ |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
-| ExpatParseBuf2Shell W324 (ADMITTED 07:4xZ, 204th) | [status](../reports/expatparsebuf2shell-status.md), [brief](../reports/frontier-expatparsebuf2shell.md), [provenance](../lab/frontier/expatparsebuf2shell/PROVENANCE.md) | CVE-2026-77214 / GHSA-8xfx-9m5m-pgcp (CWE-125, CVSS4 8.3), libexpat <=2.8.5 over-read in `XML_ParseBuffer`; fix `13c5f63a` / 2.9.0; tarballs `920dde48…88fe` / `16afbb9c…89ba`, patch `4eb9303e…1df` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/expatparsebuf2shell` | rc 0, 41 PASS / 0 FAIL; ASan `READ of size 1` at `xmltok_impl.c:873` via `doContent :3303` / `XML_ParseBuffer :2464`, 0 bytes after a 4096-byte region; chosen-byte readback 4096 bytes at seeds `0x5a`/`0x6b`; patched/2.9.0/safe clean; author and operator pathspec-archive replays (`17d186f0…` archive, log `023945b0…`) byte-identical; R4 LIMITED, witness replay requested and UNKNOWN; full procedure at the tail |
+| ExpatParseBuf2Shell W324 (ADMITTED 07:4xZ, 204th) | [status](../reports/expatparsebuf2shell-status.md), [brief](../reports/frontier-expatparsebuf2shell.md), [provenance](../lab/frontier/expatparsebuf2shell/PROVENANCE.md) | CVE-2026-77214 / GHSA-8xfx-9m5m-pgcp (CWE-125, CVSS4 8.3), libexpat <=2.8.5 over-read in `XML_ParseBuffer`; fix `13c5f63a` / 2.9.0; tarballs `920dde48…88fe` / `16afbb9c…89ba`, patch `4eb9303e…1df` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/expatparsebuf2shell` | rc 0, 41 PASS / 0 FAIL; ASan `READ of size 1` at `xmltok_impl.c:873` via `doContent :3303` / `XML_ParseBuffer :2464`, 0 bytes after a 4096-byte region; chosen-byte readback 4096 bytes at seeds `0x5a`/`0x6b`; patched/2.9.0/safe clean; author and operator pathspec-archive replays (`17d186f0…` archive, log `023945b0…`) byte-identical; R4 LIMITED, witness W326 ESTABLISHED AS LABELED with the same 41/0 and readback, no grade change; full procedure at the tail |
+| BerryFormat2Shell W326 (ADMITTED 09:0xZ, 205th) | [status](../reports/berryformat2shell-status.md), [brief](../reports/frontier-berryformat2shell.md), [provenance](../lab/frontier/berryformat2shell/PROVENANCE.md) | CVE-2026-3285 / GHSA-92ph-pr79-cv5g, Berry 1.1.0 tarball `b8eb94a4…69a7`, fix `7149c59a` source `96afb4d8…6439` (advisory claims only a lexer READ-1) | `cd lab/frontier/berryformat2shell && bash bootstrap.sh && bash run-all.sh` | rc 0, `TOTAL: 59 PASS / 0 FAIL`; ASan `WRITE of size 225` at `get_mode be_strlib.c:542` → `str_format:572`, all eight saved-RIP bytes overwritten in unprotected O0 (`0x2d30232b2d30232b`, noncanonical, no controlled branch), default hardening rc 134, patched plain and ASan clean, exact fix's separate `mode_fixlen` `WRITE of size 3`, lexer READ-1 control; operator clean-archive replay `2cbd8cb5…` log `e8ebb940…`, 14 pins matched; R4 LIMITED, R5 NOT CLAIMED, witness UNKNOWN. Full recipe in §08:4x–09:0xZ |
 | Libeventsockaddr2Shell W316 (ADMITTED 06:1xZ, 202nd) | [status](../reports/libeventsockaddr2shell-status.md), [brief](../reports/frontier-libeventsockaddr2shell.md), [provenance](../lab/frontier/libeventsockaddr2shell/PROVENANCE.md) | CVE-2026-63388 / GHSA-cvq5-vrvr-j338 (High 8.4, CWE-787/617); affected `<= 2.1.12`, `<= 2.2.1-alpha`, patched 2.1.13 / 2.2.2-alpha; vulnerable master `1b7cc9b5…`, fix `52057cb3…` (parent `9877a720…`) | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/libeventsockaddr2shell` (CMake static builds of the pinned archives) | `run-all.sh` rc 0, `PASS=23 FAIL=0`; GCC ASan `heap-buffer-overflow WRITE of size 110` at `http.c:4686`, 0 bytes after a 520-byte region from `bufferevent_socket_new`; loopback-TCP and fixed-commit controls ASan-clean; `run-probe.sh` `PASS=16 FAIL=0`, three chosen 48-bit values each appear as `mutex=<chosen>` in libc `___pthread_mutex_lock` under gdb; R4 DEMONSTRATED at the chosen-address-dereference scope, R5 NOT CLAIMED, local AF_UNIX vector; clean `git archive 090aa6bc` replay 23/0 + 16/0 (archive `889dfe52…`, logs `1edee7ac…` / `c7a0e2b…`); ADMITTED 06:1xZ as the 202nd mind under standing #6; witness W321 (#6151) independently replayed that archive (log `ce6cfca2…`, 23/0 + 16/0) and graded ESTABLISHED AS LABELED at that scope, operator folded `established=true` (count 138); no grade change and no r5; the advisory's `si_addr = mutex+0x18` stays unreproduced, this host and the witness observe `mutex+0x10`; full procedure in §05:3x–06:1xZ |
 | SAIL PSD2Shell (ADMITTED 05:3xZ, 201st) | [status](../reports/sailpsd2shell-status.md), [brief](../reports/frontier-sailpsd2shell.md), [provenance](../lab/frontier/sailpsd2shell/PROVENANCE.md) | CVE-2026-54627 / GHSA-ccqf-rv86-h3wm, affected `<= 0.9.10`, v0.9.10 `cdd9d5f2…` / v1.0.0 `0f969168…`, fix `f44a8b77…` | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/sailpsd2shell` | `PASS=42 FAIL=0` and `PASS=12 FAIL=0`; raw `psd.c:354` ASan `WRITE of size 1` zero bytes after 8, clean depth-1/fixed controls; chosen bytes at offsets 8..14 only under the synthetic allocator; clean `git archive ef370299` replay repeated both (log `61d43c76…`); ADMITTED 05:3xZ under standing #6, register row and counts 201/198/198/136 at admission, 137 established after the W317 fold; R4 LIMITED, R5 NOT CLAIMED, `established=false` pending witness replay #6112; full procedure in §05:2x–05:3xZ |
 | Ud3tn2Shell W26/W317 (newest) | [pointer-control report](../reports/ud3tn2shell-pointer-control.md), [transport matrix](../lab/frontier/ud3tn2shell/transport-w26/RESULTS.md) | pinned v0.15.1 `00b2fbef…` / v0.15.2 `6b18b267…`, fix `09f18b9c…`; tarball hashes UNKNOWN after HTTP 429 | `make posix` plain + ASan; gdb harness in `lab/frontier/ud3tn2shell/harness/` | groomed `free()` receives chosen `0x5a…` at a live post-parse pointer; CBOR-MTCP/SMTCP/TCPCLv3/SPP reach, command chain DEMONSTRATED on the pinned plain build under ASLR-off gdb via `call_chain.{py,gdb}` (marker observed, safe/fixed clean). Witness W317 (#6122) replayed `9ca46a2d` from a clean 28-file archive and graded rung 5 ESTABLISHED AS LABELED at that scope; operator folded R5 ✓ and `established=true` (count 137). No fresh-build, ASLR-on or new-rung claim; commands at the tail |
@@ -17922,8 +17924,10 @@ got the same 41/0 and byte-identical log; both are author-side, not
 independent acceptance. Admitted 07:4xZ under standing #6 as the 204th mind
 (window 212, registry 213/213). Grade R1/R2/R3 ✓, R4 LIMITED to the lab
 allocator's chosen-byte disclosure, R5 NOT CLAIMED: no named consumer,
-pointer value, dereference, marker or command. Witness replay is requested
-and UNKNOWN. Preserved negatives: small `CAP` rounds the allocation up and
+pointer value, dereference, marker or command. Witness W326 (#6231) returned
+ESTABLISHED AS LABELED from a clean archive with a byte-identical 41/0 log,
+the same ASan READ-1 and 4096/4096 readback for two seeds; no grade change.
+Preserved negatives: small `CAP` rounds the allocation up and
 the scanner stays inside; an adjacent plain `malloc(4096)` puts a chunk
 header at `buf+4096` and stops at `cdata_len=4093`. Full mechanism and URLs
 in `lab/frontier/expatparsebuf2shell/PROVENANCE.md`.
@@ -18048,8 +18052,8 @@ Post-commit smoke at 08:29Z re-ran the harness (`ALL CHECKS PASSED rc 0`,
 trace SHA-256 `a69657bb…c78b06`) and a live 4.0.1 ASan stanza; no listener
 was left running. Rung 3 CONFIRMED in a live stock build, rung 4
 DEMONSTRATED at the chosen-field/allocation scope with the instrumented
-frame labeled, rung 5 UNKNOWN: no marker, pointer execution, ASLR/NX
-measurement or witness replay. Full hashes and preserved config negatives
+measurement; W328 independently established this label (§08:4x–09:0xZ).
+Full hashes and preserved config negatives
 are in `reports/opensips2shell-live-wire.md`.
 
 ### WAMR W325 — independent replay of the shift ladder and live table
@@ -18131,3 +18135,94 @@ indices on these builds. The chosen byte is observed by a read-only gdb
 breakpoint on the vulnerable store, with a fixed-build no-store control.
 Grade: adjacent in-process rung 4, wire path CLOSED, full rung 5 NOT
 ACHIEVED; detail in `reports/ruby2shell-investigation.md` §W328.
+
+## 2026-11-27 08:4x–09:0xZ — Berry admission, live bzfs layout, OpenSIPS W328, expat W326
+
+### BerryFormat2Shell — admitted 205th, format write (R4 LIMITED)
+
+From `lab/frontier/berryformat2shell`, run `bash bootstrap.sh && bash
+run-all.sh`; `bootstrap.sh` extracts the pinned 1.1.0 tarball and fix commit
+and checks all 14 `HARNESS_SHA256.txt` entries. Expect rc 0 and `TOTAL: 59
+PASS / 0 FAIL`. `inputs/format-overflow.be` (263 bytes, `#0-+` × 56) drives
+`get_mode` to copy 225 bytes into `mode[32]`: vulnerable ASan rc 134 with
+`stack-buffer-overflow WRITE of size 225` at `be_strlib.c:542` ←
+`str_format:572`, O0 plain rc 139 in 5/5, default O2 hardened rc 134 with
+`buffer overflow detected`. Patched (local 1.1.0 backport and exact upstream
+fix) and safe inputs are clean. The gdb read after the real copy reports
+`SAVED_RIP_BYTES=2b23302d2b23302d` (`0x2d30232b2d30232b`), noncanonical with
+no branch reached. `inputs/format-numeric-residual.be` still gives ASan
+`WRITE of size 3` in `mode_fixlen` on the exact fix (`:627`) and the backport
+(`:561`); `inputs/lexer-overflow.be` gives the related READ-1 that the
+advisory actually describes. Raw `runs/` output is gitignored and regenerates
+with `run-all.sh`. The operator replayed `git archive --format=tar.gz
+c235017a lab/frontier/berryformat2shell` (archive SHA-256
+`2cbd8cb5ec449779cead31a7748e9c9e91e21c739fe72ecf582ee8888fce9cd3`), all 14
+pins matched, seven variants built and the unmodified runner returned 59/0
+with log `e8ebb940ead8be84c98665a1bdd7123b18d37f6fca0f77bbb61e109a5015f432`
+(byte-identical). Author-side replay only: witness #6261/#6265 UNKNOWN.
+Grades R1/R2/R3 ✓, R4 LIMITED to restricted-alphabet chosen bytes at the
+measured saved-RIP slot in an unprotected O0 build, R5 NOT CLAIMED: no
+consumer, dereference, marker or command. Admission details are in
+`reports/frontier-berryformat2shell.md` and the register row in
+`docs/results.md` (operator-owned).
+
+### Bzfs2Shell — live stock-layout replay, loopback only
+
+Pinned stock v2.4.30 (`29b3b97f…`) and fixed v2.4.32 (`86a5ded5…`) tag
+tarballs, local c-ares 1.27.0 prefix and server-only builds are under
+`lab/bzfs2shell-live/`. Run `bash run_live.sh <bzfs-binary> <port> <tag>`;
+the script starts a 127.0.0.1 server, passes optional client arguments to
+`send_packet.py`, captures `live-<tag>.log*` and kills the process. A raw
+1028-byte packet is consumed by the pre-auth reader, so the client first
+sends `BZFLAG\r\n\r\n` (10 bytes) and reads the 9-byte `BZFS0221\x00` welcome.
+With a 1024-byte body ending `00 f8 ff ff`, traces show `receive(1028)` at
+`tcpmsg+4`, `size=1024`, `clobber_word=fffff800`, then `tcplen=-1024` and
+`recv(fd, tcpmsg-1024, 1028)` (object offset -928). The live ASan build logs
+`ERROR: AddressSanitizer: heap-use-after-free`, `WRITE of size 1024`, stack
+`recv` → `NetHandler::receive` → `NetHandler::tcpReceive` →
+`GameKeeper::Player::handleTcpPacket`. The plain build maps second-payload
+bytes `928+m` to object offset `m`: `ares` ← 928..935, `info` ← 936..943,
+`fd` ← 964..967, `dotNotation` ← 992..1023, with observed
+`ares=0x41424344454647bc`, `info=0x41424344454647bd`,
+`playerIndex=1162233792`, `fd=1094861636`; it then segfaults on the broken
+pointers. The earlier tail `f8 ff ff ff` set `tcplen=-8` and is preserved as
+a corrected mistake. Fixed 2.4.32 logs `BZTRACE fixed-reject len=1024
+tcplen=4`, rejects the player and performs only the 4-byte header read. Raw
+logs are gitignored; the harness-only 38-byte-overwrite recipe and witness
+#761 verdict remain in §2026-11-21 above. The live scope has no chosen
+target address, function-pointer overwrite, execution or fresh witness;
+rungs 1/2/3 are live, rung 4 is chosen-value control, R5 UNKNOWN.
+
+### Opensips2Shell W328 witness receipt and raw-NUL gate (negative)
+
+The independent replay (inbox #6255, detail
+`.mishe-tauftauf/artifacts/witness-w328-opensips/detail.md`) took a clean
+`git archive` of `lab/frontier/opensips2shell` and
+`lab/opensips2shell-live` at `9f01094a`; tarball and binary hashes matched,
+the harness control gave rc 0 with 26 PASS / 0 FAIL and trace `a69657bb…`,
+and fresh live runs repeated the 401-asan `WRITE of size 304`, the 401-plain
+900-byte SIGSEGV after `fm_malloc` needed 1111579232 bytes, the 299-byte
+survival and the 4.0.2 clean control. Changing only `from[804:808]` from
+`YZAB` to `CDEF` moved the stock `fm_malloc` need to 1178944584. Verdict
+ESTABLISHED AS LABELED for rung 4 at the live chosen-field/allocation scope,
+no grade change and NO rung 5: `fromstr_s` stayed `QRSTUVWX`, the observed
+RIP bytes were ASLR-dependent real code bytes, and no marker or command ran.
+The raw-NUL gate probe (gitignored
+`.mishe-tauftauf/artifacts/opensips2shell-nul-gate/`, `probe.py` SHA-256
+`46d700b5…`, `daemon-nul.log` `38dc18a0…`) put four NULs at JID offsets
+804–807: the receiver logged the read but emitted no `instream callback`,
+no allocation and no crash (rc 0, port closed afterwards). `ut.h:818-832`
+`shm_str_dup` passes the overwritten length to `shm_malloc`, so a huge or
+wrapped length cannot reach the saved-RIP slot. The commands, pins and
+expected bytes from §08:1x–08:3xZ still apply; the live recipe is unchanged.
+
+### ExpatParseBuf2Shell W326 receipt and task.md limit
+
+Witness #6231 replayed the clean `17d186f0…` pathspec archive with all three
+pins and runner `40a6ec22…` matched. Unmodified `bash run-all.sh` returned
+41 PASS / 0 FAIL with a byte-identical `023945b0…` log; the fresh ASan stack
+and 4096/4096 chosen-byte readback for seeds `0x5a`/`0x6b` repeated, with
+safe/patched/2.9.0 controls clean. ESTABLISHED AS LABELED, no grade change:
+R4 LIMITED, no stock-glibc groom, pointer dereference or R5. This supersedes
+the witness-UNKNOWN line in the 07:3x–08:0xZ section above for the verdict
+only; the admission grade and the two preserved negatives stay as written.
