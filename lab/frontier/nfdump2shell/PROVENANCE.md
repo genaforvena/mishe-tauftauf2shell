@@ -807,4 +807,29 @@ no memory or registers were forced. Fresh source rechecks:
 `:343`, pinned `nfd_raw-parent.c:188` computes `msecReceived`, and
 `nfd_raw.c:256` stores it. Grade unchanged: rung 3 live / rung 4
 availability + chosen-offset PARTIAL / NO r5. The five older replay lanes
-remain queued and were not re-run by the witness this round.
+remain queued and were not re-run by the witness this round. The IPv4
+boundary lane was closed later by W314 (below); event 5793 IPv6 crossing was
+already closed by W292b, leaving three lanes queued.
+
+## W314 independent replay verdict — IPv4 allocation boundary (2026-11-27 04:26Z)
+
+Witness W314 (tape #6070) returned **ESTABLISHED AS LABELED** for the IPv4
+allocation-boundary lane (`run-edge.sh`, #5680), with no counterexample and
+no grade change. Detail:
+`.mishe-tauftauf/artifacts/witness-w314-nfdump-edge/detail.md`. Clean
+`git archive 325ec0c9 lab/frontier/nfdump2shell` (27 files) with only the two
+SHA-verified tarballs copied in as provisioning; `build-wire.sh` re-hashed
+them to `970247fa…` (vulnerable) and `61c92342…` (fixed) and rebuilt all four
+collector pairs. Unmodified `bash run-edge.sh` rc0, **8 PASS / 0 FAIL**.
+A fresh 65507-byte loopback datagram gave, in the vulnerable ASan collector,
+`heap-buffer-overflow`, `READ of size 1` at `nfd_raw.c:259:34 in Process_nfd`
+— the crossing read, not the 8-byte `msecReceived` store. The same-size
+complete-element control produced 1 flow with no ASan report; the fixed
+collector logged `Corrupt nfd record: expected 1 records, processd: 0` with
+no report and zero flows. The witness' source comparison: vulnerable
+`GetExtension()` walks element lengths to the requested extension or a zero
+length; fixed `ScanExtensions()` walks exactly `recordHeader->numElements`.
+The pinned store stays at raw `nfd_raw.c:256` (fixed `:264`). This lane is a
+rung-3 confirmed read at the IPv4 allocation boundary: no chosen bytes,
+pointer, marker, command or side effect, NO r5. The remaining queued lanes
+are #5645 live wire, #5712 header and #5738 element type.

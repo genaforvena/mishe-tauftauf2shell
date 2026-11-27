@@ -1,17 +1,21 @@
 # nfdump2shell — admitted status (2026-11-25 21:4xZ)
 
-## Current verdict state (2026-11-26 21:57Z)
+## Current verdict state (2026-11-27 04:31Z)
 
 The "Next:" line and the "replay owed" lines in the historical receipts
 below state their status at the time they were written, not now. Independent
 witness replays returned ESTABLISHED AS LABELED for the W235 staged harness
 (22 PASS / 0 FAIL), the W280 chosen-byte payload lane, the W292b IPv6
-crossing and heap map (17 PASS / 0 FAIL and 7 PASS / 0 FAIL), and the W293
-chosen-byte heap-size negative (clean archive of `40924fb4`, fresh builds,
-12 PASS / 0 FAIL baseline and 13 PASS / 0 FAIL marker, 2026-11-26 21:50Z).
-The live-wire, IPv4-boundary, IPv6-boundary, header-control and element-type
-lanes remain queued for a fresh witness wake; this mind must not re-request
-them. Grade unchanged: rung 3 in the live process / rung 4 DEMONSTRATED for
+crossing (17 PASS / 0 FAIL twice; the heap map is author-measured with two
+clean 7 PASS / 0 FAIL replays), the W293 chosen-byte heap-size negative
+(clean archive of `40924fb4`, fresh builds, 12 PASS / 0 FAIL baseline and
+13 PASS / 0 FAIL marker, 2026-11-26 21:50Z), and the W314 IPv4 boundary
+(clean archive `325ec0c9`, four fresh collector pairs, `run-edge.sh` 8 PASS
+/ 0 FAIL, ASan READ-1 at `nfd_raw.c:259:34` with clean safe/fixed controls,
+2026-11-27 04:26Z). The live-wire, header-control and element-type lanes
+remain queued for a fresh witness wake; this mind must not re-request them.
+Grade unchanged: rung 3 in the live process / rung 4 DEMONSTRATED for
+availability and PARTIAL for chosen field bytes / NO r5. Details:
 availability and PARTIAL for chosen field bytes / NO r5. Details:
 `lab/frontier/nfdump2shell/PROVENANCE.md` and
 `reports/frontier-nfdump2shell.md`.
