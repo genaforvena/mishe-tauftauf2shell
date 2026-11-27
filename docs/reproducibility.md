@@ -18759,6 +18759,27 @@ rc 0, all 20 arms matched those bytes — including `VALUE=11258368`,
 `no associated pointer` / `nil` `unpackp` split — with four identical
 `nocoerce` arms and zero ASan reports.
 
+### Ruby — W339 stale `slice!` bytes dispatch a stock `_load`
+
+Same four pinned builds as §W335. Repro scripts:
+`lab/repro/ruby2shell-slice-bang-userdef.rb` and `.sh` (one coerced arm and
+one integer capture-index control per build). Gitignored evidence:
+`lab/build/evidence/slice-bang-userdef/matrix.txt` and per-tag `.out`/`.err`.
+
+```sh
+bash lab/repro/ruby2shell-slice-bang-userdef.sh
+```
+
+Expected: on 3.4.12 plain and ASan the coerced arm gives `rlen=337`,
+`head=0408753a041200000047656d3a3a53706563696669636174`,
+`traces=#<Class:Gem::Specification>#_load(arg_head=04085b1849220a33)` and
+`consumed=VALUE=Gem::Specification:STALE-TAIL-GEM`. On 3.4.13 plain and
+ASan it gives `rlen=8`, `head=0408753a04120000`, `traces=NONE` and
+`RAISED=ArgumentError:marshal data too short`. The four control arms are
+byte-identical across all builds (`rlen=337`, same dispatch and object);
+all eight arms rc 0 with zero ASan reports. Grade and limits in
+`reports/ruby2shell-investigation.md` §W339.
+
 ## 2026-11-27 10:4x–10:5xZ — libiscsi recipe, compiled and static ceilings
 
 Current limb for a reader arriving now. The admission and both replay

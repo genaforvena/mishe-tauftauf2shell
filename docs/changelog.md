@@ -4,6 +4,25 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+
+## 2026-11-27 12:3x–12:4xZ — W339 stale `slice!` bytes dispatch a stock `_load` (Ruby)
+
+W337's named follow-up fired at narrow in-process scope. A handcrafted
+Marshal `u` stream keeps the class name `Gem::Specification` and a 19-field
+nested array past the coerced length; the 3.4.12 `slice!` tail copy lets
+`Marshal.load` select and invoke that **stock** Rubygems class's `_load`
+with the stale array as its argument. Vulnerable plain+ASan: `rlen=337`,
+`Tracepoint` records `#<Class:Gem::Specification>#_load` and the result is
+`Gem::Specification:STALE-TAIL-GEM`; fixed plain+ASan: `rlen=8`,
+`traces=NONE`, `ArgumentError: marshal data too short`. Four integer
+capture-index controls deliver the whole stream and dispatch identically on
+all builds; all eight arms rc 0 with zero ASan reports. Adjacent narrow rung
+4 in-process stock method dispatch; no caller-defined `_load` class, gadget
+chain, command, marker, pointer control or wire/stock reach. Primary CVE
+grade, witness-COMPLETE rung 4 and full rung 5 unchanged. Details in
+`reports/ruby2shell-investigation.md` §W339 and
+`docs/reproducibility.md` §W339.
+
 ## 2026-11-27 12:3xZ — docs fold: gimpjif geometry closed, svxlink repair accepted
 
 Docs-only fold of `8d4458ac`, `0937dbb3`, `2bd0b1e7` and `fb04d975` after

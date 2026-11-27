@@ -8161,3 +8161,54 @@ falsifier: only harness-defined `_load` classes work, or the fixed build
 shows the same dispatch. Do not repeat the Marshal fixnum/string shapes
 above, the 543-byte bands shape, partition, backref `[]=`, each_line,
 append_as_bytes, concat or setbyte unchanged.
+
+## 2026-11-27 12:3x–12:4xZ — W339: stale `slice!` bytes dispatch a stock `_load` (Ruby)
+
+W337's named follow-up fired. `ObjectSpace.each_object(Class).select { |c|
+c.respond_to?(:_load) }` on 3.4.12-plain yields `Encoding`,
+`Gem::Specification` and `NameError::message` — all stock, no harness-defined
+class is needed. Reproduction:
+`lab/repro/ruby2shell-slice-bang-userdef.{rb,sh}`; evidence gitignored under
+`lab/build/evidence/slice-bang-userdef/`.
+
+- **Stream.** Handcrafted Marshal `u` (TYPE_USERDEF) object:
+  `04 08 75 3a 04 12 00 00 00 "Gem::Specification" <len> <nested array>`.
+  The 19-field nested array carries `rubygems_version`, spec version, name
+  `STALE-TAIL-GEM`, `Gem::Version`, a valid date and filler fields. The
+  head `04 08 75 3a 04 12 00 00` ends on the last high byte of the 5-byte
+  symbol length; `to_int` replaces the receiver with that head and
+  `String#replace` writes its NUL terminator over a byte already NUL in the
+  well-formed length (guarded by an assertion in the script). The class name
+  and the entire nested payload therefore live past the coerced length.
+- **Observed.** Vulnerable 3.4.12 plain and ASan, coerced arm: `rlen=337`,
+  `head=0408753a041200000047656d3a3a53706563696669636174`, and
+  `Marshal.load` returns `Gem::Specification:STALE-TAIL-GEM`. A TracePoint
+  on `:call` records `#<Class:Gem::Specification>#_load(arg_head=04085b1849220a33)`
+  — a stock Rubygems method selected by the stale bytes, with the nested
+  Marshal array passed as its argument. Fixed 3.4.13 plain and ASan:
+  `rlen=8`, `head=0408753a04120000`, `traces=NONE`,
+  `RAISED=ArgumentError:marshal data too short`. The falsifier fails to
+  materialise: no dispatch on the fixed build through the stale path.
+- **Controls.** Integer capture-index (`W339_COERCE=0`) arms deliver the
+  complete well-formed stream and dispatch `_load` on all four builds with
+  byte-identical output (`rlen=337`, same head, same object). Thus the
+  headers are valid everywhere and only the coerced stale bound differs.
+  All eight arms returned rc 0 with zero ASan reports; the over-read stays
+  inside the live receiver buffer.
+
+Grade: **adjacent narrow rung 4 in-process — stock method dispatch from
+stale bytes.** A real loader chooses a stock class and invokes its own
+`_load` implementation on bytes past the post-coercion length, yielding a
+typed object whose chosen name survives. No gadget chain, command, benign
+marker, pointer control or wire/stock reach; the caller chose its own bytes
+and the class is a stock Rubygems class. Primary CVE grade, witness-COMPLETE
+rung 4 and full rung 5 unchanged.
+
+Next named experiment: a stock consumer that turns stale bytes into a live
+side effect without any caller-defined coercion object (e.g. an encoding or
+parser path reached from a stock HTTP/multipart call), or a stale-backed
+object surviving into a second request; falsifier: only harness-triggered
+paths work, or the fixed build shows the same effect. Do not repeat the
+`Gem::Specification` userdef shape, the Marshal fixnum/string shapes,
+`unpack("p")`, the 543-byte bands shape, partition, backref `[]=`,
+each_line, append_as_bytes, concat or setbyte unchanged.
