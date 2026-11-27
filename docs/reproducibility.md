@@ -20311,6 +20311,40 @@ chosen-field chain remains author-only pending replay (#6628). The
 §16:0xZ and §16:3xZ recipes above are unchanged: no new JIF, runner,
 binary or hash was produced by this repair.
 
+### Gimpjif2Shell W352 — third-stage chosen table base (author-only)
+
+From the repository root, with the provisioned SHA256SUMS-verified GIMP
+3.2.8 AppImage and the unchanged no-shim runner (§16:0xZ setup):
+
+```sh
+sha256sum lab/frontier/gimpjif2shell/live/run-appimage-min340.sh \
+  lab/frontier/gimpjif2shell/live/evidence/w352-stage2-wide256.jif \
+  lab/frontier/gimpjif2shell/live/gdb-w352-table.cmd
+export GIMPJIF_W340_JIF="$PWD/lab/frontier/gimpjif2shell/live/evidence/w352-stage2-wide256.jif"
+export GIMPJIF_W340_GDB="$PWD/lab/frontier/gimpjif2shell/live/gdb-w352-table.cmd"
+export GIMPJIF_W340_OUT=/tmp/w352-table-run.log GIMPJIF_W340_LOG=/tmp/w352-table-gdb.log
+bash lab/frontier/gimpjif2shell/live/run-appimage-min340.sh
+```
+
+Expect SHA-256 `b047c40e…` (runner), `76b41106f6ef3da606414f5a913bc599ac0613f2e8701b73fcaf1d3eb120e8d8`
+(JIF) and `f1c9004d39179b03a489f2add884c01106e2bb78faea312576c1ac6a19380d2b`
+(read-only observer). The JIF is a 786432-byte `0x40` flood with
+`P1=0x5555556c0240` every 8 bytes over output offsets `0x46c00..0x473f8`
+(256 copies), `zlen=800`, file size 838. The author's committed logs
+`live/evidence/w352-wide-{run,gdb}.log` (SHA-256 `f6201f9c…` /
+`832ac9d5…`) and `w352-table-{run,gdb}.log` (`2e0f0391…` / `bd5306aa…`)
+show `W349 CHOSEN n=32`, `W351 STAGE2`, and the terminal fault at
+`0x7ffff7fd12e1` (`mov (%rdx,%rax,8),%rax`), with the table observer
+firing on genuine loader bases first and then on chosen filler
+`rdx=0x4040404040404040`, `rax=0x40`. Layout is not byte-reproducible:
+`idx` was `0x555555678f70` in run 1 and `0x5555556790b0` in run 2, with
+`ARRBASE−idx=0x47210` in both. No chosen-address write, control-flow
+word, marker, command or r5; author-only, grade unchanged. Docs
+re-verified the three pinned SHA-256 values on disk but did not run the
+AppImage here. Detail: `lab/frontier/gimpjif2shell/PROVENANCE.md` §W352
+and `reports/frontier-gimpjif2shell.md` §W352. Next bounded question:
+tune the JIF path/`zlen` to aim `P1+0x330/0x338` in a measured run.
+
 ### UxPlayPin2Shell W362 — witness verdict at the pinned-sink/argv scope
 
 From `lab/frontier/uxplaypin2shell`, `sh harness/run-all.sh` checks 4 pins

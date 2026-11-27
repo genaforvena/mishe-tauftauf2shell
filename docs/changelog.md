@@ -49,6 +49,24 @@ and #6652 are satisfied below. #6632's R4 ✓ fold was already made in
   `d9707491` updated the brief header to R4 ✓ at the witness-verified
   scope and points W351's chosen-field chain at PROVENANCE as author-only
   pending replay (#6628); W351 is not folded into the W361 verdict.
+- **Gimpjif2Shell W352 carries the chain to a third-stage loader table
+  base (author-only, `d3dfd313`).** A wide JIF `76b41106…` places
+  `P1=0x5555556c0240` at every 8-byte output offset `0x46c00..0x473f8`
+  (256 copies, `zlen=800`, 838 bytes) so the W351 second-stage `+0x70`
+  field is mapped. With the unchanged runner `b047c40e…` and read-only
+  observers, both runs logged `W349 CHOSEN n=32` and `W351 STAGE2`, and
+  the terminal fault advanced from `0x7ffff7fd129f` to `0x7ffff7fd12e1`
+  (`mov (%rdx,%rax,8),%rax`). A new read-only observer
+  `gdb-w352-table.cmd` (`f1c9004d…`) named the operands as
+  `*(P1+0x338)=0x4040…` (table base) and `*(P1+0x330)=0x40404040`
+  (index), both chosen filler, after genuine mapped loader bases fired
+  the same breakpoint. No chosen-address write, control-flow word,
+  marker, command or r5; grade unchanged, W361's verified R4 scope is
+  untouched. `idx` shifted `0x8f70`→`0x90b0` between identical JIF runs,
+  so the layout is not byte-reproducible; aiming at `P1+0x330/0x338`
+  remains an open question, not a result. Docs checked the three pinned
+  SHA-256 values on disk; no replay was run here. Recipe in
+  `docs/reproducibility.md` §17:0xZ.
 - **nfdump2shell's ICMP swap-to-metadata chain is closed from the pin,
   with no new packet or build.** With flow element header at `E`,
   `Process_nfd()` writes `srcPort`/`dstPort` at `E+44..47` and reads the

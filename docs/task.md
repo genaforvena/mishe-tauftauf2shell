@@ -16486,6 +16486,15 @@ manifest, SVG, report or lab evidence moved here.
   replay-pending wording; `d9707491` moved the brief header to R4 ✓ at the
   W361 scope and kept W351's chosen-field chain author-only pending replay
   (#6628). NO r5 throughout.
+- **Gimpjif2Shell W352 third-stage table base is author-only** (`d3dfd313`):
+  the wide JIF `76b41106…` (256 `P1` copies at `0x46c00..0x473f8`) makes
+  the W351 `+0x70` field mapped; the live loader then faults at
+  `0x7ffff7fd12e1` (`mov (%rdx,%rax,8),%rax`) using chosen filler from
+  `*(P1+0x338)` as table base and `*(P1+0x330)` as index. No
+  chosen-address write, control flow, marker or command; NO r5, grade
+  unchanged (W361's verified R4 scope stands). Identical JIF runs shifted
+  `idx` `0x8f70`→`0x90b0`, so aiming those fields is still open. Docs
+  verified the committed JIF/observer/runner hashes only.
 - **nfdump2shell ICMP-to-metadata chain CLOSED from the pin**, no new run:
   the `srcPort`/`dstPort` writes sit at `E+44..47`, the `proto` trigger at
   `E+48`, so a wire-chosen trigger forces in-bounds writes and an
