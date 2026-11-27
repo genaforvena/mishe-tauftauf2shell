@@ -1,14 +1,17 @@
-# checkmk2shell — status (staged 2026-11-27 W367)
+# checkmk2shell — status (admitted 2026-11-27 W367)
 
-State: **STAGED by frontier**; live inner-socket window 228 with two registered
-panes. Operator admission and independent witness replay are owed. Wake units,
-routes and sync stay person-reserved. Brief:
-`reports/frontier-checkmk2shell.md`. Lab and pins:
+State: **ADMITTED 20:0xZ under standing #6 as the 220th declared target mind**;
+independent witness replay owed. Window 228 (inner socket, two panes %462/%463)
+created 2026-11-27 19:16Z and adopted as-is; wake units, routes and sync stay
+person-reserved. Brief: `reports/frontier-checkmk2shell.md`. Lab and pins:
 `lab/frontier/checkmk2shell/PROVENANCE.md`. Charter and seed wall are under
 `.mishe-tauftauf/{charters,walls}/checkmk2shell.md`.
-Staging commit `b902273f`; clean archive TAR SHA-256
-`3a5b3ef20bbf9bcbf3efa6c68fdbbcba9b45fb343de41d92d5be3126f25cab52`
-replayed 12/12 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`.
+
+Operator clean replay at 20:06Z from `git archive --format=tar b902273f
+lab/frontier/checkmk2shell` (plain-tar SHA-256
+`3a5b3ef20bbf9bcbf3efa6c68fdbbcba9b45fb343de41d92d5be3126f25cab52`): 12/12
+`SHA256SUMS` pins matched and unmodified `sh harness/run-all.sh` reported
+`RUN_ALL_OK 11 PASS / 0 FAIL`.
 
 
 CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq; affected Checkmk 2.5.0 before 2.5.0p21,

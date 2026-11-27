@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 219,
+      "value": 220,
       "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell (19:2xZ), pcre2jit2shell (19:5xZ), gnutlsdtls2shell (20:4xZ) libtiffpixarlog2shell (21:0xZ), inihlongline2shell (21:4xZ), mujs2shell (22:1xZ), openscapmangle2shell (22:2xZ), live555vorbis2shell (22:5xZ) and oiiocineon2shell (23:1xZ) and sngrepsip2shell (23:3xZ) admitted 2026-11-26 under standing #6, and libicalclean2shell admitted 2026-11-27 under standing #6; the earlier roster name list is preserved in docs/architecture.md. and libmodplugdsm2shell admitted 2026-11-27 under standing #6 and openjphcleanup2shell admitted 2026-11-27 under standing #6 and afflibpage2shell admitted 2026-11-27 under standing #6 and lzxwindow2shell admitted 2026-11-27 under standing #6 and sqlitesession2shell admitted 2026-11-27 under standing #6 and lwipmqtt2shell admitted 2026-11-27 under standing #6 sailpsd2shell (05:3xZ), libeventsockaddr2shell (06:1xZ), nsdsvcb2shell (07:2xZ), expatparsebuf2shell (07:4xZ), berryformat2shell (09:0xZ), coturnoauthnonce2shell (09:4xZ), tcpreplayservices2shell (10:0xZ), libiscsiluns2shell (10:4xZ), sippauth2shell (11:0xZ), svxlinkdirectory2shell (11:3xZ), libssh-sftp-longname2shell (12:5xZ), samtoolsrg2shell (13:2xZ),",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 216,
+      "value": 217,
       "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell admitted 19:2xZ, pcre2jit2shell admitted 19:5xZ, gnutlsdtls2shell admitted 20:4xZ libtiffpixarlog2shell admitted 21:0xZ, inihlongline2shell admitted 21:4xZ, mujs2shell admitted 22:1xZ, openscapmangle2shell admitted 22:2xZ, live555vorbis2shell admitted 22:5xZ and oiiocineon2shell admitted 23:1xZ and sngrepsip2shell admitted 23:3xZ and libicalclean2shell admitted 00:5xZ and libmodplugdsm2shell admitted 01:2xZ and openjphcleanup2shell admitted 01:3xZ and afflibpage2shell admitted 02:2xZ on 2026-11-27. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. and lzxwindow2shell admitted 02:4xZ on 2026-11-27. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here. sqlitesession2shell admitted 03:2xZ on 2026-11-27 under standing #6. lwipmqtt2shell admitted 04:0xZ on 2026-11-27 under standing #6. sailpsd2shell admitted 05:3xZ, libeventsockaddr2shell admitted 06:1xZ, nsdsvcb2shell admitted 07:2xZ, expatparsebuf2shell admitted 07:4xZ, berryformat2shell admitted 09:0xZ, coturnoauthnonce2shell admitted 09:4xZ, tcpreplayservices2shell admitted 10:0xZ, libiscsiluns2shell admitted 10:4xZ, sippauth2shell admitted 11:0xZ, svxlinkdirectory2shell admitted 11:3xZ, libssh-sftp-longname2shell admitted 12:5xZ, samtoolsrg2shell admitted 13:2xZ,",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 216,
+      "value": 217,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary. lwipmqtt2shell row added 04:0xZ under standing #6. SailPsd2Shell row added 05:3xZ under standing #6. LibeventSockaddr2Shell row added 06:1xZ under standing #6.Nsdsvcb2Shell row added 07:2xZ under standing #6.ExpatParseBuf2Shell row added 07:4xZ under standing #6.BerryFormat2Shell row added 09:0xZ under standing #6.CoturnOauthNonce2Shell row added 09:4xZ under standing #6.TcpreplayServices2Shell row added 10:0xZ under standing #6.LibiscsiLuns2Shell row added 10:4xZ under standing #6.SippAuth2Shell row added 11:0xZ under standing #6.SvxLinkDirectory2Shell row added 11:3xZ under standing #6.LibsshSftpLongname2Shell row added 12:5xZ under standing #6.SamtoolsRg2Shell row added 13:2xZ under standing #6.LibstropheScram2Shell row added 14:0xZ under standing #6.EditorConfigGlob2Shell row added 14:4xZ under standing #6.",
       "source": "docs/results.md"
     },
@@ -3379,6 +3379,22 @@
         "reports/pymupdfcallout2shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "Checkmk2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "◐",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 20:0xZ under standing #6 as the 220th declared target mind; staged two-pane window 228 adopted as-is (registry 229/229 unique names, panes %462/%463 dead=0, exactly one checkmk2shell entry created 19:16Z). CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq unchecked mkevent append_str copy of monitored-host check output into `char message[8192]` is distinct from every admitted notification/syslog lane.** Operator clean replay 20:06Z from `git archive --format=tar b902273f lab/frontier/checkmk2shell` (plain-tar SHA-256 `3a5b3ef20bbf9bcbf3efa6c68fdbbcba9b45fb343de41d92d5be3126f25cab52`): 12/12 SHA256SUMS pins OK, unmodified `sh harness/run-all.sh` `RUN_ALL_OK 11 PASS / 0 FAIL`. The real pinned parser reports ASan `stack-buffer-overflow`, `WRITE of size 10000` at `append_str` called from `parse_notification :144`; fixed 10000-byte arm rc 0 with message size 8191, 100-byte safe arm size 144 on both builds. Read-only GDB sees chosen `0x4343434343434343` at the saved-RIP slot, but the real parser crashes before `ret` in return-object construction. An isolated verbatim-sink/no-canary/no-PIE wrapper returns to a local `BENIGN_MARKER` at text offset 8172; offsets 8171/8173 crash without the marker. Grade R1/R2/R3 ✓, R4 ◐ LIMITED to that isolated sink scope, R5 — NOT CLAIMED: no live Checkmk process, notification spooler, Event Console, wire path or command side effect was exercised; established:false until an independent witness replay.",
+      "reports": [
+        "reports/frontier-checkmk2shell.md",
+        "reports/checkmk2shell-status.md"
+      ],
+      "established": false
     }
   ]
 }

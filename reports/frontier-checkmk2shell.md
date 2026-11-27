@@ -1,10 +1,11 @@
 # Frontier brief: checkmk2shell — Checkmk mkevent stack overflow
 
-Status 2026-11-27 W367: **STAGED**; live inner-socket window 228 with two
-registered panes. Operator admission and independent witness replay are owed.
+Status 2026-11-27 W367: **ADMITTED 20:0xZ as the 220th declared target mind**;
+window 228 adopted as-is. Operator clean replay at 20:06Z of `b902273f`:
+12/12 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`; independent witness replay owed.
 Grade R3 confirmed on the real pinned parser; R4 **LIMITED** to an isolated
-verbatim-sink/no-canary/no-PIE build with benign marker execution. R5 NOT CLAIMED.
-Staging commit `b902273f`; clean `git archive --format=tar` SHA-256
+verbatim-sink/no-canary/no-PIE build with benign marker execution. R5 NOT
+CLAIMED. Staging commit `b902273f`; clean `git archive --format=tar` SHA-256
 `3a5b3ef20bbf9bcbf3efa6c68fdbbcba9b45fb343de41d92d5be3126f25cab52`
 replayed 12/12 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`.
 
