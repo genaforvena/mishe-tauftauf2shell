@@ -892,3 +892,38 @@ write. Together with `nfcapd.c:343` and `:442`, the stored 8 bytes are
 wall-clock derived on every live packet. This closes the plausible
 "chosen-index metric write" hypothesis; grade stays rung 3 live / rung 4
 availability + chosen-offset PARTIAL / NO r5.
+
+## W318 source-bound negative — no wire input path enlarges the OOB store (2026-11-27 05:55Z)
+
+Read-only check of the pinned parent
+`8a00543aa5c7b25b7d3f7642fdf306fd9979f237`; no new run, no claim change.
+The question closed here: can a different socket mode, a longer datagram or
+a stream reader push the terminal store past the next chunk header into the
+source-ident chunk or the `FlowSource_t` object?
+
+- `src/nfcapd/nfcapd.c:273` allocates `in_buff` with
+  `malloc(NETWORK_INPUT_BUFF_SIZE)` (65535 B, `src/collector/nfnet.h:49`).
+  `:319` calls `receive_packet(socket, in_buff, NETWORK_INPUT_BUFF_SIZE, ...)`
+  for every packet, so no receive function can return a count above 65535
+  bytes into this buffer.
+- The network default is `recvfrom` (`:507`). All receive sockets are UDP:
+  `SOCK_DGRAM` in `src/collector/nfnet.c:65,321,420` for the dual-stack,
+  unicast and multicast paths. There is no TCP/stream receive mode, so a
+  datagram cannot be made larger than IPv6's 65527-byte UDP payload.
+- The only other `receive_packet` assignments are offline file readers:
+  `NextYafRecord` (`:867`, `-y` yaf file) and `NextPacket` (`:878`, `:885`,
+  pcap file/device under `ENABLE_READPCAP`). `NextPacket` passes the same
+  `buffer_size` to `decode_packet()`
+  (`src/collector/pcap_reader.c:449-460`) and is not a remote input path;
+  neither reader is reachable from a loopback wire request.
+- `harness/wire_send.py:148-166` places the 4-byte terminal EXgenericFlow
+  element at `total`, so the `msecReceived` store is at `total+16`. With
+  `total <= 65527` (IPv6) the maximum is `in_buff+65543..65550`, exactly the
+  next malloc chunk's header; smaller datagrams land inside `in_buff`. The
+  store can never reach the 32-byte ident chunk's user data or the `fs`
+  object 0x80 bytes later.
+
+This closes the receive-path expansion hypothesis. Grade stays rung 3 live /
+rung 4 availability DEMONSTRATED + chosen-offset PARTIAL / NO r5; an advance
+still needs a measured pointer-bearing adjacency or a live command side
+effect, neither of which exists in this pinned collector.
