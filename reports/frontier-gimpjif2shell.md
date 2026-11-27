@@ -798,3 +798,33 @@ rewrite that had not happened. `patch-shim.c` now emits
 replay: 7 PASS / 0 FAIL with `UNKNOWN: fake fd word unchanged at exit`;
 the published log's before and exit words are identical. No glibc write
 into the shim fake was observed, so the grade is unchanged.
+
+
+## Collateral repair and chosen-pointer use (W301, 2026-11-27)
+
+The natural-neighbour question is closed by measurement, not by another
+variant. The pinned `ReadJeffsImage()` makes no plugin allocation between
+`indexes` and the `inflate()` write; W252's pre-write dump shows the next
+chunks are already-live allocated objects (0x21/0x21/0x21/0x71/0x81),
+the first holding `[1, pointer -> out+368]`. W290/W291 wrote a file-chosen
+unmapped pointer at `out+280` in the real plugin and saw neither a fault
+at the chosen address nor a hardware-watchpoint hit. No fixed 3.2.10
+AppImage is published (gimp.org lists 3.2.8 as of 00:50Z), so the fixed
+control remains BLOCKED.
+
+W301 tested the missing condition: whether the loader can reach a use of
+that pointer once the collateral chunk-size corruption is removed.
+`live/repair-shim.c` restores only `out+264 = 0x21` and `out+272 = 1`
+after real zlib has written the JIF, leaving the file-chosen pointer at
+`out+280` untouched, and arms the W290 SIGSEGV handler. The replay is
+**6 PASS / 0 FAIL** with one explicit UNKNOWN: no fault. The attack log
+shows `total_out=448`, the repaired words decoding to
+`(0x21, 0x1, 0x00007f0000414243)`, then GIMP's 90 s cleanup and
+`RUN_RC=137`; the safe JIF completes cleanly with no shim line. The
+chosen pointer therefore persists in a live object's word across the
+overflow and its collateral repair, but no dereference was observed in
+the measured window, and the repair is shim-assisted. A clean
+`git archive HEAD` replay of `run-witness.sh` passed 6/0 with core
+29/0. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL, NO r5.
+Exact hashes and logs are in
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

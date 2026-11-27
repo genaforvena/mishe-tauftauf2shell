@@ -1154,3 +1154,68 @@ has `SHIM_FAKE_BEFORE=18e2b3aa295d000060cf365f34730000` equal to
 completes with no patch call. No glibc write into the shim fake, no
 chosen-address write to a named live object and no command; grade
 unchanged.
+
+## W301 collateral-repair probe and clean replay (2026-11-27, 00:32Z wake)
+
+Reconciliation: W300 yielded `changed` cleanly and committed `8ab87ca6`;
+there was no cut run. `issue://5900` does not resolve in this repo, so the
+W297 witness verdict remains UNKNOWN and blocks nothing. gimp.org's
+downloads page still lists 3.2.8 as newest stable when checked at 00:50Z,
+so the fixed-AppImage control stays BLOCKED.
+
+Decision from source and prior logs: the pinned
+`ReadJeffsImage()` allocates `compressed` then `indexes` and performs no
+plugin allocation between that allocation and the `inflate()` write
+(`src/file-gif-load-vulnerable.c:1541-1611`); only zlib-internal
+`inflateInit`/window allocations follow the write. The natural neighbours
+are therefore not plugin allocations made after `indexes`. W252 already
+measured them as live allocated chunks before the write
+(`live/evidence/galloc-long.log`: `SHIM_PRECHUNK1..5` sizes
+0x21/0x21/0x21/0x71/0x81 and `SHIM_PREUSER1` = `01 00…` plus a pointer to
+the 96-byte `g_type_module_register_type` allocation at `out+368`),
+and W290/W291 placed a file-chosen unmapped pointer at `out+280` with no
+fault and no hardware-watchpoint hit. That lane is closed; no variant was
+retried.
+
+New bounded experiment: `live/repair-shim.c` (SHA-256
+`75056f0b6fce75baa933e69f8f7f23ea15dd5883baafed0800065d1409595d12`)
+wraps the pin's single `inflate()`, installs the W290 SIGSEGV handler, and
+after real zlib returns restores only the two collateral words the
+overflow destroyed (`out+264` = 0x21 and `out+272` = 1, the pre-write
+values logged by W252). The file-chosen pointer at `out+280` from
+`realglib/evidence/published-ptr.jif` (SHA-256
+`b3e3ab52de3a583fb0e57fb4097c60a60e24b464a8b60c9b7594fd788910a031`)
+is untouched; the repair itself is instrumented, not file-chosen.
+`live/run-appimage-repair.sh` (SHA-256
+`b4853acb190d7dbfe7b6f5692aa00a0d618e72fff60b71c204499feaded8edd5`)
+preloads it into the SHA-verified GIMP 3.2.8 AppRun, runs safe and attack
+JIFs through the PDB `gimp-file-load` path, then restores the pre-probe
+AppRun preload line. Final replay: **6 PASS / 0 FAIL**, one explicit
+UNKNOWN (`no fault observed in the live plugin window`). A first replay
+had a runner-hex defect (`4342410000007f00` instead of the correct
+`43424100007f0000`); it was corrected and the whole probe replayed, not
+reported as a finding.
+
+`live/evidence/appimage-repair-safe.log` (SHA-256
+`97030671edfe387e62bea85dc30b8ddcf3441cb239d4987dcbe0ca88a54a0c4c`):
+`batch command executed successfully`, `RUN_RC=0`, no `REPAIR_` line.
+
+`live/evidence/appimage-repair-ptr.log` (SHA-256
+`26dbf5218f0fd7a0fd564f6c1ab03ad2f388a9e8bc1528fa13081294a8655952`):
+`REPAIR_ARMED pid=95825 out=0x5df3ce855610 avail_out=2147483778
+chosen=0x7f0000414243`; `REPAIR_WORD_BEFORE=2100000000000000
+0100000000000000<heap pointer>` (original pre-write words);
+`REPAIR_PATCHED pid=95825 total_out=448`;
+`REPAIR_WORD_AFTER=2100000000000000010000000000000043424100007f0000`,
+decoded as `(0x21, 0x1, 0x00007f0000414243)`; then GIMP and both children
+terminated at the runner's 90 s cleanup, `RUN_RC=137`, no `REPAIR_FAULT`
+line. The chosen pointer was preserved in a live object's word even after
+the collateral repair, but no dereference was observed in the measured
+window. Repairing the collateral damage to let the loader proceed is a
+shim-assisted condition, so even a fault would have been rung-4 mechanics.
+
+Independent clean-archive check: `git archive HEAD lab/frontier/gimpjif2shell`
+into `/tmp/w301-gimp-clean`, then `bash run-witness.sh` gave
+`REPLAY_PASS=6 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, with core
+`TOTAL: 29 PASS / 0 FAIL`. Grade unchanged: rung 3 pinned verbatim /
+rung 4 PARTIAL, NO r5.
