@@ -8,6 +8,12 @@ commands are in that tree. Live inner-socket window 219 (`%444`/`%445`,
 `dead=0`), registry 220/220 unique names. No libssh server, SFTP client,
 listener or remote wire input was run.
 
+Stage commit `24674321`; clean `git archive --format=tar` SHA-256
+`244c358eb7ab556c9e6054b99eececbd7861ce90a021ef4fbf54b477c4de339e`.
+The private replay passed 4/4 source pins and 8/8 harness pins, rebuilt four
+binaries, returned `RUN_ALL_OK 15 PASS / 0 FAIL`, and produced the same summary
+SHA-256 byte-for-byte. Author replay is not witness acceptance.
+
 ## Verified ground truth
 
 - Primary source: `https://www.libssh.org/security/advisories/CVE-2026-15370.txt`

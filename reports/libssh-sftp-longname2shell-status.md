@@ -6,6 +6,10 @@ UNKNOWN.** Brief `reports/frontier-libssh-sftp-longname2shell.md`, lab
 Live inner-socket window 219 (`%444`/`%445`, `dead=0`), registry 220/220
 unique names.
 
+Stage commit `24674321`; clean plain-tar SHA-256 `244c358e…`, 4/4 source pins,
+8/8 harness pins, four rebuilt binaries, `RUN_ALL_OK 15 PASS / 0 FAIL`, and
+summary `bc87203c…` byte-identical. Author replay is not witness acceptance.
+
 Finding: CVE-2026-15370 (CWE-121), upstream libssh `>= 0.11.0` and `< 0.11.5`,
 plus `0.12.x < 0.12.1`; fixed releases `0.11.5` / `0.12.1`. Fix
 `b2065f71c905d347b5e8dd7f8e24856807d71e99`, exact parent
