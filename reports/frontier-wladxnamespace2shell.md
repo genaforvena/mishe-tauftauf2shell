@@ -1,10 +1,12 @@
 # Frontier brief: wladxnamespace2shell — WLA DX `wlalink` stack overflow
 
-Status 2026-11-27 W379: **SCREENED for staging**, not yet admitted; no window.
+Status 2026-11-27 W379: **STAGED** with inner-socket window 232 (`%470`/`%471`);
+operator admission and independent witness replay owed.
 Grade: R1/R2/R3 on the real pinned `wlalink` binary; R4 **LIMITED** to
 attacker-chosen bytes in adjacent stack memory of the lab build; R5 **NO**.
 Harness `lab/frontier/wladxnamespace2shell`; `RUN_ALL_OK 16 PASS / 0 FAIL`
-twice, including after pin refresh. Witness replay not yet owed (no stage).
+twice in-tree and from clean git archive `41a8e1d5`; witness replay owed after
+admission.
 
 - CVE-2026-131871, NVD published 2026-11-18T03:17Z, last modified
   2026-11-27T02:16Z; CWE-121. Claim: WLA DX 9.7 through 10.7
