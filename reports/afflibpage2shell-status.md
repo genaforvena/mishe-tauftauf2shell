@@ -26,6 +26,10 @@ wire/request path, marker or command was observed.
 
 `sh build-all.sh && sh run-all.sh`: rc 0 `BUILD_OK` then `PASS=29 FAIL=0`.
 Runner SHA-256 `f2e166d0907e746dfcd2382e51ede996cc8d8269538519ab500896633f9339ff`.
+Clean-archive replay from `git archive dce931cf lab/frontier/afflibpage2shell`
+(7 entries, no `runs/`, checkouts, builds or binaries) rebuilt both pins and
+returned rc 0 `BUILD_OK` then unmodified `sh run-all.sh` rc 0 `PASS=29 FAIL=0`
+with the same runner hash above.
 Operator admission under standing #6 and independent witness replay are owed;
 this author report is not acceptance.
 

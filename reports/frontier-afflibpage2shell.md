@@ -64,6 +64,11 @@ Observed raw report: `ERROR: AddressSanitizer: heap-buffer-overflow`,
 (`sector=512`, `page=4096`) reads a full page on both pins with no finding.
 Plain vulnerable mode faults before readback, so chosen-byte control is NOT
 claimed. Full provenance and negatives: `lab/frontier/afflibpage2shell/PROVENANCE.md`.
+Clean `git archive` replay from staging commit `dce931cf` (7 committed
+entries; `runs/`, source checkouts, build directories and binaries absent)
+rebuilt all four libraries and returned rc 0 `BUILD_OK` then unmodified
+`sh run-all.sh` rc 0 `PASS=29 FAIL=0` with the same runner hash. Author and
+operator replays are not independent acceptance; witness verdict is owed.
 
 ## Rung-4 feasibility and cheapest next experiment
 

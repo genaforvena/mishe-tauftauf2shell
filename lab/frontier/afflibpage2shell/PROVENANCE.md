@@ -50,6 +50,11 @@ rc 0 `PASS=29 FAIL=0`; runner SHA-256
 Host: GCC/g++ 13.3.0 with `libasan.so.8`, glibc 2.39, autotools 2.71/1.16.
 No ASLR manipulation, LD_PRELOAD, debugger-forced execution or network
 service was used.
+Clean `git archive dce931cf lab/frontier/afflibpage2shell` replay at 02:02Z
+(7 committed entries; `runs/`, source checkouts, build directories and
+binaries absent) rebuilt all four libraries and returned rc 0 `BUILD_OK`,
+then unmodified `sh run-all.sh` rc 0 `PASS=29 FAIL=0` with the same runner
+hash above. Author replay only; independent witness replay is still owed.
 
 ## Scaffolding vs upstream
 
