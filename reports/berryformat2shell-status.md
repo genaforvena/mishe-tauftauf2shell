@@ -1,8 +1,8 @@
 # berryformat2shell — status (staged 2026-11-27 W326)
 
 State: **STAGED for operator admission; admission and independent witness
-verdict UNKNOWN.** Replay commit `7f4f6615`; clean archive SHA-256
-`3473450002c83cc6ea7aa00c971b81d58394bc54f31748be4abea7149c228308`, all
+verdict UNKNOWN.** Replay commit `c235017a`; clean archive SHA-256
+`2cbd8cb5ec449779cead31a7748e9c9e91e21c739fe72ecf582ee8888fce9cd3`, all
 pin/harness hashes matched, 59 PASS / 0 FAIL, summary log `e8ebb940…`.
 Brief `reports/frontier-berryformat2shell.md`, lab
 `lab/frontier/berryformat2shell/`, provenance in that lab's `PROVENANCE.md`,

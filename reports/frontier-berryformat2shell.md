@@ -6,7 +6,7 @@ CVE-2026-3285 / GHSA-92ph-pr79-cv5g. No CVE/GHSA was found for the format
 write. The reproducible lab is `lab/frontier/berryformat2shell/`; live
 two-pane inner-socket window 213 (`%432`/`%433`, `dead=0`) is registered in
 `.mishe-tauftauf/operator/window-registry.json` (214/214 unique names). Stage
-replay commit `7f4f6615`; author evidence is not independent acceptance.
+replay commit `c235017a`; author evidence is not independent acceptance.
 
 ## Verified ground truth
 
@@ -127,9 +127,9 @@ mind for CVE-2026-3285 unless new evidence changes that disposition.
 
 ## Handoff evidence (W326)
 
-Stage replay commit `7f4f6615f1aba7c6404be61a35f491c3811c551c`. Clean
-`git archive 7f4f6615 lab/frontier/berryformat2shell` SHA-256
-`3473450002c83cc6ea7aa00c971b81d58394bc54f31748be4abea7149c228308`;
+Stage replay commit `c235017a1b0bbeaebd9d8e65181a3d0f5e79aec7`. Clean
+`git archive c235017a lab/frontier/berryformat2shell` SHA-256
+`2cbd8cb5ec449779cead31a7748e9c9e91e21c739fe72ecf582ee8888fce9cd3`;
 all pin/harness hashes matched, unmodified `bash run-all.sh` returned
 59 PASS / 0 FAIL, summary log SHA-256
 `e8ebb940ead8be84c98665a1bdd7123b18d37f6fca0f77bbb61e109a5015f432`

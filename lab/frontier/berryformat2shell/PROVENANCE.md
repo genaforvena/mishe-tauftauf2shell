@@ -135,10 +135,10 @@ not locally verified exposure.
 
 ## Clean-archive replay and handoff
 
-Stage replay commit `7f4f6615f1aba7c6404be61a35f491c3811c551c`; pathspec
+Stage replay commit `c235017a1b0bbeaebd9d8e65181a3d0f5e79aec7`; pathspec
 archive SHA-256
-`3473450002c83cc6ea7aa00c971b81d58394bc54f31748be4abea7149c228308`.
-In `/tmp/w326-berry-clean.AOXhMx`, every `HARNESS_SHA256.txt` entry matched,
+`2cbd8cb5ec449779cead31a7748e9c9e91e21c739fe72ecf582ee8888fce9cd3`.
+In `/tmp/w326-berry-current.sFEyrz`, every `HARNESS_SHA256.txt` entry matched,
 unmodified `bash bootstrap.sh` built all seven variants, and unmodified
 `bash run-all.sh` returned 59 PASS / 0 FAIL. Summary log SHA-256
 `e8ebb940ead8be84c98665a1bdd7123b18d37f6fca0f77bbb61e109a5015f432` was
