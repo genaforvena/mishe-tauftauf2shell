@@ -87,6 +87,11 @@ encoder; the 28-byte control is its first block. `sh build-all.sh` returned rc
   disproved. Both plain controls and both fixed plain runs exit 0 with
   `apply-rc=0`. No chosen-byte readback. Full hashes, raw excerpt and negatives:
   `lab/frontier/sqlitesession2shell/PROVENANCE.md`.
+Clean `git archive ca9a5d35 lab/frontier/sqlitesession2shell` replay (20
+committed lab files; `runs/`, source trees, build dirs and binaries absent)
+rebuilt both amalgamations, returned rc 0 `BUILD_OK`, then unmodified
+`sh run-all.sh` rc 0 `PASS=44 FAIL=0` with the same runner hash and the raw
+`sqlite3.c:238155` WRITE-12. Independent witness replay is owed.
 
 
 ## Rung-4 feasibility and cheapest next experiment
