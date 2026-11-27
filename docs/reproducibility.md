@@ -47,6 +47,7 @@ containers whose host ports bind only to loopback.
 | CoturnOAuthNonce2Shell W330/W331 (ADMITTED 09:4xZ, 206th) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; clean archive `5a982134…` and log `b9c20a26…` at admission, W331 witness ESTABLISHED AS LABELED at that clean-archive/harness scope (count 140); no live wire; full recipe in §09:2x–09:4xZ |
 | TcpreplayServices2Shell (ADMITTED 10:0xZ, 207th; W332 ESTABLISHED) | [brief](../reports/frontier-tcpreplayservices2shell.md), [status](../reports/tcpreplayservices2shell-status.md), [provenance](../lab/frontier/tcpreplayservices2shell/PROVENANCE.md) | CVE-2026-102896 / GHSA-fwcr-mqg6-hqmx, affected `<=4.6.0-beta2` pin `9d291ec9…`, fixed `4.6.0-beta3` pin `e6e32ec7…`; 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/tcpreplayservices2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (unmodified real `tcpprep`, local services file, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 20-digit services line gives ASan `WRITE of size 20` in `parse_services` at `src/common/services.c:74` into 10-byte `port[]`, 11 digits gives WRITE-11, fixed and 5/9-digit inputs clean; clean `git archive 52bcb913` replay (archive `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0; operator admission 10:0xZ as 207th (window 215, registry 216/216); W332 independent clean-archive replay 12/0 with byte-identical `98b92441…`, ESTABLISHED AS LABELED at that local-CLI/harness scope; R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED, no grade or `established:false` change. |
 | LibiscsiLuns2Shell (ADMITTED 10:4xZ, 208th; W333 ESTABLISHED) | [brief](../reports/frontier-libiscsiluns2shell.md), [status](../reports/libiscsiluns2shell-status.md), [provenance](../lab/frontier/libiscsiluns2shell/PROVENANCE.md) | Benjamin Ali advisory 2026-08-04 (no CVE/GHSA — UNKNOWN), vulnerable `ef5491376…`, fixed `eff2822fd…` (no release tag), six SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/libiscsiluns2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (direct `scsi_datain_unmarshall()` harness, four in-tree autotools builds, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 4-byte reply gives ASan `WRITE of size 4` at `lib/scsi-lowlevel.c:590` via `:3851`, 0 bytes after a 10-byte region, plain `num=4294967295 (-1)`; fixed returns NULL, 8/16-byte well-formed controls clean; summary SHA-256 `d97043e1…`; witness clean archive `412c89ab…` matched 6/6 pins, ESTABLISHED AS LABELED, R4 LIMITED, R5 NOT CLAIMED |
+| SippAuth2Shell (ADMITTED 11:0xZ, 209th; witness UNKNOWN) | [brief](../reports/frontier-sippauth2shell.md), [status](../reports/sippauth2shell-status.md), [provenance](../lab/frontier/sippauth2shell/PROVENANCE.md) | CVE-2026-90779 (no GHSA ID found — UNKNOWN), SIPp <=3.7.7, vulnerable v3.7.7 `369b3c187…` / fixed v3.7.8 `741ee230…`, release tarballs `e55b15f5…` / `a2519f85…`, fix `1d4a5622` is not an ancestor of the fixed tag; eight digests in `HARNESS_SHA256.txt` | `cd lab/frontier/sippauth2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (direct-call harnesses link real pinned SIPp objects, no listener) | rc 0, `TOTAL: 15 PASS / 0 FAIL`; 32-byte `algorithm=` → ASan `WRITE of size 1` at `src/auth.cpp:190`, 33/64 bytes → WRITE-33/64 at `:189` into `algo[32]`, vulnerable plain 64 bytes rc 139, fixed/safe clean. Read-only GDB shows chosen saved RBP/RIP `0x4141414141414141`; 62 chosen bytes set the six low saved-RIP bytes and the harness `mmap(MAP_FIXED)` marker prints `SIPP_AUTH_MARKER` only on the vulnerable build. R4 in-process only, R5 NOT CLAIMED, no witness replay yet; full recipe in §11:0x–11:1xZ |
 | Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, W328 ESTABLISHED AS LABELED with a stock-build chosen-length counterexample, R5 UNKNOWN, raw-NUL gate negative. Full recipe in §08:1x–08:3xZ and §08:4x–09:0xZ |
 | Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` (1028 with a 1028-byte second packet) via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; chosen-value control only, no r5; W330 (#6283) independently replayed the live wire from its own builds: ESTABLISHED AS LABELED, no grade change. Full recipe in §08:4x–09:0xZ and §09:2x–09:4xZ |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
@@ -18758,3 +18759,113 @@ body, and seven `ret 0x458b` whose target is the non-executable heap
 pointer at `[rsp]`. The staged two-stanza variant is closed by the single
 NUL geometry in `reports/opensips2shell-live-wire.md`. Static only; no
 live run, chosen code or side effect, no grade change, r5 UNKNOWN.
+
+## 2026-11-27 11:0x–11:1xZ — sippauth admitted, W334 verdict, bounded negatives
+
+Current limb for a reader arriving now; it supersedes the gimpjif and
+OpenSIPS "next experiment" lines in the 10:4x–10:5xZ section of
+`docs/task.md`. The operator's 209th admission already re-rendered the
+register (209 declared / 206 active / 206 reported / 141 established), so
+no rung, grade, `established` flag or generated cell moved here. Ruby W334's
+`rpartition` recipe is in §W334 above; `04196495` corrected that report's
+clean-control count from 14 to 10 without changing the 40-arm matrix.
+
+### SippAuth2Shell — admitted direct-call `algo[32]` write
+
+From the repository root, with all eight digests in
+`lab/frontier/sippauth2shell/HARNESS_SHA256.txt`:
+
+```sh
+cd lab/frontier/sippauth2shell
+sha256sum -c HARNESS_SHA256.txt
+bash bootstrap.sh
+bash run-all.sh
+sha256sum summary.txt
+```
+
+`bootstrap.sh` extracts the pinned official release tarballs
+`pins/vuln.tar.gz` (v3.7.7 `369b3c187…`, SHA-256 `e55b15f5…`) and
+`pins/fixed.tar.gz` (v3.7.8 `741ee230…`, SHA-256 `a2519f85…`) and builds
+vuln/fixed × ASan/plain. The harness renames SIPp's own `main` with
+`objcopy --redefine-sym` and links the remaining real objects, so
+`createAuthHeader()` is the pinned upstream function; no listener, socket
+or 401/407 wire input is used. The exact fix `1d4a5622…` is not an ancestor
+of v3.7.8, which carries the equivalent bounded call. The advisory has no
+published GHSA ID or PoC (UNKNOWN).
+
+Expected: rc 0, `TOTAL: 15 PASS / 0 FAIL`, summary SHA-256 `8dd15795…`.
+An 8- or 31-byte `algorithm=` value is clean on vulnerable ASan; 32 bytes
+give `WRITE of size 1` at `src/auth.cpp:190` (the NUL) at offset 64 of
+`algo[32]`; 33 and 64 bytes give `WRITE of size 33`/`WRITE of size 64` at
+`:189`. All five fixed-ASan inputs are clean; vulnerable plain O0 exits 0
+at 31 bytes and 139 at 64, and both fixed-plain runs exit 0. The read-only
+GDB command at `:190` shows twelve chosen `0x41` bytes at `algo+32..+43`
+and saved RBP/RIP `0x4141414141414141`; with 62 bytes the six low saved-RIP
+bytes are chosen and the harness's `mmap(MAP_FIXED)` marker at canonical
+`0x0000414141414141` prints `SIPP_AUTH_MARKER` only on the vulnerable
+build. That mapping, the unprotected build and the marker are lab
+mechanics, not a wire primitive: R4 is DEMONSTRATED in-process only, R5 is
+NOT CLAIMED, and an independent witness replay is still owed. Source trees,
+builds, `runs/` logs and harness binaries are gitignored and regenerated by
+the commands above; the pins, the fixed patch and the brief are tracked.
+
+### Ruby W333 — witness W334 verdict (#6367)
+
+The independent replay is recorded in the gitignored site artifact
+`.mishe-tauftauf/artifacts/witness-w334-ruby/detail.md`. It used own
+3.4.12 rebuild SHA-256 `572c347a…` and 3.4.13 rebuild `b9a48d6e…`, plus
+the unmodified 72-arm whole-capture matrix: the equal-length `shrink`
+arms print `len=1 head=5a chosen=1` on vulnerable plain and ASan with no
+ASan error, while all 24 fixed mutation arms raise `RuntimeError: string
+modified`. Four vulnerable ASan arms and four matching plain arms report
+`negative-size-param` at `vlen=1`; 40 remaining arms return chosen bytes.
+A read-only full-span GDB dump counted exactly 296 chosen bytes at
+`obj+0x18..0x137`, zeros at `obj+0x140`, and a fill swap from `0x5a` to
+`0x41` moved every byte. Verdict: ESTABLISHED AS LABELED at that narrow
+in-process scope, no grade or `established` flag change, NO r5. The one NIT
+is that report line ranges start mid-function; no factual correction was
+needed. The witness rebuilt both versions independently, so this recipe
+does not depend on the author's gitignored lab binaries.
+
+### Gimpjif2Shell W334 — cgroup ceiling and live fault phase
+
+Read the host guard with `cat /sys/fs/cgroup/memory.max`,
+`memory.high`, `memory.events` and the parent slice's `memory.current`;
+the sampled limits, 695 memory readings and the committed
+`lab/frontier/gimpjif2shell/live/evidence/w334-mem-{noshim-65536.log,samples.txt}`
+record the observation. This wake's cgroup is capped at 2 GiB
+(`memory.high=1610612736`) inside a 10 GiB plant slice already holding
+~7.99 GiB; the smallest wrapping geometry `33025x65026` needs ~4 GiB of
+`dest` plus an ~8 GiB GEGL layer, so no in-scope configuration completes a
+load. Raising a workload slice or memory limit is host administration
+reserved to the person. The 64 KiB no-shim run peaked at 833318912 bytes
+(0.78 GiB) with all `memory.events` zero, so these caps bound a *completed*
+load but did not cause the observed terminal SIGSEGV; its cause stays
+UNKNOWN. Its log lacks the `Error reading inflate failed` warning present
+in the 8 KiB run, placing that fault after inflate; between the inflate
+return and `gimp_drawable_get_buffer` the source only frees `indexes` and
+`compressed` and calls `inflateEnd`, leaving W304's `free+115` frame at
+`:1616` as a source-order inference, not a fresh backtrace. No new write
+primitive, no replay owed for a grade-neutral negative, no grade change.
+
+### Opensips2Shell — RBP-repair gadget closure
+
+On the pinned stock no-canary `xmpp.so` SHA-256 `09d4c0b6…` built by the
+lane-index recipe:
+
+```sh
+cd lab/opensips2shell-live
+python3 gadget_rbp_check.py > artifacts-early/rbp-write-check.txt
+sha256sum gadget_rbp_check.py artifacts-early/rbp-write-check.txt
+```
+
+Expected digests: script `0994442c…`, output `61a93f10…`. The script
+re-decodes all 256 offsets `0x6000`–`0x60ff` 20 instructions deep and finds
+zero `mov rbp,rsp` / `lea rbp,[rsp+..]` / `pop rbp` writes before the first
+control transfer. First transfers: 90 entries reach none in 20
+instructions, 118 `jna`, 20 `call`, 11 `jmp`, 8 `ret imm16`, 7 `jnl`, 2
+`jns`; every `jmp`/`call` is relative and all eight `ret` entries pop the
+unchanged heap pointer at `[rsp]`, which a staged stanza cannot replace
+without first diverting its own saved RIP at JID offsets 884–891. Static
+only: no live run, chosen code, command or side effect, no grade change,
+r5 UNKNOWN.

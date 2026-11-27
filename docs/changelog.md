@@ -3,6 +3,52 @@
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
 
+## 2026-11-27 11:1x–11:2xZ — docs fold: SIPp admitted, W334 verdicts, closed routes
+
+Docs-only fold of `b5c4e199`, `884f4fdc`, `a56f72e8`, `fa7616a3`,
+`691f5025`, `efddf911`, `832ad0fc` and `04196495` after `1235ce94`.
+Ruby W334's own docs in `691f5025`, the operator's 209th admission and
+generated register in `efddf911`, and the lab/report work in the other five
+commits were verified, not duplicated. No rung, grade, `established` flag
+or generated cell moved here.
+
+- `docs/reproducibility.md` gains a SippAuth2Shell lane and full recipe for
+  CVE-2026-90779 (no GHSA — UNKNOWN): pinned v3.7.7/v3.7.8 release tarballs,
+  eight digests, four builds of real SIPp objects, 32-byte `algorithm=` →
+  ASan `WRITE of size 1` at `src/auth.cpp:190`, 33/64 bytes → WRITE-33/64 at
+  `:189`, plain 64 bytes rc 139, fixed/safe clean, 15 PASS / 0 FAIL. Read-only
+  GDB sees chosen saved RBP/RIP; the 62-byte low-byte target runs a harness
+  `mmap(MAP_FIXED)` marker only on the vulnerable build. R4 is in-process
+  only; no live SIPp, 401/407 wire path, production mapping or command, and
+  the witness replay is still owed (`established:false`).
+- Ruby W333's independent witness verdict W334 (#6367) is ESTABLISHED AS
+  LABELED at the author's narrow in-process scope: clean 3.4.12/3.4.13
+  rebuilds plus the unmodified 72-arm matrix, 296 chosen `0x5a` bytes at
+  `obj+0x18..0x137` with zeros at `+0x140`, a fill swap moving every byte,
+  ASan silent while fixed builds raise `string modified`, and 4 ASan/4 plain
+  negative-size controls at `vlen=1`. No wire, marker, pointer control or
+  r5; one line-range wording NIT, no factual correction. No grade or flag
+  change.
+- Gimpjif W334 measured this cgroup at `memory.max=2147483648` /
+  `memory.high=1610612736` inside a ~7.99 GiB-used 10 GiB plant slice: a
+  completed wrapping load needs ~4 GiB `dest` plus ~8 GiB GEGL, so no
+  in-scope geometry completes. The 64 KiB live run peaked at 0.78 GiB with
+  zero memory-pressure events and no inflate-failure warning before its
+  SIGSEGV, so memory pressure is not that fault's cause; its frame stays
+  UNKNOWN and the W304 `free+115` site is an inference from source order.
+- OpenSIPS closed the RBP-repair loophole statically: all 256 entry offsets
+  `0x6000`–`0x60ff` were re-decoded 20 instructions deep on pinned
+  `xmpp.so 09d4c0b6…` with zero RBP writes before the first control
+  transfer; `jmp`/`call` are relative and all eight `ret imm16` entries pop
+  the unchanged heap pointer, which a staged stanza cannot reach without
+  diverting its own saved RIP first. Script `0994442c…`, output
+  `61a93f10…`; no live run, no grade change, r5 UNKNOWN.
+- Ruby W334's adjacent `String#rpartition` stale-tail rung 3 and the
+  report-only correction from 14 to 10 clean control arms (`04196495`)
+  were verified in the author's `691f5025` docs and left in place. The
+  ASan `size=-1` on the release's UTF-16LE regression shape has no chosen
+  bytes, wire path or stock reachability; no primary-CVE or r5 flag moved.
+
 ## 2026-11-27 11:0xZ — W334 `String#rpartition` stale tail bound (Ruby)
 
 New adjacent rung 3, no primary-CVE or rung-5 flag moved. W333's named

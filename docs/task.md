@@ -16163,3 +16163,64 @@ re-rendered the register (208/205/205/141) and is not repeated here.
   moved. What would change this limb: a live iSCSI reply reaching the
   sink, a compiled gimpjif consumer reading OOB, or a chosen-code side
   effect from another OpenSIPS offset.
+
+## 2026-11-27 11:0x–11:2xZ — 209th admission, W334 verdicts, closed static routes
+
+Current limb for a reader arriving now; it supersedes the gimpjif and
+OpenSIPS "next experiment" lines in the 10:4x–10:5xZ limb above. The
+operator's 209th admission at `efddf911` already re-rendered the register
+(209 declared / 206 active / 206 reported / 141 established); no rung,
+grade, `established` flag or count moved here. Pins and commands are in
+`docs/reproducibility.md` §11:0x–11:1xZ.
+
+- **SippAuth2Shell (ADMITTED 11:0xZ as the 209th mind, witness UNKNOWN).**
+  CVE-2026-90779 (no GHSA ID — UNKNOWN), vulnerable v3.7.7 / fixed v3.7.8
+  release pins; 32-byte `algorithm=` gives ASan WRITE-1 at `auth.cpp:190`
+  and 33/64 bytes WRITE-33/64 at `:189` into `algo[32]`, fixed and safe
+  clean, 15 PASS / 0 FAIL from a clean archive with 8/8 pins. R4 is
+  DEMONSTRATED in-process: GDB reads chosen saved RBP/RIP, and a 62-byte
+  low-byte target runs a lab-`mmap` benign marker only on the vulnerable
+  build. No live SIPp process, 401/407 wire path, production mapping or
+  command side effect; R5 NOT CLAIMED and `established:false` is correct.
+  Next: run pinned UAS/UAC scenarios on loopback with a 401 challenge of 62
+  chosen `algorithm=` bytes, confirm `bShouldAuthenticate` and that the
+  challenge reaches `createAuthHeader()` under ASan, then record whether
+  the return target is mapped in that process; a wire crash without a
+  request-driven side effect stays rung 4.
+- **Ruby W333's narrow in-process rung 4 is witness-ESTABLISHED AS LABELED
+  (W334, #6367).** Own 3.4.12/3.4.13 rebuilds and the unmodified 72-arm
+  matrix reproduced 296 chosen bytes at `obj+0x18..0x137`, ASan silence on
+  vulnerable shrink arms, fixed-build `string modified` guards and 4/4
+  negative-size controls; a fill swap moved every byte. No grade or flag
+  change, no wire path, marker, pointer control or r5; the line-range NIT
+  needs no factual repair. No replay is owed; the open question is still a
+  real consumer of the stale length, not a re-run of the same matrix.
+- **Ruby W334 `String#rpartition` is an adjacent rung 3, author-folded in
+  `691f5025` and verified here.** The release's UTF-16LE regression shape
+  gives ASan `size=-1` in `memcpy` via `str_subseq`/`rb_str_subseq`/
+  `rb_str_rpartition`; 40 arms across four builds, 1/3/5/9-byte receiver
+  sweep, fixed and non-firing controls clean. No chosen bytes, wire path,
+  stock reachability or r5; `04196495` only corrected the report's clean
+  control count from 14 to 10. Next: establish a real caller passing a
+  stale tail length, before any rung-4 claim.
+- **Gimpjif2Shell W334 closes the "survive the ~4 GiB `dest`" route on this
+  host.** The cgroup cap is 2 GiB (`memory.high=1.5 GiB`) inside a ~7.99
+  GiB-used 10 GiB slice, while a completed wrapping load needs ~12 GiB
+  resident; raising those limits is person-reserved host administration.
+  The live 64 KiB fault peaked at 0.78 GiB with zero memory-pressure
+  events and no inflate-failure warning, so memory pressure is refuted as
+  its cause, but the fault frame stays UNKNOWN (the `free+115` site is a
+  source-order inference). Next needs a different consumer/build or a
+  measured fault site, not another watcher re-arm or the closed geometry.
+- **Opensips2Shell W334 closes RBP repair statically.** Across all 256
+  entry offsets on pinned `xmpp.so 09d4c0b6…` there is no RBP write before
+  the first control transfer; relative `jmp`/`call` and `ret imm16` popping
+  the unchanged heap pointer offer no chosen-code route, and a staged
+  stanza cannot set that stack slot without diverting its own saved RIP
+  first. Script `0994442c…`, output `61a93f10…`; no live run, no grade
+  change. Next still requires a genuinely different primitive with an
+  observed side effect and an independent replay before rung 5.
+
+What would change this limb: a loopback SIPp wire result reaching the sink,
+a real gimpjif consumer surviving the allocation, an executed mapped target
+with an observed side effect, or a checker RED on committed HEAD.
