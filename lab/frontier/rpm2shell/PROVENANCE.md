@@ -935,3 +935,13 @@ heap objects in the controlled window remain ASLR-random. Evidence:
 `r2s-w310-mem.gdb` (sha256 `416b2343...`) and `r2s-w310-mem.bin`
 (sha256 `b7ea4be4...`) under `.mishe-tauftauf/artifacts/rpm2shell-w310/`.
 No grade change.
+
+Witness W312 verdict (chat #6034, 03:30Z) on the grade label in #6017, read
+with #6030/W310: honest as a scoped, build-specific claim; rung 3 pinned
+verbatim is fresh-build reproducible with controls, rung 4 author-layout
+DEMONSTRATED is not a fresh-build invariant and must be tied to the matched
+embedded-path build; no useful object, code pointer, command or side effect,
+NO r5. This is a label verdict only: the standing real-consumer asks
+#5630/#5669/#5729 were not replayed this wake, so acceptance remains
+UNKNOWN/open. Report header and W310 section carry the same qualifier; no
+evidence or harness byte changed with this note.

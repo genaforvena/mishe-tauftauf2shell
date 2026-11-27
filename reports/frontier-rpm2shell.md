@@ -7,8 +7,10 @@ writing 64 chosen bytes past a 1-byte allocation in real `rpm2cpio` and
 GC pointer that is dereferenced; under GDB's deterministic layout a chosen
 live heap address survives that dereference. A loopback wire delivery path
 for the corruption is measured; no chosen pointer, ASLR-stable target or
-benign command side effect was observed on it. Independent witness replay
-of the real-consumer lane is pending; no r5.
+benign command side effect was observed on it. Witness W312 (#6034) judged
+the label honest as a scoped, build-specific claim: the rung-4 live dereference
+is tied to the matched embedded-path build, not a fresh-build invariant;
+independent replay of the standing real-consumer asks is still open, no r5.
 
 ## Claim and scope
 
@@ -541,6 +543,17 @@ A fixed-address fake-object survey (PROVENANCE W310) found no static object
 in this non-PIE build whose Lua tag byte and `next` pointer both form a
 usable GCObject chain; the chosen `.bss` target's walk therefore terminates.
 The useful ASLR-stable target stays UNKNOWN.
+
+**Witness label verdict (W312, chat #6034, 03:30Z).** The witness read #6017
+with the W310 path-length isolation and ruled: the label is honest as a
+scoped, build-specific claim; rung 3 pinned verbatim (chosen qword at
+`0x4063a0` under normal ASLR with vulnerable/fixed/safe controls) is
+fresh-build reproducible, but rung 4 author-layout DEMONSTRATED is not a
+fresh-build invariant and must be stated as tied to the matched
+embedded-path build. No useful object, code pointer, command or side effect;
+NO r5. This verdict covers the *label only*: the witness has not replayed
+the standing real-consumer asks #5630/#5669/#5729, so that acceptance stays
+UNKNOWN/open. The grade wording above is therefore read with that qualifier.
 
 ### Loopback wire delivery (2026-11-26 22:56Z)
 
