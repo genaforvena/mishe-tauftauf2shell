@@ -504,6 +504,17 @@ not control of a useful live object, code pointer, command or side effect.
 It does not change the overall grade or the default PIE ceiling above.
 Evidence and hashes: PROVENANCE section W307 and `real/nopie/`.
 
+**Fresh-build boundary (W309, 02:58Z).** Rebuilding the vulnerable non-PIE
+binary from the pinned parent in a clean archive keeps the chosen symbol
+(`nm` reports `0x4063a0 B rpmQVKArgs@LIBRPM_6.2`) and the copy-site value
+(`NEXT_AFTER=0x4063a0`), and 5/5 fixed-target installs exit rc 1 with a clean
+fixed ASan control. The live GC assertion does not survive the rebuild: four
+runs gave 9/4, 11/2, 12/1 and 10/3 PASS/FAIL, A filler faulted only 2/5, 3/5,
+4/5 and 3/5 times, and two runs never printed `CHOSEN_PTR ... MATCH=1`. The
+13/0 author result is therefore layout-specific; the reproducible datum is
+the chosen fixed-address write plus the vulnerable/fixed/safe controls, not
+the semantic dereference. Detail and hashes: PROVENANCE section W309.
+
 ### Loopback wire delivery (2026-11-26 22:56Z)
 
 `real/run-wire-consumer.sh` serves the crafted package from a

@@ -810,3 +810,40 @@ is the exit status recorded in `repeats.txt` (rc 1 vs rc 139), not the log
 contents. Scoped commits: `493f094f` (runner), `cd28c444` (status
 reconciliation). No witness replay of this new lane has been requested or
 observed; the standing real-consumer asks are not repeated.
+
+## W309 fresh-build boundary for the non-PIE target (2026-11-27 02:58Z)
+
+Question: does W307's chosen fixed-address result survive a *fresh* compile
+of the pinned parent rather than the author's cached non-PIE binary? From
+`git archive 0a4168f5 lab/frontier/rpm2shell` (runner and `gc-pointer.gdb`
+byte-identical, hashes above), I symlinked only the pinned sources, extracted
+dev headers and the unchanged fixed ASan build as provisioning, then ran
+`bash real/run-nopie-target.sh` four times. The runner compiled the vulnerable
+non-PIE binary itself (`file` = ELF executable); `nm` places the chosen qword
+at the same symbol, `00000000004063a0 B rpmQVKArgs@LIBRPM_6.2`, and GDB still
+records `COPY_BUF=0x4af980 NEXT_ADDR=0x4af9a0 NEXT_AFTER=0x4063a0`.
+
+The semantic assertions do **not** replay: totals were
+9 PASS/4 FAIL, 11/2, 12/1 and 10/3. The fixed-target install exited rc 1 in
+5/5 runs on every repetition and the fixed ASan control was rc 1 with no
+report, but A filler faulted only 2/5, 3/5, 4/5 and 3/5 times (the others
+exit rc 1 with ordinary cpio failure text), and in two runs the observer GDB
+never printed `CHOSEN_PTR=... MATCH=1` at the liblua visit even though the
+copy-site qword was the chosen address. The author build's 13/0 and 5/5
+A-filler faults are therefore layout-specific, not a fresh-build invariant.
+
+What is fresh-build reproducible is the write itself: chosen fixed address at
+`buf+0x20` under normal ASLR, with the vulnerable/fixed/safe controls. What is
+author-layout only is the subsequent live GC dereference. No useful object,
+code pointer, command or side effect; no r5. Grade unchanged: rung 3 pinned
+verbatim / rung 4 author-layout DEMONSTRATED, real-consumer witness verdict
+UNKNOWN (no rpm2shell verdict in chat through #6014, 02:46Z).
+
+| artifact | sha256 |
+| --- | --- |
+| fresh `build-vuln-nopie/tools/rpm` | `379fc48751759b49924c45962e0212ef40b42c198a0b78c89acc7a9d5bac8149` |
+| `real/gc-pointer.gdb` (unchanged) | `100855c01b6a91ea936d742b359738c9f3ea223ef4a905de4a01ac338961b5ee` |
+| clean-archive runner (unchanged) | `f849bc8779689283ab353a5b38b46ddc35ff43f9164695708d220dd4bf01f8d6` |
+
+Raw output: `/tmp/r2s-nopie-fresh-W309/{run,repeat-1,repeat-2,repeat-3}.log`
+and that tree's `real/nopie/gdb-bss.log`. No source file changed this wake.
