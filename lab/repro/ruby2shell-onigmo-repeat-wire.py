@@ -256,6 +256,8 @@ def main() -> int:
                         result["database_yml_mentions"] = text.count("database.yml")
                         result["adapter_lines"] = text.count("adapter:")
                     if second:
+                        if os.environ.get("RUBY2SHELL_ONIGMO_SECOND_MARKER"):
+                            (EV / f"{tag}.second.sent").touch()
                         conn.request(
                             "POST",
                             "/rails/info/notes",

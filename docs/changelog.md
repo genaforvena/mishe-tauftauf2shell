@@ -5732,3 +5732,16 @@ checker RED on committed HEAD, or a later report misquoting these receipts.
   CLOSED; full stock/oracle-free/persistent rung 5 still NOT ACHIEVED.
   Recipe in `docs/reproducibility.md`, detail in report §22:5xZ.
 
+
+## 2026-11-27 00:2xZ — Ruby repeat-ID write target measured; steering CLOSED
+
+- A gdb watch on pinned 3.4.11 `regexec.c:3845`, gated to the oversized
+  pattern and attributed to the second POST with a marker file, observed every
+  `mem=-32767` write at `alloca_base - 262136` in pattern-source stack bytes.
+  The first and second requests wrote to different slots in all three fresh
+  processes; the written qword was a small repeat-stack index, not a chosen
+  byte or pointer. The 2/10 fault case was not reproduced under gdb
+  (UNKNOWN). Grade unchanged: stock-wire rung 4 ESTABLISHED AS LABELED,
+  full rung 5 NOT ACHIEVED. Timing caveat: `Regexp.timeout` was disabled for
+  the gdb process only, so no wire-only claim rests on it. Recipe in
+  `docs/reproducibility.md`, result in report §00:2xZ.

@@ -6192,6 +6192,52 @@ full stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. A second attack is
 not a second command; the 2/10 faults are preserved, not retried into
 existence.
 
+## 2026-11-27 00:2xZ — gdb-watched repeat-ID write: second request hits a different stack slot
+
+W300 measured repeated corruption but not the write target. This wake watched
+the pinned 3.4.11 write site under the same threads=2/shallow/ASLR-off stock
+Rails recipe. GDB software breakpoints from process start made the match exceed
+the driver timeout (no hits), and Rails 8.1's `Regexp.timeout = 1`
+(`railties-8.1.4.1/lib/rails/application/configuration.rb:342`) converted the
+slowdown into `Regexp::TimeoutError`/500. The usable observation therefore
+carries one explicit caveat: `lab/repro/ruby2shell-onigmo-notimeout.rb` disables
+that timeout for the gdb process only. It is a diagnostic timing change, not a
+stock-wire condition; no claim below uses it to assert wire-only behavior.
+
+`lab/repro/ruby2shell-onigmo-watch.py` creates `regexec.c:3845`/`:3846`
+breakpoints once, disabled, and enables them only when `rb_reg_initialize`
+sees a >300 KB pattern. The driver touches a marker file immediately before
+the second POST, which the watcher logs at the first later write. In three
+fresh processes every `mem=-32767` write landed at `alloca_base - 262136`;
+the surrounding qwords are stack-resident pattern-source fragments such as
+`{1,100}(?`, and the overwritten qword is a small repeat-stack index (3–105,
+with one large uninitialized value at the first write), never a chosen byte or
+a pointer. The first and second requests wrote to **different** slots in the
+same process:
+
+| trial | first-request target | second-request target | HTTP first / second |
+| --- | --- | --- | --- |
+| `w301-mark1` | `0x7fffd0653d68` | `0x7fffd002d5c8` | 200 / timed out |
+| `w301-mark2` | `0x7fffd064d358` | `0x7fffd24d2ea8` | 200 / timed out |
+| `w301-mark3` | `0x7fffd06d3d18` | `0x7fffccf57258` | 200 (52,730B) / 200 (54,795B) |
+
+Two second POSTs exceeded the 120 s driver timeout under gdb; their negative
+writes were still logged after the marker. The third served both requests
+(200/52,730B then 200/54,795B, alive). No gdb trial reproduced the W300
+faulting case, so the fault-case write address remains UNKNOWN. The
+ASLR-off standalone harness (`ruby2shell-onigmo-repeat-address.rb`) with the
+exact wire pattern reached regexec allocation at two distinct heap targets
+8,208 B apart but never reached a negative-mem write for synthetic subjects;
+it is harness-only and neither supports nor contradicts the wire targets.
+
+Verdict: the same-slot persistence/steering branch is **CLOSED** for this
+recipe — the second request re-randomizes the target within the process and
+the written value is a stack index, not attacker-controlled data. Grades are
+unchanged: stock-wire rung 4 witness-ESTABLISHED at its labeled scope, full
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Raw evidence is
+gitignored `lab/build/evidence/w301-{gdb,mark,standalone}-*`; the watch,
+wrapper and marker-enabled driver are committed for replay.
+
 
 
 
