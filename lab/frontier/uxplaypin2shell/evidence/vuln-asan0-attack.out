@@ -1,15 +1,15 @@
 =================================================================
-==3447055==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7eebf45000c0 at pc 0x7eebf6cfb303 bp 0x7ffe1c9bf650 sp 0x7ffe1c9bedf8
-WRITE of size 128 at 0x7eebf45000c0 thread T0
-    #0 0x7eebf6cfb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
-    #1 0x5f787a7df769 in handler_pin harness/uxplaypin.cpp:38
-    #2 0x5f787a7dfa37 in main harness/uxplaypin.cpp:56
-    #3 0x7eebf642a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #4 0x7eebf642a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #5 0x5f787a7df384 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/uxplaypin2shell/harness/vuln-asan0+0x2384) (BuildId: d7c2b393ae0b3c659f852a3fcb10600efae37fd4)
+==3468850==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7509c1f000c0 at pc 0x7509c46fb303 bp 0x7ffd6f069b60 sp 0x7ffd6f069308
+WRITE of size 128 at 0x7509c1f000c0 thread T0
+    #0 0x7509c46fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5fb1ef08a769 in handler_pin harness/uxplaypin.cpp:38
+    #2 0x5fb1ef08aa37 in main harness/uxplaypin.cpp:56
+    #3 0x7509c3e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7509c3e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5fb1ef08a384 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/uxplaypin2shell/harness/vuln-asan0+0x2384) (BuildId: d7c2b393ae0b3c659f852a3fcb10600efae37fd4)
 
-Address 0x7eebf45000c0 is located in stack of thread T0 at offset 192 in frame
-    #0 0x5f787a7df53d in handler_pin harness/uxplaypin.cpp:24
+Address 0x7509c1f000c0 is located in stack of thread T0 at offset 192 in frame
+    #0 0x5fb1ef08a53d in handler_pin harness/uxplaypin.cpp:24
 
   This frame has 4 object(s):
     [48, 49) 'sink' (line 42)
@@ -20,17 +20,17 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:
-  0x7eebf44ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7eebf44ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7eebf44fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7eebf44fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7eebf4500000: f1 f1 f1 f1 f1 f1 01 f2 00 f2 f2 f2 00 f2 f2 f2
-=>0x7eebf4500080: 00 00 00 00 00 00 00 00[f3]f3 f3 f3 00 00 00 00
-  0x7eebf4500100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7eebf4500180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7eebf4500200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7eebf4500280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7eebf4500300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7509c1effe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7509c1effe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7509c1efff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7509c1efff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7509c1f00000: f1 f1 f1 f1 f1 f1 01 f2 00 f2 f2 f2 00 f2 f2 f2
+=>0x7509c1f00080: 00 00 00 00 00 00 00 00[f3]f3 f3 f3 00 00 00 00
+  0x7509c1f00100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7509c1f00180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7509c1f00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7509c1f00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7509c1f00300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -50,4 +50,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==3447055==ABORTING
+==3468850==ABORTING

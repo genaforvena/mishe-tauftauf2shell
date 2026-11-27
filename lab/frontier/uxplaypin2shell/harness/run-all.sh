@@ -49,7 +49,7 @@ fi
 
 sum=$(cat evidence/vuln-asan0-attack.out evidence/vuln-asan0-rip.out \
         evidence/vuln-asan0-safe.out evidence/fixed-asan0-*.out \
-        | grep -E 'ERROR: AddressSanitizer|WRITE of size|proof_len=' \
+        | grep -oE 'ERROR: AddressSanitizer: stack-buffer-overflow|WRITE of size [0-9]+|proof_len=[0-9]+' \
         | sha256sum | cut -d' ' -f1)
 note "RUN_ALL_OK $pass PASS / $fail FAIL"
 note "SUMMARY_SHA256 $sum"

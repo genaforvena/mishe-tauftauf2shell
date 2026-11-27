@@ -18,4 +18,4 @@ PASS: fixed safe clean
 == saved-RIP control ==
 PASS: chosen 0x43 at saved RIP
 RUN_ALL_OK 10 PASS / 0 FAIL
-SUMMARY_SHA256 2c0ecad3a7c06dfd9fda9a1bc9faad51142bca913a32bca15de24743c2b89254
+SUMMARY_SHA256 d3faf93535892ff5e3fdd4aba3bf6c2aa45da6cf273bd7cbf441af00a7ade994

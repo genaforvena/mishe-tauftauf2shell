@@ -20,7 +20,7 @@
 - Harness `harness/uxplaypin.cpp`, SHA-256
   `c270551ef57cbc8035935dadcf520e89394006c092fbeb4ec75f8a8b96ed111d`; runner
   `harness/run-all.sh` SHA-256
-  `a5a9e3d0e49e6534ee8eb4918c33a198d352837573eeff40844be4d1c896c513`.
+  `2d96bf8cb2d14b7a8936bd20b511923d5b1039e383efdb7547623a7e12815ed0`.
   No archive is fetched at replay time; the pinned `.h` files and runner are
   self-contained.
 
@@ -58,8 +58,8 @@ in `evidence/vuln-asan-attack.out` from the first build.
   case faults in `free()` with `mem=0x4343434343434343`, i.e. a second
   attacker-chosen word is consumed as a pointer before return.
 - `RUN_ALL_OK 10 PASS / 0 FAIL`, summary SHA-256
-  `2c0ecad3a7c06dfd9fda9a1bc9faad51142bca913a32bca15de24743c2b89254`
-  (stable lines only; PIDs and addresses excluded).
+  `d3faf93535892ff5e3fdd4aba3bf6c2aa45da6cf273bd7cbf441af00a7ade994`
+  (grep -oE stable tokens only; PIDs and addresses excluded).
 
 ## Grade and limits
 

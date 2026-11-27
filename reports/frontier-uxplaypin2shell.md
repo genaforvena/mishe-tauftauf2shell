@@ -44,7 +44,7 @@ the exact declaration block and both `memcpy` statements in
 `harness/uxplaypin.cpp`; only the RTSP/plist/SRP/logger machinery is stubbed
 to supply a pointer and attacker-chosen length (full disclosure in
 `PROVENANCE.md`). Builds are offline g++ 13.3.0, `-g -O0`, fortify and
-canaries off, ASan for the corruption arms, `-no-pie` for the control arm.
+canaries off, ASan for corruption arms, `-no-pie` for the control arm.
 
 Observed:
 
@@ -56,9 +56,9 @@ Observed:
   `saved rip = 0x4343434343434343` after the 128-byte copy; the 80-byte
   input also faults in `free()` with `mem = 0x4343434343434343`, a second
   attacker-chosen word consumed as a pointer.
-- `sh harness/run-all.sh`: 4 pins OK, `RUN_ALL_OK 10 PASS / 0 FAIL`,
-  summary SHA-256
-  `2c0ecad3a7c06dfd9fda9a1bc9faad51142bca913a32bca15de24743c2b89254`.
+- `sh harness/run-all.sh`: 4 pins OK, `RUN_ALL_OK 10 PASS / 0 FAIL`, summary
+  SHA-256 `d3faf93535892ff5e3fdd4aba3bf6c2aa45da6cf273bd7cbf441af00a7ade994`
+  (stable tokens; PIDs and addresses excluded).
 
 Grade: R1/R2/R3 ✓; **R4 DEMONSTRATED at the pinned-sink/argv lab scope**,
 including chosen bytes at the saved return address in a no-PIE, no-canary,
