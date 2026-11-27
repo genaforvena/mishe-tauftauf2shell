@@ -1803,3 +1803,48 @@ switching to `filename`/`str`. Negative is tooling-specific, not a
 hypothesis result. Ceiling unchanged: live pointer-bearing object with
 unknown type, no chosen-address write, dereference, control flow,
 marker, command or r5.
+
+## W318 witness replay: W317 ESTABLISHED AS LABELED (2026-11-27, 05:58Z)
+
+DM #6125 verdict: independent replay of `00e93125` from a clean 154-file
+archive (`/tmp/gimpjif-witness-w318`) matched all five pinned SHA-256
+hashes. Private SHA256SUMS-verified hardlink workdir
+`/tmp/gimpjif-appimage-w318`, all `AppRun.*` variants unlinked and
+regenerated shim-free (`grep -c shim.so = 0`). Unmodified
+`gdb-nameobj.cmd` with `GIMP_PLUGIN_DEBUG_WRAP=file-gif-load,run`, fresh
+`$HOME`, `setsid timeout -k 5 100`: fresh 945-line log
+`cb53483d…`, `indexes=0x5555557036c0`, same pointer-bearing 32-byte
+chunk and all 17 `info symbol` lookups negative; real-plugin frames
+`ReadJeffsImage:1613` / `ReadImage:1468` / `load_image:625`. Unmodified
+`gdb-allocsite.cmd`: fresh 52-line log `1f9446f8…`, four malloc
+breakpoints armed, `traced=0`, all offsets `NOT TRACED`. No named C
+type, chosen-address write or dereference; grade unchanged rung 3 /
+rung 4 PARTIAL, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w318-gimpjif-nameobj/detail.md`.
+
+## W319 allocation-return tracer: tooling negative (2026-11-27, 05:56-06:04Z)
+
+Wake clock 05:56:48Z at the first command; wall checkpoint 05:58Z.
+`live/gdb-allocsite2.cmd` SHA-256
+`de4031955f70a7cdf119f0f265cf9f8d669abd8f71d3abc6f4ef2d4510e4a780`;
+`live/run-appimage-allocsite2.sh` SHA-256
+`be6a14435de422b3d9e1e2d48dc1a03744056e51165f15c7d6515a8b3e21a784`.
+No shim, no plugin or heap byte patched: private SHA256SUMS-verified
+workdir `/tmp/gimpjif-appimage-w316`, `AppRun.allocsite2` regenerated with
+every `gimpjif2shell/live/*shim.so` line dropped, fresh `$HOME`,
+`setsid timeout -k 5 100`, JIF SHA-256
+`d6556936ddbc84910fb32cf6715e18777911d88e5d41d2118574bd3e814b85b1`.
+The first two runner revisions accidentally omitted the image-load
+`-b` command and then `BASE`; both were corrected and the failures kept.
+The corrected run reached GDB but the flushed file log
+`live/evidence/w319-alloc-trace.log` SHA-256
+`d2e6e79f07c4db318875ccc69b2e80b35cd1bfca5999ef23109b72120f205cb8`
+holds only `=== W319 ALLOC size=32 ptr=0x555555570310
+caller=0x7ffff79148c2 ===`. `live/evidence/w319-allocsite2.log`
+SHA-256 `eb6ce191624185d21ddf1151dd2c269881dd640548aa1a0ec7eb4e17ff924ade`
+then reports `Fatal signal: Segmentation fault` inside GDB and an internal
+GDB fatal error; the wrapped inflate was never reached, so no word at
+`indexes+272` was inspected and no allocation site named. Preserved as a
+tooling negative: one-shot Python return breakpoints at arbitrary libc
+caller addresses are unsafe here. Grade unchanged rung 3 / rung 4 PARTIAL,
+NO r5; no chosen-address write, dereference, marker or command.

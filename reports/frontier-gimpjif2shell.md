@@ -1228,3 +1228,45 @@ a Python indentation error, and `gdb.Objfile.name` not existing in GDB
 claim that the object was never allocated. Grade unchanged: rung 3
 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. No chosen-address
 write, named-object dereference, control flow, marker or command.
+
+## Witness replay of the no-shim object inspection (W318, 2026-11-27)
+
+Verdict on DM #6125: **ESTABLISHED AS LABELED**, no counterexample, grade
+unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+The witness replayed commit `00e93125` from a clean 154-file `git archive`
+in `/tmp/gimpjif-witness-w318`; all five pinned SHA-256 hashes matched
+(both GDB command scripts, both committed logs, the `d6556936…` JIF). A
+private hardlink SHA256SUMS-verified GIMP 3.2.8 AppImage workdir
+`/tmp/gimpjif-appimage-w318` had every `AppRun.*` unlinked and regenerated
+shim-free (`grep -c shim.so = 0`). An unmodified `live/gdb-nameobj.cmd`
+under `GIMP_PLUGIN_DEBUG_WRAP`, a fresh `$HOME` and `setsid timeout -k 5
+100` produced a fresh 945-line log (`cb53483d…`): `indexes=0x5555557036c0`
+(ASLR-shifted), the same live pointer-bearing 32-byte chunk after
+`indexes` (`+264=0x21`, `+272=0x1`, `+280=indexes+304`, `+288=0`,
+pointee `0x7fff00000001,0,0`, `+336/+344` heap pointers), all 17 `info
+symbol` lookups "No symbol matches", and the real-plugin frames
+`ReadJeffsImage:1613` / `ReadImage:1468` / `load_image:625`. The fresh
+`gdb-allocsite` log is 52 lines (`1f9446f8…`): four malloc breakpoints
+armed, `traced=0`, every offset `NOT TRACED`. No named object, no
+chosen-address write, no dereference. Detail:
+`.mishe-tauftauf/artifacts/witness-w318-gimpjif-nameobj/detail.md`.
+
+## GDB allocation-return tracer failed before the wrapped inflate (W319, 2026-11-27)
+
+A third no-shim attempt to name the object's allocation site used
+`live/gdb-allocsite2.cmd` (SHA-256 `de403195…`): at entry to `malloc`,
+`calloc` and `realloc`, arm a one-shot GDB breakpoint at the caller's
+return address, record the returned pointer, and at the wrapped inflate
+match `indexes+272/+304/+336` against recorded allocations. The runner
+`live/run-appimage-allocsite2.sh` (SHA-256 `be6a1443…`) regenerated a
+shim-free AppRun in the SHA-verified 3.2.8 workdir and wrote the same
+`d6556936…` JIF. Result: **negative, tooling failure**. The flushed trace
+(`w319-alloc-trace.log`, SHA-256 `d2e6e79f…`) holds exactly one record,
+`size=32 ptr=0x555555570310 caller=0x7ffff79148c2`; the main log
+(`w319-allocsite2.log`, SHA-256 `eb6ce191…`) then reports a fatal signal
+inside GDB itself and terminates without reaching the wrapped inflate.
+No word at `indexes+272` was inspected and no allocation site was named.
+The earlier runner edits that omitted the image-load batch command and
+the `BASE` variable are preserved in the transcript; the corrected runner
+reached GDB but not the target call. Grade unchanged rung 3 / rung 4
+PARTIAL, NO r5. This method is retired, not to be repeated unchanged.
