@@ -15580,7 +15580,7 @@ single-block controls clean, plain vulnerable rc 139 in 5/5. The published
 "4-byte region" was not observed; no chosen-byte readback, pointer, marker,
 wire service or r5. Admission adopted window 207 and folded generated
 counts 198/195/195/132 → 199/196/196/132 with `established=false`; grade
-R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —, independent witness replay owed.
+R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —, independent witness replay then owed.
 
 `8b7372bb` recorded two independent gimpjif2shell verdicts without moving
 the grade: W308 (#6006, clean 130-file `47e0e07d` archive) gave core 29/0,
@@ -15635,3 +15635,78 @@ pop without request-path mtrace (report §3231, exact command in
 `docs/reproducibility.md` §03:4xZ). What would change these limbs: a measured
 same-arena `0x43f` pop with chosen bytes reaching a live consumer, or a
 witness verdict contradicting the closed-lane scope.
+
+## 2026-11-27 03:3x–03:5xZ — verdict boundaries, live pointer, staged lwipmqtt
+
+This fold covers `af0332cd`, `14d348e4`, `5401e884`, `bfd7b8a5`, `b7020ba3`,
+`124c9a40`, `be7d7dc7`, `7649d232`, `2dadcb8a`, `60640b59`, `446583d5`,
+`7de5366b`, `b3e21b50`, `4e972dfd` and `0932fa04`, 15 commits. `7649d232`
+already wrote the Ruby W311 consumer CLOSED recipe in §03:4xZ; verified,
+not duplicated.
+No grade, count, register row or report was authored here — the operator's `b7020ba3`
+moved the generated established count 132 → 134 for the lzxwindow W310 and
+sqlitesession W312 verdicts, and `60640b59` moved the generated declared /
+register counts to 200/197/197 on admission of lwipmqtt2shell.
+
+The two new witness verdicts stay at their exact scopes. lzxwindow2shell's
+second replay (#6018) from clean `15295203` reproduced `BUILD_OK` /
+`PASS=28 FAIL=0` with runner `a89a11cb…` and the raw `LzxDecoder.cpp:1396`
+fault; sqlitesession2shell's W312 replay (#6032) from clean `ca9a5d35`
+reproduced `PASS=44 FAIL=0` with runner `f16b47cd…` and the `WRITE-12` at
+raw `sqlite3session.c:4401`. Both are ESTABLISHED AS LABELED with no grade
+change and NO r5; the 4-byte-region geometry and all rung-5 claims stay
+UNOBSERVED. The generated `established` flags now read true and the count
+is 134; no new evidence was created by that fold.
+
+gimpjif2shell crossed a measured boundary without changing its grade. The
+W312 no-shim probe watched a live flags word and heap pointer at
+`indexes+272`/`+280` take eight file-chosen `0x4d` bytes through bundled
+libz, `16 PASS / 0 FAIL` with runner `ed8a09a7…`; the author's clean replay
+and witness #6044's clean 140-file `5401e884` replay both returned rc 0
+16/0 with the committed probe and log hashes matched. That is ESTABLISHED AS
+LABELED at the chosen-byte-write scope, not a named object, a dereference,
+a chosen address, control flow, marker or command. The terminal allocator
+frame is layout-sensitive (`g_malloc0`/`ReadImage:1477` for the witness, the
+author's `free` at `:1616`), so assert the generalized chosen-byte write,
+not a frame or register. The fixed-build control stays BLOCKED with no
+published 3.2.10 AppImage; no r5.
+
+rpm2shell's W312 witness accepted the label as honest and build-specific:
+the pinned `0x4063a0` write with vulnerable/fixed/safe controls is
+fresh-build reproducible, while rung 4 `author-layout DEMONSTRATED` holds
+only for the matched embedded-path build. That verdict did not replay the
+standing real-consumer asks, which #6048 consolidated for the witness
+(21/0, 21/0, 14/0 + 8/0 or 10/0); no verdict by 03:5xZ means acceptance
+UNKNOWN, not GREEN. The target-field idea closed negatively: `rpmQVKArgs`
+holds CLI-set enums/counters in its first qword and its function pointers
+lie past the terminating zero qword, so the useful ASLR-stable target
+remains UNKNOWN.
+
+**lwipmqtt2shell was STAGED at handoff and is now ADMITTED 200th.** Its
+lwIP MQTT *client* parser overrun (`mqtt.c:862`, tags 2.0.1–2.2.1, fix
+`68b2c119…` with no fixed release). The local oracle is UBSan array-bounds
+under both compilers, `PASS=12 FAIL=0`; the published ASan heap overflow is
+NOT observed because the write is intra-object into the adjacent output
+ring. Grade R1 — / R2 ✓ / R3 ✓ / R4 LIMITED chosen-byte readback in a
+stubbed transport / R5 —. Admission at 04:0xZ adopted window 208 from a
+clean 18-file `124c9a40` archive replay (12/0); independent witness replay
+is owed. The named depth experiment is a real loopback client and local
+broker with fixed-pin and well-formed controls before any wider claim.
+
+Four commits landed after the admission and are folded here. `446583d5`
+corrected the W252 shim-pointer reading to `out+304`, not `out+368`; this
+does not restore a named live object. `b3e21b50`'s post-inflate read watcher
+(16/0, `26dde087…` / `551fdd93…`) saw zero reads of the overwritten pointer
+word before a collateral allocator SIGSEGV: a preserved negative, with
+per-thread watchpoint coverage UNVERIFIED because `libthread_db` was absent.
+`7de5366b` opened a distinct CVE-2026-137567 TCP COPY_TENSOR lane with local
+rung 3 ASan `WRITE-16` and byte-exact wire readback in 3/3 runs; it is
+PENDING witness and changes no other lane's grade. `4e972dfd`'s relaxed rpm
+rescan found no terminal static GCObject usable by the chosen write, so the
+useful target stays UNKNOWN.
+`0932fa04` also recorded a clean-archive read-watch replay (16/0, zero
+read hits, fault at another heap address); witness verdict UNKNOWN.
+
+Recipes and expected bytes are in `docs/reproducibility.md` §03:3xZ. What
+would change these limbs: a witness verdict contradicting these scopes, a
+report misquoting the receipts, or a checker RED on committed HEAD.

@@ -2,6 +2,129 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 03:3x–03:5xZ — verdict folds, live pointer, lwipmqtt, rpm closure
+
+This fold covers `af0332cd`, `14d348e4`, `5401e884`, `bfd7b8a5`, `b7020ba3`,
+`124c9a40`, `be7d7dc7`, `7649d232`, `2dadcb8a`, `60640b59`, `446583d5`,
+`7de5366b`, `b3e21b50`, `4e972dfd` and `0932fa04`, 15 commits past
+`1bedc36b`; `7649d232` already wrote coherent Ruby W311 briefs in all three
+docs (§03:4xZ), verified and not duplicated. Explanation and recipes only —
+no generated cell, register row, grade, count, report, SVG or lab evidence
+moved here.
+
+- `af0332cd` folded rpm2shell's W312 label verdict (#6034, 03:30Z): honest
+  as a scoped, build-specific claim. Rung 3 pinned verbatim (chosen qword at
+  `0x4063a0` under normal ASLR with vulnerable/fixed/safe controls) is
+  fresh-build reproducible; rung 4 `author-layout DEMONSTRATED` is NOT a
+  fresh-build invariant and must be tied to the matched embedded-path build.
+  No useful object, code pointer, command or side effect, NO r5. The verdict
+  covers the *label only*: standing real-consumer asks #5630/#5669/#5729
+  were not replayed, so that acceptance stays UNKNOWN/open.
+- `14d348e4` folded two independent verdicts. lzxwindow2shell W310 (#6018,
+  closing #6011) replayed a clean 10-file `git archive 15295203` whose only
+  delta from `b8f8f23c` was +8 lines in `PROVENANCE.md`: runner `a89a11cb…`,
+  `BUILD_OK` / `PASS=28 FAIL=0`, stale-pos SEGV at raw `LzxDecoder.cpp:1396`
+  and near-offset `WRITE-4096` reproduced, fixed clean, plain rc 0;
+  ESTABLISHED AS LABELED, no grade change, NO r5. sqlitesession2shell W312
+  (#6032) replayed a clean `git archive ca9a5d35` with runner `f16b47cd…`
+  and all 12 pin hashes: `BUILD_OK` / `PASS=44 FAIL=0`, ASan `WRITE-12` at
+  raw `sqlite3session.c:4401` (amalgamation `sqlite3.c:238155`), fixed and
+  both 28-byte controls clean, plain vulnerable rc 139 in 5/5;
+  ESTABLISHED AS LABELED, no grade change, NO r5, published 4-byte geometry
+  still UNOBSERVED.
+- `b7020ba3` folded those verdicts into generated presentation only: README
+  table `| 199 | 196 | 196 | 132 |` → `| 199 | 196 | 196 | 134 |`,
+  `docs/results.md` established count 132 → 134 with the two basis
+  sentences, manifest `established` true for `LzxWindow2Shell` and
+  `SqliteSession2Shell`; SVG unchanged. No new evidence or harness byte.
+- `5401e884` added gimpjif2shell's W312 no-shim live-pointer watch:
+  probe `dd8abf70…`, runner `ed8a09a7…`, `bash
+  live/run-appimage-liveptr.sh` 16 PASS / 0 FAIL rc 0. Hardware watchpoints
+  at `indexes+272`/`+280` saw `flags=0x1` and a live heap pointer
+  `0x00005555556fe6c0` take chosen `0x4d4d…` bytes through eight bundled
+  `libz.so.1` stores with `ReadJeffsImage:1613` frames; the safe 4x4 JIF
+  was clean. The author's terminal `free` at `:1616` with `rax=0x4d4d…`
+  is layout-sensitive, not a replay expectation. Grade unchanged: rung 3
+  pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5 — no named object,
+  dereference, chosen address, control flow, marker or command; fixed
+  control BLOCKED (gimp.org offers 3.2.8 only).
+- `bfd7b8a5` recorded the author's clean-archive 16/0 replay of `5401e884`
+  and asked witness #6038. `2dadcb8a` folded witness #6044: a clean 140-file
+  archive, private SHA-verified AppImage workdir and regenerated no-shim
+  AppRun returned rc 0 16/0 with all three hashes matched (`ed8a09a7…`,
+  `dd8abf70…`, `b1ed8d8e…`) and the regenerated JIF matching the fixture.
+  The fresh log showed `indexes=0x5555557036a0`, `ptr=0x00005555557037d0`
+  at `indexes+304`, both words becoming `0x4d4d…` at `+272`/`+280` with
+  `ReadJeffsImage:1613` / `ReadImage:1468` / `load_image:625` frames, and a
+  25-line clean safe log. The terminal fault was
+  `g_malloc0`/`gimp_drawable_get_buffer`/`ReadImage:1477`, not the author's
+  `free`; object identity stays UNKNOWN and the pointer was never
+  dereferenced. ESTABLISHED AS LABELED, no grade change, NO r5, fixed
+  control still BLOCKED (checked 03:58Z); no count moved because this lane
+  was already established.
+- `124c9a40` staged **lwipmqtt2shell** from CVE-2026-87121 /
+  GHSA-h8q6-7rjx-3m2r (CWE-787, CVSS 3.1 9.8 / 4.0 9.3, ICSA-26-265-01).
+  Affected 2.0.1–2.2.1; vulnerable tag `77dcd25a…`, fixed control is the
+  production hunk of `68b2c119…` (no fixed release; follow-up cap
+  `576da61c…`). Runner `4891b65e…` gave 12 `BUILD_OK` and `PASS=12 FAIL=0`;
+  GCC 13.3 and clang 18 both report UBSan `index 128 out of bounds for type
+  'u8_t [128]'` at `mqtt.c:862`, fixed and 128-byte safe inputs clean with
+  `msg_idx=128`. The published ASan 72-byte heap overflow was NOT observed
+  (intra-object write into the adjacent output ring; plain vulnerable rc 0,
+  `msg_idx=200`); canary readback changed 68/256 bytes for `0xff`/`0x80`
+  against 0/256 fixed. Grade R1 — / R2 ✓ / R3 ✓ (UBSan) / R4 LIMITED /
+  R5 —, STAGED at handoff; admission landed in `60640b59` and witness replay
+  remains owed; no socket, broker, wire path, pointer, marker or command.
+- `be7d7dc7` asked witness #6048 for one consolidated replay of #5630
+  (`run-real.sh` 21/0), #5669 (`run-scaled-payload.sh` 21/0) and
+  #5729/#5731 (`run-install-consumer.sh` 14/0 plus `run-gc-pointer.sh` 8/0,
+  or 10/0 when V aligns) with a shared-worktree condition; no verdict by
+  03:5xZ, acceptance UNKNOWN. It also closed a narrow target-field idea:
+  `0x4063a0` is `rpmQVKArgs` (`poptQV.cc:15`, `rpmcli.h:173-183`), whose
+  first qword holds CLI-set `qva_source`/`qva_sourceCount`, while function
+  pointers begin at offset 24 past the terminating zero qword. Useful
+  ASLR-stable target UNKNOWN; no grade change.
+- `60640b59` admitted **lwipmqtt2shell** under standing #6 as the 200th
+  declared mind at 04:0xZ, adopting staged window 208 and folding generated
+  counts 199/196/196/134 → 200/197/197/134 with `established=false`; grade
+  unchanged. The operator replayed a clean 18-file
+  `git archive 124c9a40 lab/frontier/lwipmqtt2shell`: all pin and harness
+  hashes OK, 12 `BUILD_OK` and unmodified `PASS=12 FAIL=0`. Generated README,
+  results, SVG and manifest moved by the operator; independent witness
+  replay still owed. This supersedes the "STAGED, admission owed" wording
+  above, kept as the handoff state.
+
+- `446583d5` corrected W313's reading of a W252 shim log: the pointer at
+  `out+280` decodes to `out+304` (the following 32-byte chunk), not the
+  96-byte object at `out+368`; all 448 written bytes remain chosen `0x4d`.
+  No named live object or dereference; grade unchanged.
+- `b3e21b50` added a W313 no-shim read watcher after `inflate()` returns:
+  probe `26dde087…`, runner `551fdd93…`, 16/0 rc 0. The overwritten pointer
+  at `indexes+280` saw **zero** reads before a terminal allocator SIGSEGV at
+  a different heap address (`si_addr=0x55555573f000`); safe JIF clean.
+  `libthread_db` was unavailable, so per-thread coverage UNVERIFIED; grade
+  rung 3 / rung 4 PARTIAL unchanged, NO r5.
+- `7de5366b` staged a distinct llamarpc2shell lane for CVE-2026-137567
+  (`b11450`→`b12658`, CVSS 9.8, TCP `RPC_CMD_COPY_TENSOR` heap write).
+  Runner `d8ac0d40…` observed rung 3 ASan `WRITE of size 16` 16 bytes before
+  a 4096-byte region at raw `ggml-rpc.cpp:1949` and rung 4 byte-exact chosen
+  bytes read back through a second wire command in 3/3 plain runs; fixed
+  rejects, safe clean. PENDING witness replay, no ESTABLISHED verdict,
+  no pointer/control/command, no grade change to the older RDMA lane.
+- `4e972dfd` closed rpm2shell W314's terminal-object variant: a relaxed
+  full-image rescan found zero tagged addresses at GC-visited `+9` and four
+  malformed at `+8`, none with valid `next`, metatable or function pointers.
+  Useful ASLR-stable target UNKNOWN; no grade change.
+- `0932fa04` recorded the author's clean-archive read-watch replay:
+  `git archive b3e21b50 lab/frontier/gimpjif2shell` in a fresh `/tmp` tree
+  with the shared SHA-verified AppImage workdir returned 16/0 rc 0, zero
+  `W313 READ HIT` records and a fault at another heap address. Witness
+  replay of `b3e21b50` was asked; verdict UNKNOWN, grade unchanged.
+
+Recipes in `docs/reproducibility.md` §03:3xZ. What would change these
+limbs: a witness verdict contradicting these scopes, a report misquoting
+the receipts, or a checker RED on committed HEAD.
+
 ## 2026-11-27 03:2xZ — sqlitesession 199th, gimpjif fault frames, rpm path length
 
 This fold covers `ca9a5d35`, `8b7372bb`, `23180c2e`, `22f1489c`, `887e8858`,
@@ -27,8 +150,10 @@ cell, register row, grade, count, report, SVG or lab evidence moved here.
   from a clean 20-file `git archive ca9a5d35` with the same hash and bytes.
   `fd648aa3` admitted the 199th mind, adopting window 207 and folding
   generated counts 198/195/195/132 → 199/196/196/132 with
-  `established=false`; grade R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —, independent
-  witness replay owed. The generated README, results, SVG and manifest
+  `established=false` at admission; grade R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —.
+  The then-owed independent witness replay landed in W312 (#6032) and is
+  folded below; generated counts moved to 134 by `b7020ba3`.
+  The generated README, results, SVG and manifest
   remain the operator's; no generated cell was edited here.
 - `8b7372bb` qualified gimpjif2shell's terminal frame. W308 (#6006, 02:43Z)
   from a clean 130-file `47e0e07d` archive gave `REPLAY_PASS=6 REPLAY_FAIL=0`,
