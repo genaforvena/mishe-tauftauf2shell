@@ -8557,3 +8557,72 @@ covered by the 288-case length sweep and 3000-case transcode fuzz
 (`lab/src/cmp/enc-diff.txt`, report §"Adjacent fix-series triage");
 falsifier is that every remaining `enc/` hunk is table metadata or an
 already closed lane. Keep `--again 300`.
+
+## 2026-11-27 15:19–15:2xZ — W348: remaining `enc/` fix hunks CLOSED
+
+W347's named follow-up is closed. `lab/src/cmp/enc-diff.txt` contains 317
+lines over 17 files; its write-relevant hunks fall into four groups, and
+each is now accounted for by source or observation:
+
+1. **Fourteen duplicated `case_map` guards** (`iso_8859_1/2/3/4/9/10/13/
+   14/15/16`, `windows_1250/1252/1254/1257`, `to < to_end` → `to_end -
+   to > 1`). The report's earlier source audit (`:367-396`) covered all
+   14 but only ISO-8859-1 had a dynamic probe. New harness
+   `lab/repro/ruby2shell-enc-case-sweep.{rb,sh}` drives 14 encodings ×
+   3 stock calls (`upcase`, `swapcase`, `downcase(:fold)`) × three
+   lengths (21, 42, 83) on four builds: 504 arms, all rc 0 except 84
+   arms on `ruby-3.4.12-asan`, which each report
+   `SUMMARY: AddressSanitizer: heap-buffer-overflow ... in case_map`
+   at that encoding's file and line (six reports per encoding). The
+   pattern is exactly `N` odd → overflow, `N` even → clean: capa =
+   N+20 is odd only for N=21/83, matching the parity rule already
+   measured on ISO-8859-1 (`:241-249`). All 126 fixed-ASan arms, all
+   126 vulnerable-plain arms and all 126 fixed-plain arms are clean;
+   for every arm the vulnerable and fixed plain builds return
+   byte-identical output (same SHA-256, e.g. 21×`0xDF` upcase/swapcase
+   `69a5885c909c419581a7d7fd7dbd2d0322494fb45325f1cef647d1e566741a8c`,
+   len 42, tail `5353535353535353`; fold
+   `7bbed07d913f65baca2e07d1498ad3280559d30c87a7da56ac7e8c6d33be1e60`,
+   tail `7373737373737373`). `swapcase` reaches the same overflow on
+   all 14 encodings, but the installed gems contain no `swapcase` caller
+   on request data (only RuboCop's `percent_q_literals.rb:65` and RBS
+   docs); the already-closed entry-point survey (`:4783`) remains the
+   web-reachability result. Raw matrix and per-arm stdout/stderr are
+   gitignored under `lab/build/evidence/enc-case-sweep/` (matrix
+   SHA-256 `9339c61790458a012dd60e0182c8f4d2747157dcb2c551c4e964e146eec5476f`).
+   Reproduce with `bash lab/repro/ruby2shell-enc-case-sweep.sh`.
+2. **`enc/emacs_mule.c` fold refactor** — the 3.4.12 local body copies
+   one ASCII-lowered byte or `mbc_enc_len(p, end, enc)` bytes;
+   `onigenc_mbn_mbc_case_fold` (`regenc.c:713-735`) copies the same
+   counts via `enclen(enc, p, end)`, which is `ONIGENC_MBC_ENC_LEN` →
+   the same encoding's `mbc_enc_len`. No write-bound change. Observed:
+   `"AB\x83\xA1\x83\xA2C".force_encoding("Emacs-Mule").downcase` gives
+   `616283a183a263`, and `match?(/b/i)`/`match?(/\w/)` both give
+   `true`, on both builds.
+3. **`enc/emacs_mule.c:is_code_ctype`** — changes only regex ctype
+   classification for non-word codepoints ≥128 (previously any
+   multibyte char passed every ctype test); no buffer write in either
+   version. No framework in the lab uses Emacs-Mule for request data.
+4. **`enc/utf_32{be,le}.c:mbc_to_code`** — the old multiply chain
+   overflows signed `int` for a leading byte ≥0x80 (UBSan reports
+   `runtime error: signed integer overflow: 8388608 * 256` at
+   `enc/utf_32be.c:75` on 3.4.12, absent on 3.4.13). `OnigCodePoint`
+   is `unsigned int` (`include/ruby/onigmo.h:80`), so the wrapped
+   32-bit result equals the new shift expression; both builds raise
+   `ArgumentError: invalid byte sequence in UTF-32BE` for
+   `"\x80\x00\x00\x00"`. No write and no observable value difference.
+
+The transcode-table `max_output`/checksum hunks remain the previously
+closed lane (§"Adjacent fix-series triage": 288-case sweep + 3000-case
+fuzz, zero ASan on both builds). Falsifier met: no remaining `enc/`
+hunk exposes a new write-bound window or a web-facing caller outside
+the already-closed primary entry points. Grade unchanged: primary CVE
+wire-only rung 3, W341/W342 adjacent rung 3, witness-COMPLETE rung 4,
+harness-condition rung 5 ESTABLISHED at its labeled scope, full stock
+rung 5 NOT ACHIEVED. Next named experiment: test whether case-map
+buffer chaining (`string.c:7828-7851`) can produce a *second* odd-capa
+buffer and hence a second one-byte overflow in one `upcase` call;
+`capa = remaining × buffer_count + 20` suggests the second buffer is
+always even and the third's parity depends on `remaining`. Falsifier:
+every chained buffer is even or stops before filling, so only the
+first buffer can overflow. Do not repeat this `enc/` sweep unchanged.
