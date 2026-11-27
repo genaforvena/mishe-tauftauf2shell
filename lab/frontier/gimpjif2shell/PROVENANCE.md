@@ -3664,3 +3664,39 @@ map's fields at one chosen address. Grade unchanged: rung 3 pinned verbatim /
 rung 4 chosen-pointer read, NO chosen-address store, NO r5. Do not replay
 these two JIFs unchanged; a further attempt needs a measured `idx`-independent
 layout, which this wake did not establish.
+
+## W357 ASLR-off idx probe: drift narrowed, not eliminated (2026-11-27, 19:57Z wake)
+
+Bounded test of W356's stated prerequisite: if `setarch -R` makes `idx`
+deterministic, W356's coherent fake map could be re-encoded for the measured
+value and its write sinks re-measured. All six runs used the unmodified
+`run-appimage-min340.sh` (SHA `b047c40e…`), the SHA256SUMS-verified 3.2.8
+AppImage, a regenerated shim-free AppRun and read-only GDB observers. This is
+an ASLR-off lab control; no r5 claim is made from it.
+
+Tooling negative: the first invocation supplied a relative JIF path. The
+runner `cd`s to the AppImage root, so `gimp-file-load` reported "No such file
+or directory" and no pinned inflate was reached; discarded, not counted.
+
+Two W353-JIF runs (`f867cd09…`) with `gdb-min337.cmd` (`a8f23d0a…`) both
+logged `W337 PRE avail=0x80000002 idx=0x555555679070` (GDB logs `02888ad3…`
+and `f476705e…`), much tighter than W356's 0x100–0x130 drift. But two
+otherwise identical replays of W356 try01 (`8fd3ac21…`) with the unmodified
+`gdb-w355-forged.cmd` (`23c3cbf1…`) gave `idx=0x555555679050` (GDB
+`f9ca0b76…`) and then `idx=0x555555679060` (GDB `b18a01ea…`). Both logged
+only genuine `adler32`/`adler32_z` lookups and the genuine GOT write
+`rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0`; no chosen-map TABLE hit, no
+`0xb200` LUSED store and no chosen GOT value. A third run with
+`gdb-w352-table.cmd` (`f1c9004d…`) logged `idx=0x5555556790b0`,
+`ARRBASE=0x5555556c02c0`, `DELTA_FROM_IDX=0x47210`: the encoded array delta
+held while `idx` still moved by 0x10–0x60 across observers and runs.
+
+Conclusion: `setarch -R` narrows but does not eliminate `idx` drift, so a
+static multi-field fake map cannot be anchored even under the ASLR-off
+control; W356's negative is not repaired by this control. No chosen-address
+store, chosen-value GOT write, marker or command. Grade unchanged: rung 3
+pinned verbatim / rung 4 chosen-pointer dereference, NO r5. Another
+single-pointer retune is not indicated; a further attempt needs a consumer
+that tolerates 16-byte phase drift (as W353 did) or a measured source of a
+deterministic `idx`. Raw logs: `/tmp/w357-idx-{a,b}-*`, `/tmp/w357-map{,-2}-*`
+and `/tmp/w357-delta-*` in this wake's session; SHA-256s recorded there.

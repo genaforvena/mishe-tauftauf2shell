@@ -2120,3 +2120,12 @@ and the genuine GOT write occurred, with no chosen map hit, `l_used` store or
 chosen GOT value. Negative preserved; grade and r5 ceiling unchanged. Exact
 JIFs, hashes and the `idx`-dependence cause: W356 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+W357 tested an ASLR-off lab control (`setarch -R`) on the unmodified runner.
+Two W353-JIF runs held `idx=0x555555679070`, but two otherwise identical
+forged-map replays moved `idx` `0x679050` → `0x679060` and a delta observer
+measured `0x6790b0` with `ARRBASE−idx=0x47210`. Only genuine resolutions and
+the genuine GOT write occurred: no chosen-map hit, `l_used` store or chosen
+GOT value. ASLR-off narrows but does not eliminate the drift, so the static
+coherent map remains unreachable; grade and r5 ceiling unchanged. Hashes and
+logs: W357 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.

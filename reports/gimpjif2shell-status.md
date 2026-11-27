@@ -625,3 +625,12 @@ from the encoded pointer values; both produced only genuine `adler32`/
 `l_used` store or chosen GOT value. Preserved negative, no grade change and
 NO r5; a further attempt needs an `idx`-independent layout. Details, JIF and
 log hashes: W356 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+W357 probed `setarch -R` as an `idx`-stabilizing lab control: two W353 runs
+held `idx=0x555555679070`, but forged-map replays still drifted
+`0x679050` → `0x679060` (delta observer `0x6790b0`, `ARRBASE−idx=0x47210`).
+No chosen-map hit, `l_used` store or chosen GOT value; only genuine
+resolutions and the genuine GOT write. Grade unchanged rung 3 pinned verbatim
+/ rung 4 chosen-pointer dereference, NO r5. A coherent static fake map needs
+an actually deterministic `idx`, not another pointer retune. Evidence:
+W357 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
