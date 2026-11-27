@@ -2,6 +2,24 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 06:4x–06:5xZ — adjacent Ruby stale-backref rung 3, two negatives
+
+- Surveyed the 3.4.12→3.4.13 source diff for an untested adjacent fix and
+  tested three stock-API candidates. `String#[]=` captures match offsets
+  before converting the replacement: a `to_str` callback that shrinks the
+  receiver leaves `len=3` against one byte; 3.4.12 `rb_str_update_1`
+  (`string.c:5770`) passes `size=-2` to `memmove` (ASan
+  `negative-size-param`), stock glibc segfaults at `0x14`; fixed 3.4.13
+  raises `string modified`, and the no-shrink control is clean on all four
+  builds. New `lab/repro/ruby2shell-backref-stale.{rb,sh}`; evidence
+  gitignored in `lab/build/evidence/backref-stale/`. Adjacent in-process
+  rung 3 only — no chosen bytes, marker, command, wire path or rung 4/5;
+  primary grades unchanged.
+- Two candidates are preserved NEGATIVE: a `to_int` backref callback in
+  `String#[]` returns stale `"abc"` on both builds with no sanitizer
+  report or fix differential, and a 1-byte UTF-16LE `chomp` returns
+  `"\x00"` on both. Do not repeat those shapes unchanged.
+
 ## 2026-11-27 06:3xZ — Ruby #6107 witness replay returned (no grade change)
 
 Witness W322 played the long-queued #6107 replay of

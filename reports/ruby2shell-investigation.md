@@ -7333,3 +7333,51 @@ NOT ACHIEVED. The owed independent witness replay of report §5108 (#6107)
 was returned by witness W322 on 2026-11-27: ESTABLISHED AS LABELED for
 the narrow secondary rung 4 lane, no grade change and no r5. The tape
 note from 06:15Z listing it unplayed is preserved above as history.
+
+## 2026-11-27 06:4x–06:5xZ — W320: stale backref offsets after a conversion callback, adjacent rung 3 (Ruby)
+
+The witness verdict above closed the last owed replay, so this wake surveyed
+the 3.4.12→3.4.13 source diff under `lab/src/cmp/` for an untested adjacent
+memory-safety fix. Three stock-API candidates were proposed; one reproduced.
+
+**CONFIRMED adjacent lane — stale match offsets reach an OOB `memmove`.**
+`String#[]=` captures the match's BEG/END offsets before converting the
+replacement value: 3.4.12 `string.c:5861` calls `StringValue(val)` and then
+`rb_str_update_0`, without re-checking the receiver length; 3.4.13
+`string.c:5897-5900` raises `RuntimeError: string modified` when
+`start + len > RSTRING_LEN(str)`. A replacement object whose `to_str`
+shrinks the receiver during conversion leaves stale `len=3` against a
+1-byte string. `rb_str_update_1` (`string.c:5770`) then calls
+`memmove(..., slen - (beg + len))` with size `-2`. Observed:
+`ruby-3.4.12-asan` rc 1, `AddressSanitizer: negative-size-param (size=-2)`
+at `string.c:5770`; stock-glibc `ruby-3.4.12-plain` rc 139,
+`[BUG] Segmentation fault at 0x14`. Fixed 3.4.13 plain and ASan both rc 0
+with `string modified`; the no-shrink `to_str` control yields `"Ydef"` on
+all four builds. Reproduce:
+
+```
+bash lab/repro/ruby2shell-backref-stale.sh
+```
+
+The script runs five arms (`write-attack`, `write-safe`, `read-attack`,
+`read-safe`, `chomp`) on plain/ASan vulnerable/fixed builds; stdout/stderr
+per arm is gitignored under `lab/build/evidence/backref-stale/`.
+
+**Two candidates NEGATIVE, preserved.** (1) Stale backref offsets via a
+`to_int` callback in `String#[]` (3.4.12 `string.c:6023-6025` vs 3.4.13
+`:6063-6067`): the callback fires, but both builds return the stale
+`"abc"` from the shrunken string's retained buffer, with no sanitizer
+report and no fix differential. (2) Short multibyte `chomp` underflow
+(3.4.12 `string.c:10063`/`:10110` vs 3.4.13 `:10114-10115`/`:10162`):
+a 1-byte UTF-16LE receiver returns `"\x00"` with no sanitizer report on
+both builds. Neither supports a rung claim; do not repeat those shapes
+unchanged.
+
+Grade for the confirmed arm: adjacent in-process lane at **rung 3**
+(ASan observed the invalid `memmove` size; stock glibc reproduced the
+crash), fix-sensitive and control-clean. No chosen-byte write was
+demonstrated, no benign marker or command, no wire reachability, and the
+conversion callback is caller-supplied rather than a stock request-path
+consumer — so no primary grade change and no rung 4/5 claim. Falsifier:
+any safe-control or fixed-build fault, or an ASan report at any other
+site, would break this attribution.

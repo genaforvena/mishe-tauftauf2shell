@@ -17643,3 +17643,29 @@ logical end from a stock `String#rindex` call. The fixed build guards that
 report, output difference, chosen-byte write or wire path was measured.
 Source-level SUSPECTED with a measured negative; no rung claim. Do not repeat
 these shapes unchanged.
+
+### W320 — stale backref offsets after a conversion callback (Ruby)
+
+```
+bash lab/repro/ruby2shell-backref-stale.sh
+```
+
+The driver runs `write-attack`, `write-safe`, `read-attack`, `read-safe`
+and `chomp` on the four pinned builds (plain/ASan 3.4.12/3.4.13) and writes
+per-arm `.out`/`.err` under gitignored
+`lab/build/evidence/backref-stale/`. Expect:
+
+```
+ruby-3.4.12-plain write-attack rc=139  (SIGSEGV at 0x14)
+ruby-3.4.12-asan  write-attack rc=1    (negative-size-param size=-2 at string.c:5770)
+ruby-3.4.13-plain write-attack rc=0    (raised RuntimeError: string modified)
+ruby-3.4.13-asan  write-attack rc=0    (raised RuntimeError: string modified)
+```
+
+All four builds give `ok len=4 "Ydef"` for `write-safe`, `result="abc"`
+for `read-attack`, `result="abc" len=6` for `read-safe`, and `result="\x00"`
+for `chomp`. The read and chomp arms are preserved negatives: no sanitizer
+report and no fix differential, despite the added guards in 3.4.13 at
+`string.c:6063-6067` and `:10114-10115`/`:10162`. The confirmed write arm
+is an adjacent in-process rung 3 only: no chosen-byte write, marker,
+command or wire path; the `to_str` callback is caller-supplied.
