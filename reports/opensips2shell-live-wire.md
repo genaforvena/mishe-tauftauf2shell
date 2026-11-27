@@ -3,8 +3,9 @@
 Scope: GHSA-5gm5-wj62-p234, unbounded `sprintf` in `ENC_SIP_URI()` at stock
 OpenSIPS tag `4.0.1`, tested against a **real receiver process**, not the
 harness. Everything ran on 127.0.0.1 in `lab/opensips2shell-live/`; no external
-probe, no marker execution, no witness replay. Wake started 08:09:48Z; first
-live report observed 08:23:54Z.
+probe and no marker execution. No witness replay existed when these results
+were first recorded; the independent replay is appended below. Wake started
+08:09:48Z; first live report observed 08:23:54Z.
 
 ## Builds and exact inputs
 
@@ -82,7 +83,8 @@ stanza: `<?xml version='1.0'?><stream:stream ... from='127.0.0.1'>` plus
   `from[884:892]` there, but the stock process died inside `tm` before return
   and no overwritten RIP was observed. **Rung 5 UNKNOWN**: no benign marker,
   no pointer-control execution, no ASLR/NX measurement, no remote path outside
-  this plant's loopback listener, no independent witness replay.
+  this plant's loopback listener. The independent witness replay below
+  confirmed these labels and found no rung-5 evidence.
 
 ## Negative results preserved
 
@@ -93,6 +95,43 @@ with the 299-byte JID did not crash: the 48 overflow bytes do not reach a live
 pointer in that frame. The instrumented probe changes the stack layout
 (`delta=904` instead of the stock frame's 888), so its RIP observation is a
 measurement of the instrumented frame only.
+
+## Independent witness replay (W328, 2026-11-27 08:45–08:50Z)
+
+Witness inbox #6255; detail at
+`.mishe-tauftauf/artifacts/witness-w328-opensips/detail.md`. The witness took a
+clean `git archive` of `lab/frontier/opensips2shell` and
+`lab/opensips2shell-live` at commit `9f01094a` into
+`/tmp/w328-opensips-clean`; all traffic was 127.0.0.1:5269 and no listener was
+left behind. Tarball, `401-asan/opensips`, both `xmpp.so` and `probe-xmpp.c`
+hashes matched this report. The unmodified harness control returned rc 0,
+26 PASS / 0 FAIL, canonical trace sha256 `a69657bb…` byte-identical. Author
+logs hashed exactly as reported. Fresh witness cases:
+
+| case | observed | fresh log sha256 prefix |
+| --- | --- | --- |
+| `401-asan` / 299 B | `stack-buffer-overflow`, `WRITE of size 304`, frames `vsprintf` → `sprintf` → `xmpp_send_sip_msg` → `in_stream_node_callback` → expat → `xode_stream_eat` → `xmpp_server_child_process`; `buf_from` `[192,448)` underflows `buf` `[512,1024)` | `7dc7801db89b155f…` |
+| `401-plain` / 900 B | `fm_malloc` need `1111579232`, SIGSEGV, daemon rc 139 | `ca70a65c8e06d033…` |
+| `402-asan` / 900 B | `ignoring message stanza before dialback authentication`, no ASan report, daemon rc 0 | `fdb3b245c586198d…` |
+| `401-plain` / 299 B (extra control) | no segfault; `bad host name in URI <sip:victim@sip.domain>` after the sink | not hashed in the detail |
+
+Counterexample hunt: the witness rebuilt the instrumented module from the
+clean source and changed only `from[804:808]` from `YZAB` to `CDEF`.
+`fromstr_len` changed from 1111579225 to 1178944579 (`0x46454443`) and the
+**stock** no-canary `fm_malloc` need changed from 1111579232 to 1178944584,
+both still SIGSEGV. The chosen wire bytes therefore drive the overwritten
+length field and allocation in the stock build, not only in the instrumented
+frame. Negative results preserved: `fromstr_s` stayed `QRSTUVWX`; `ripbytes`
+were ASLR-dependent real code bytes (`0017ed0e40740000` /
+`000714f7ca740000`), not chosen JID bytes; two early probe runs failed rc 127
+because the private build tree was placed at the archive root, then succeeded
+after moving it inside `lab/opensips2shell-live`. No marker, exec,
+control-flow diversion or off-loopback traffic.
+
+Witness verdict: **ESTABLISHED AS LABELED** — rung 3 confirmed in a live stock
+receiver, rung 4 demonstrated chosen-field control with an observed
+allocation-size change in stock and instrumented live builds under the stated
+no-canary/loopback/900-byte conditions. No grade change and NO rung 5.
 
 ## Reproduction
 

@@ -49,17 +49,21 @@ possible depending on canary/ASLR/NX. Brief:
   ignores the stanza before dialback for both lengths. Full evidence, hashes,
   config, wire bytes and limits: `reports/opensips2shell-live-wire.md`.
 - Rung 3 CONFIRMED in a live stock build. Rung 4 DEMONSTRATED security impact
-  under the lab conditions (chosen bytes overwrite a length/pointer field in
-  the live receiver and force a huge allocation and crash). Control-flow
-  diversion and rung 5 remain UNKNOWN: no overwritten saved RIP was observed
-  in a stock frame, no marker/pointer execution, no ASLR/NX measurement, no
-  witness replay.
+  under the lab conditions (chosen bytes overwrite the live `fromstr.len` and
+  force a huge allocation and crash). Control-flow diversion and rung 5 remain
+  UNKNOWN: no overwritten saved RIP was observed in a stock frame, no
+  marker/pointer execution, no ASLR/NX measurement. Independent witness replay
+  W328 (2026-11-27 08:45–08:50Z, inbox #6255) ESTABLISHED the rung-4 label as
+  written: from a clean `git archive` it reproduced the harness control and all
+  four live cases, and changing only `from[804:808]` from `YZAB` to `CDEF`
+  moved the stock `fm_malloc` need from 1111579232 to 1178944584. NO rung 5.
+  Detail: `.mishe-tauftauf/artifacts/witness-w328-opensips/detail.md`;
+  evidence table: `reports/opensips2shell-live-wire.md`.
 
-Next bounded work: hand the loopback replay to the witness for independent
-replay and rung-4 acceptance; then, only if a measured slot is available,
-test whether a longer chosen JID can place bytes at the stock frame's saved
-RIP (`buf_from+888`, from disassembly) without dying inside `tm` first. No
-marker execution or rung-5 claim without that measurement and witness replay.
-Adjacent-lane candidate for a later wake: GHSA-qc7q-vrx3-3j4h (`sip_i`
-`parse_isup` length-controlled `memcpy` into `val[128]`), recorded from
-operator inbox #6227 and deliberately not worked in this wake.
+Next bounded work: rung 4 is settled; a rung-5 attempt first needs a measured
+stock-frame slot and a way to survive `tm` (an ASCII-only JID forces a huge
+`fromstr.len` at JID offset 804; XML forbids the NUL bytes a small length
+would need). No marker execution or rung-5 claim without that measurement and
+a fresh independent replay. Adjacent-lane candidate for a later wake:
+GHSA-qc7q-vrx3-3j4h (`sip_i` `parse_isup` length-controlled `memcpy` into
+`val[128]`), recorded from operator inbox #6227 and deliberately not worked.
