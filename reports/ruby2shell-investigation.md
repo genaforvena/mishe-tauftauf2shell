@@ -8876,3 +8876,61 @@ the next glibc chunk's size LSB; predict the same valgrind stack plus
 a glibc metadata abort in fresh processes, falsifier = no invalid
 write at that offset or zero glibc diagnostics across the sweep.
 Do not repeat the seven-shape chain matrix unchanged.
+
+## 2026-11-27 17:5xZ — W353: mixed-parity geometry on EOL Ruby 3.2.11 CLOSED
+
+Prediction: the one-leading-`a` mixed shape (`a` + N x `0xDF`, N = 27/43/59,
+N == 11 mod 16) that on 3.4.12 put the fixed `0x53` overflow byte on the
+next glibc chunk's size LSB produces the same write on the EOL 3.2.11 plain
+build, plus glibc metadata diagnostics in fresh processes. Falsifier: no
+invalid write at that offset, or zero glibc diagnostics across the sweep.
+The falsifier is not met on either half.
+
+- **Valgrind, 9/9 arms** (three fresh processes per N, `--error-limit=no`):
+  exactly one `Invalid write of size 1` at
+  `case_map (iso_8859_1.c:293)` from `rb_str_casemap (string.c:7341)`;
+  allocation from `rb_str_casemap (string.c:7336)` via
+  `objspace_xmalloc0 (gc.c:12355)`. Valgrind reports the byte `0 bytes after
+  a block of size 72/88/104` for N=27/43/59, i.e. 24-byte `mapping_buffer`
+  header + capa N+21 (48/64/80), so the write offset is `R = N+45` and
+  `R == 8 (mod 16)`. Each arm also shows the known copy-out one-byte
+  `Invalid read` in `memmove` from `rb_str_casemap (string.c:7368)` at the
+  same address; outputs are 55/87/119 correct bytes and `rc=0`. Three error
+  contexts per run are the write, the read, and a bootstrap uninitialised
+  conditional in `add_insn_info (compile.c:2244)`. Raw logs: gitignored
+  `lab/build/evidence/casemap-chain/w353/mixed-{27,43,59}-{1,2,3}.txt`.
+- **Fresh unsanitized processes (stock glibc 2.39)**, two independent sweeps,
+  both showing layout-dependent aborts. First sweep: 7/9 aborts — N=27 3/3
+  `munmap_chunk(): invalid pointer`, N=43 1/3
+  `malloc(): invalid next size (unsorted)` and 2/3 clean (`rc=0`, out
+  len=87), N=59 3/3 `malloc(): invalid next size (unsorted)`. Committed
+  driver replay: 8/9 aborts — N=27 3/3 `munmap_chunk`, N=43 2/3 unsorted
+  diagnostic and 1/3 clean, N=59 3/3 `rc=134` (two with the unsorted
+  diagnostic, one abort without a matched diagnostic string). Clean runs at
+  the same command are preserved as the layout dependence already recorded
+  on 3.4.12 (5/10 aborts there), not retried into existence. Safe control
+  N=28 (even capa, no overflow): 3/3 `rc=0`, out len=57, no diagnostic in
+  both sweeps. Logs: `lab/build/evidence/casemap-chain/w353/plain/`.
+- **Direct byte observation (gdb, plain 3.2.11, N=27)**: at the first
+  `case_map` call the successor size LSB at `(char *)current_buffer + 72`
+  reads `0x61`; after `case_map` returns it reads `0x53` (`used=49`), and
+  the same process then aborts with `munmap_chunk(): invalid pointer`.
+  Evidence: `lab/build/evidence/casemap-chain/w353/gdb-mixed27.log`.
+
+Replay all three halves with the committed driver
+`bash lab/repro/ruby2shell-mixed-eol.sh` (gdb script
+`lab/repro/ruby2shell-mixed-eol.gdb`). No wire request, no chosen bytes and
+no command execution here: this closes the EOL mixed-geometry lane at rung
+3, not a grade change. Grade unchanged: primary wire-only rung 3, W341/W342
+adjacent rung 3, witness-COMPLETE rung 4, harness-condition rung 5
+witness-ESTABLISHED at its labeled scope, full stock/oracle-free/persistent
+rung 5 NOT ACHIEVED.
+
+Next named experiment W354: run the same mixed parity on the other
+vulnerable branch builds (3.3.13, 4.0.9; their `string.c` line maps are in
+W350) with patched 3.3.14 as a control. Prediction: the same one-byte
+`case_map` write and glibc diagnostics on both vulnerable builds, zero on
+the patched control; falsifier: no invalid write at `R = N+45`, or any
+write/diagnostic on 3.3.14. First command:
+`for rb in lab/build/plain/ruby-3.3.13-plain/bin/ruby lab/build/plain/ruby-4.0.9-plain/bin/ruby; do for n in 27 43 59; do valgrind --error-limit=no "$rb" lab/repro/ruby2shell-rung3-mixed.rb "$n"; done; done`.
+Do not repeat the seven-shape chain matrix unchanged.
