@@ -133,3 +133,32 @@ and `witness-w323-gimpjif-w322/detail.md`.
   READ-watch sweep armed four hardware watchpoints on chosen-byte words and
   logged zero hits before the plug-in crashed. This is a short-window
   negative, not exclusion of a completed-load consumer; grade unchanged.
+- Chat #6233 (offer #6223, commit `0350c778`): W325 four-word READ-watch
+  sweep ESTABLISHED AS LABELED, no counterexample, no grade change. Clean
+  195-file `git archive 0350c778` (SHA-256 `5e5c3ad9…`), all three offered
+  pins matched; unmodified runner in a private hardlink AppImage tree rc 0.
+  Fresh probe reproduced `avail=0x80000082`, four chosen `0x4d` words at
+  `+280/+336/+344/+376` and `WATCHERS ARMED count=4`; all four hardware
+  read watchpoints confirmed inserted, zero `READ HIT`. A positive control
+  with the same GDB watchpoint API form fired on a real read, so the zero is
+  not a silent-watchpoint artifact. NITs: fresh GDB internal error after the
+  SIGSEGV, no libthread_db, short pre-crash window. Detail:
+  `.mishe-tauftauf/artifacts/witness-w326-gimpjif/detail.md`.
+
+## W327 executable-pointer check (2026-11-27, 08:25-08:31Z)
+
+- Hypothesis: W325's `0x7ffff02a…` words at `+416/+424/+448/+752/+760/
+  +784` were function/vtable pointers worth watching. No-shim GDB script
+  `live/gdb-coderead-327.cmd` checked them against `/proc/<pid>/maps` at
+  the pinned inflate return; runner `live/run-appimage-coderead-327.sh`
+  used the verified AppImage, shim-free AppRun and `span-1024.jif`.
+- First run armed zero watchers and is preserved as a tooling negative
+  (no mapping self-check). Repaired second run
+  (`w327-coderead2-probe.log` SHA `3f2230c9…`) self-checked a real
+  executable mapping (`libz.so.1+0x99a0 perms=r-xp`) and found all six
+  words **unmapped** (`MAPWORD … None`). Zero candidates, zero watchers,
+  no READ HIT possible; plug-in still faulted outside GDB's stop.
+- Conclusion: the address-pattern code-pointer inference is refuted for
+  this build/layout. Grade unchanged rung 3 pinned verbatim / rung 4
+  PARTIAL chosen bytes, NO r5. Full hashes in
+  `lab/frontier/gimpjif2shell/PROVENANCE.md`.

@@ -1506,3 +1506,27 @@ crashing. No counterexample, no grade change, NO r5. Detail:
 `.mishe-tauftauf/artifacts/witness-w325-gimpjif/detail.md`. The W322
 type-name replay was closed separately at tape #6196, also ESTABLISHED AS
 LABELED with no grade change.
+
+Witness tape #6233 independently replayed W325 (offer #6223, commit
+`0350c778`) **ESTABLISHED AS LABELED**, no grade change. From a clean
+195-file archive (`5e5c3ad9…`) the unmodified runner armed all four
+hardware read watchpoints on the chosen words and logged zero hits; a
+positive control using the same GDB watchpoint API form fired on a real
+read, so the zero is not a silent watchpoint. The short pre-crash window,
+missing libthread_db and a post-SIGSEGV GDB internal error remain preserved
+NITs; a completed-load consumer is still unexcluded. Detail:
+`.mishe-tauftauf/artifacts/witness-w326-gimpjif/detail.md`.
+
+## No executable-pointer words in the OOB span (W327, 2026-11-27)
+
+W325's "text-range" words were an address-pattern inference. W327 checked
+them against `/proc/<pid>/maps` in the live 3.2.8 plug-in at the pinned
+`inflate()` with a no-shim, read-only GDB script. The mapping test passed
+its self-check (`EXEC SELF pc=… libz.so.1+0x99a0 perms=r-xp`), but all six
+`0x7ffff02a…` words at `+416/+424/+448/+752/+760/+784` are `MAPWORD … None`
+— unmapped, not executable. No OOB word qualified, so zero watchpoints
+were armed and no read could be observed; the plug-in still faulted outside
+GDB's stop. This refutes the code-pointer inference for this build/layout,
+not the existence of a consumer in a completed load. Grade unchanged rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. Hashes and logs:
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

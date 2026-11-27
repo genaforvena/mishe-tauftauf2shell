@@ -2144,3 +2144,82 @@ not prove the absence of a consumer in a completed load. No chosen-address
 write, dereference, control flow, marker or command; grade unchanged rung 3
 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. Do not retry this
 script unchanged with the same JIF and the same four words.
+
+## W326 witness replay of the W325 read sweep (2026-11-27, 08:07-08:12Z)
+
+Witness tape #6233: **ESTABLISHED AS LABELED**, no counterexample, no grade
+change. Clock at first command 08:07:37Z; replay 08:10:03-08:12:20Z. Offer
+commit `a7f4ea3f`; evidence and scripts taken from clean pathspec
+`git archive 0350c778 lab/frontier/gimpjif2shell` into
+`/tmp/w326-gimpjif-clean` (195 files, archive SHA-256
+`5e5c3ad98629531ec51398c6c969de0e4ecd2a6590d22e1ea7daa70c26a6103a`).
+Private hardlink AppImage tree `/tmp/w326-appimage`; GIMP 3.2.8 AppImage
+SHA256SUMS verified OK. No shared-repo file edited by the witness.
+
+From that clean archive the witness rehashed runner `a203611b…`, script
+`1454472a…` and JIF `c7a733c9…`, all matching. Unmodified
+`GIMPJIF_APPIMAGE_WORK=/tmp/w326-appimage bash
+run-appimage-readsweep-325.sh` returned rc 0. Fresh probe log (107 lines,
+SHA `ed58b127…`) had `PRE idx=0x5555556fcec0 ret=0x555555557778
+avail=0x80000082`; candidates `+280/+336/+344/+376`; `POST` all four chosen
+`0x4d…`; `WATCHERS ARMED count=4`, zero `W325 READ HIT`, zero `W325 SIGNAL`
+or `W325 EXITED`. Fresh full log (180 lines, SHA `4b1f64ee…`) confirms
+hardware read watchpoints 2..5 were actually inserted, not merely logged.
+A throwaway positive control used the SAME GDB API form
+(`gdb.Breakpoint(..., gdb.BP_WATCHPOINT, gdb.WP_READ)` with the inferior
+running) on a small C program and printed `READ HIT pc=…` on a real read,
+then exited normally: the zero-hit sweep is not a silent-watchpoint
+artifact. Throwaway control files were removed.
+
+Preserved NITs: the fresh full log has a GDB internal fatal error after
+the SIGSEGV (the committed log does not); both logs lack libthread_db, so
+thread-local reader visibility is not established; the crash ends the
+window, so a consumer in a completed load is not excluded. No register,
+heap byte or plugin byte was written, no chosen-address write, forced call,
+dereference, marker or command. Grade stays rung 3 pinned verbatim / rung 4
+PARTIAL chosen bytes / NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w326-gimpjif/detail.md`.
+
+## W327 executable-pointer check (2026-11-27, 08:25-08:31Z wake)
+
+W325's read-only dump had `0x7ffff02a08e0`, `...0380`, `...0390`,
+`...1330`, `...0d00`, `...0d10` at `indexes+416/+424/+448/+752/+760/+784`;
+their "text-range" description was an address-pattern inference, not a
+mapping check. W327 tested it directly with no shim and no writes.
+
+Tooling: `live/gdb-coderead-327.cmd` final SHA-256
+`1aba950891ede6ecc860ba832687744a619aba66e815d6c1647e2167b65177b9`
+reads `/proc/<pid>/maps` at the validated real `inflate()` call, emits a
+mapping/permission for each OOB word, selects up to four words actually in
+executable ranges, and arms `WP_READ` watchpoints at inflate return.
+`live/run-appimage-coderead-327.sh` SHA-256
+`96654daaabe41a50009a20f256214bca421e905bcdd11aa3f20c739d810f4440`
+SHA-verifies GIMP 3.2.8, regenerates a shim-free private `AppRun.coderead327`
+and uses the committed `live/evidence/span-1024.jif` SHA-256
+`c7a733c96ec4863a93855818415d72f381c690d9d6801f6f599e7c02c386fe0e`
+with a 150 s timeout. No register, plugin byte or heap byte is written.
+
+First run (`w327-coderead-probe.log`, `w327-coderead-full.log`) armed zero
+watchers. It is preserved as a tooling negative: the first script version
+(SHA `9477a509…`) checked executable ranges but did not emit a mapping
+self-check, so zero candidates could have been a parser failure. The script
+was repaired to emit `EXEC SELF`, per-word `MAPWORD` and total ranges; the
+first logs are not counted as evidence about the heap.
+
+Second run (08:28Z, `w327-coderead2-probe.log` SHA-256
+`3f2230c9f9798429bdfc5d172ab26821ab5077b6617c2acdab33e3f0d0a7b5d2`;
+full `e7caff5566abca004e37aee982900602f8a3770b812801f097ad98f8b5778f4d`):
+`PRE idx=0x5555557036a0 ret=0x555555557778 avail=0x80000082`,
+`EXEC RANGES count=138 total=859`, and
+`EXEC SELF pc=0x7ffff7a909a0 map=libz.so.1+0x99a0 perms=r-xp`, proving the
+mapping test recognises a real executable address. All six `0x7ffff02a…`
+words are logged `MAPWORD … None`: **not in any mapping of the live
+plugin**, hence not executable code pointers. `CANDIDATES` is empty and
+`WATCHERS ARMED count=0`; no READ HIT was possible. GIMP still printed
+`Fatal signal: Segmentation fault` and `Plug-in crashed: "file-gif-load"`,
+with a post-crash GDB internal error in the full log, so a completed-load
+consumer remains unexcluded by this run. Conclusion: the
+address-pattern inference of executable pointers in the OOB span is
+refuted for this build/layout; no code-pointer consumer path was available
+to watch. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen
+bytes / NO r5. Do not retry the raw address-pattern inference unchanged.

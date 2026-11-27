@@ -1,0 +1,180 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage-w316/squashfs-root
+GLib-GIO-Message: 08:28:46.037: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 08:28:46.037: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 08:28:56.080: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 08:28:56.080: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 08:28:56.080: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 08:28:56.081: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 08:28:56.081: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 08:28:56.082: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 08:28:56.082: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 08:28:56.082: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 08:28:56.083: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 08:28:56.084: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 08:28:56.087: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 08:28:56.090: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 08:28:56.090: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+Breakpoint 1 at 0x2240
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+W327 PRE idx=0x5555557036a0 ret=0x555555557778 avail=0x80000082
+W327 EXEC RANGES count=138 total=859
+W327 EXEC SELF pc=0x7ffff7a909a0 map=/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1+0x99a0 perms=r-xp
+W327 WORD +264=0x0000000000000021
+W327 WORD +272=0x0000000000000001
+W327 WORD +280=0x00005555557037d0
+W327 WORD +288=0x0000000000000000
+W327 WORD +296=0x0000000000000021
+W327 WORD +304=0x00007fff00000001
+W327 WORD +312=0x0000000000000000
+W327 WORD +320=0x0000000000000000
+W327 WORD +328=0x0000000000000021
+W327 WORD +336=0x00005555557035b0
+W327 WORD +344=0x0000555555703590
+W327 WORD +352=0x0000000000000000
+W327 WORD +360=0x0000000000000071
+W327 WORD +368=0x00007fff00000001
+W327 WORD +376=0x0000555555703880
+W327 WORD +384=0x00005555556bcc60
+W327 WORD +392=0x0000000000000190
+W327 WORD +400=0x0000000000000000
+W327 WORD +408=0x0000000000000000
+W327 WORD +416=0x00007ffff02a08e0
+W327 MAPWORD +416=0x7ffff02a08e0 None
+W327 WORD +424=0x00007ffff02a0380
+W327 MAPWORD +424=0x7ffff02a0380 None
+W327 WORD +432=0x0000000000000000
+W327 WORD +440=0x0000555500000028
+W327 WORD +448=0x00007ffff02a0390
+W327 MAPWORD +448=0x7ffff02a0390 None
+W327 WORD +456=0x0000000000000000
+W327 WORD +464=0x0000000000000000
+W327 WORD +472=0x0000000000000081
+W327 WORD +480=0x000055555569ddb0
+W327 WORD +488=0x0014000400000000
+W327 WORD +496=0x0000000000000000
+W327 WORD +504=0x0000000000000000
+W327 WORD +512=0x00000000000002c7
+W327 WORD +520=0x0000555555703900
+W327 WORD +528=0x0000000000000000
+W327 WORD +536=0x0000000000000000
+W327 WORD +544=0x0000555555703880
+W327 WORD +552=0x00005555556bcc60
+W327 WORD +560=0x0000555555690c40
+W327 WORD +568=0x00005555556846a0
+W327 WORD +576=0x0000000000000050
+W327 WORD +584=0x0000000000000000
+W327 WORD +592=0x0000000000000000
+W327 WORD +600=0x0000000000000021
+W327 WORD +608=0x0000000000000001
+W327 WORD +616=0x0000555555703920
+W327 WORD +624=0x0000000000000000
+W327 WORD +632=0x0000000000000021
+W327 WORD +640=0x00007fff00000001
+W327 WORD +648=0x0000000000000000
+W327 WORD +656=0x0000000000000000
+W327 WORD +664=0x0000000000000021
+W327 WORD +672=0x0000555555703810
+W327 WORD +680=0x00005555557037f0
+W327 WORD +688=0x0000000000000000
+W327 WORD +696=0x0000000000000071
+W327 WORD +704=0x00007fff00000001
+W327 WORD +712=0x00005555557039d0
+W327 WORD +720=0x00005555556bcc60
+W327 WORD +728=0x0000000000000190
+W327 WORD +736=0x0000000000000000
+W327 WORD +744=0x0000000000000000
+W327 WORD +752=0x00007ffff02a1330
+W327 MAPWORD +752=0x7ffff02a1330 None
+W327 WORD +760=0x00007ffff02a0d00
+W327 MAPWORD +760=0x7ffff02a0d00 None
+W327 WORD +768=0x0000000000000000
+W327 WORD +776=0x0000555500000028
+W327 WORD +784=0x00007ffff02a0d10
+W327 MAPWORD +784=0x7ffff02a0d10 None
+W327 WORD +792=0x0000000000000000
+W327 WORD +800=0x0000000000000000
+W327 WORD +808=0x0000000000000081
+W327 WORD +816=0x000055555569ddb0
+W327 WORD +824=0x0014000400000000
+W327 WORD +832=0x0000000000000000
+W327 WORD +840=0x0000000000000000
+W327 WORD +848=0x00000000000002c8
+W327 WORD +856=0x0000555555703b70
+W327 WORD +864=0x0000000000000000
+W327 WORD +872=0x0000000000000000
+W327 WORD +880=0x00005555557039d0
+W327 WORD +888=0x00005555556bcc60
+W327 WORD +896=0x0000555555690c40
+W327 WORD +904=0x00005555556846a0
+W327 WORD +912=0x0000000000000050
+W327 WORD +920=0x0000000000000000
+W327 WORD +928=0x0000000000000000
+W327 WORD +936=0x0000000000000121
+W327 WORD +944=0x00005555556bcd80
+W327 WORD +952=0x00005555556efa70
+W327 WORD +960=0x00005555556eff40
+W327 WORD +968=0x00005555556ec2d0
+W327 WORD +976=0x00005555556ec570
+W327 WORD +984=0x0000555555706170
+W327 WORD +992=0x00005555556df3f0
+W327 WORD +1000=0x00005555557220f0
+W327 WORD +1008=0x0000555555722250
+W327 WORD +1016=0x00005555556f13a0
+W327 WORD +1024=0x00005555556f14f0
+W327 WORD +1032=0x00005555556f1640
+W327 WORD +1040=0x00005555556dbb40
+W327 WORD +1048=0x00005555556dbc90
+W327 CANDIDATES 
+W327 POST idx=0x5555557036a0 size264=0x4d4d4d4d4d4d4d4d nq272=0x4d4d4d4d4d4d4d4d
+W327 WATCHERS ARMED count=0
+
+
+Fatal signal: Segmentation fault
+----- Backtrace -----
+0x4d3574 ???
+0x5cb4f9 ???
+0x5cb68a ???
+0x74c12d24532f ???
+	./signal/../sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c:0
+0x65450a ???
+0x655d65 ???
+0x64d354 ???
+0x913bd5 ???
+0x954cce ???
+0x7f7216 ???
+0x7f7ae6 ???
+0x5d1669 ???
+0x50e389 ???
+0x4ff704 ???
+0x697c59 ???
+0x697d55 ???
+0x94e19a ???
+0x43f4cc ???
+0x74c12d22a1c9 __libc_start_call_main
+	../sysdeps/nptl/libc_start_call_main.h:58
+0x74c12d22a28a __libc_start_main_impl
+	../csu/libc-start.c:360
+0x445544 ???
+0xffffffffffffffff ???
+---------------------
+A fatal error internal to GDB has been detected, further
+debugging is not possible.  GDB will now terminate.
+
+This is a bug, please report it.  For instructions, see:
+<https://www.gnu.org/software/gdb/bugs/>.
+
+GIMP-Error: Plug-in crashed: "file-gif-load"
+(/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load)
+
+The dying plug-in may have messed up GIMP's internal state. You may want to save your images and restart GIMP to be on the safe side.
+
+batch command experienced an execution error:
+Error: Procedure execution of gimp-file-load failed on invalid input arguments: Procedure 'file-jif-load' returned no return values 
+Stopping at failing batch command [0]: (let* ((img (car (gimp-file-load RUN-NONINTERACTIVE "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/evidence/span-1024.jif" "span-1024.jif")))) (gimp-message (number->string (car (gimp-image-get-width img)))))
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+
+== INFO ==
+GIMP is now running as a background process. You can quit anytime with Ctrl-C (SIGINT).
+
+If you wanted to quit immediately instead, call GIMP with --quit.
