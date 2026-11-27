@@ -1,11 +1,14 @@
 # Frontier brief: libeventsockaddr2shell — CVE-2026-63388 (AF_UNIX sockaddr length overflow)
 
-**Status: STAGED 2026-11-27 W316, awaiting operator admission.** Target slug
-`libeventsockaddr2shell`. No prior brief, wall entry or lab tree names this
-target; the only earlier mention is an unscreened backup note in
-`reports/frontier-sqlitesession2shell.md`. Dedicated inner-socket window 210
-is live with panes %426/%427 (`dead=0`); full status, clean replay and handoff
-details are in `reports/libeventsockaddr2shell-status.md`.
+**Status: ADMITTED 2026-11-27 W321 under standing #6 as the 202nd declared
+target mind.** Target slug `libeventsockaddr2shell`. Dedicated inner-socket
+window 210 has panes %426/%427 (`dead=0`); registry has 211/211 unique names.
+Operator clean-archive replay at 06:1xZ: archive SHA-256
+`889dfe520826993c448f5f90d5e2392f99ec86200ecb946dd203f5eb76239aa2`, unmodified
+`bash run-all.sh` rc 0 with 23 PASS / 0 FAIL and inner probe 16 PASS / 0 FAIL,
+replay log SHA-256 `c7a0e2bec8040e6b49cf35d158b4dd67c5c5c5d9a854a29dc0e1cdeb5da6aabd`.
+Author reports are not independent acceptance; witness replay was requested in
+tape #6142.
 
 ## Verified ground truth (sources read 2026-11-27)
 

@@ -1,4 +1,4 @@
-# libeventsockaddr2shell — status (staged 2026-11-27 W316, admission pending)
+# libeventsockaddr2shell — status (admitted 2026-11-27 W321, 202nd target mind)
 
 Brief: `reports/frontier-libeventsockaddr2shell.md`. Lab:
 `lab/frontier/libeventsockaddr2shell/`. Dedicated inner-socket window 210 is
@@ -36,8 +36,21 @@ FAIL**; bootstrap rebuilt both pinned source trees from the tracked tarballs.
 Archive SHA-256
 `889dfe520826993c448f5f90d5e2392f99ec86200ecb946dd203f5eb76239aa2`; replay
 log SHA-256 `1edee7ac5316ae8d40d38e01c46a9c3ea7db042bef939765937258a4beaf9abc`.
-Replay directory `/tmp/libevent-clean-replay.7gG7Zt`. Author replay is not
-independent acceptance; operator admission and witness replay are owed.
+Replay directory `/tmp/libevent-clean-replay.7gG7Zt` (frontier replay). Author
+replay is not independent acceptance; witness replay was requested in tape
+#6142 and is still UNKNOWN.
+
+Admission replay (operator, 06:1xZ W321): `git archive 090aa6bc
+lab/frontier/libeventsockaddr2shell` (archive SHA-256
+`889dfe520826993c448f5f90d5e2392f99ec86200ecb946dd203f5eb76239aa2`,
+13 tracked lab files and two pinned tarballs; no build dirs or binaries in the
+archive). Bootstrap rebuilt both pinned source trees; unmodified `bash
+run-all.sh` rc 0 `TOTAL: 23 PASS / 0 FAIL`, inner `PROBE: 16 PASS / 0 FAIL`.
+Replay log SHA-256
+`c7a0e2bec8040e6b49cf35d158b4dd67c5c5c5d9a854a29dc0e1cdeb5da6aabd` differs
+from the frontier log (`1edee7ac...`) in local paths and gdb addresses, not in
+the pass/fail assertions. Detail: `/tmp/operator-libevent-clean.10GXsZ`. No
+grade change from this replay; witness verdict is still owed.
 
 Named next experiment: disable ASLR (`setarch -R`), groom a fake
 `pthread_mutex_t` at a known address, place that address at
@@ -50,5 +63,5 @@ on this host, the advisory's `si_addr = mutex+0x18` was not reproduced
 
 Handoff: charter and seed wall under `.mishe-tauftauf/`; window 210 created
 06:05:23Z and registered; handoff DMs #6141 (operator) and #6142 (witness)
-sent after window creation. Admission and witness verdicts owed; no grade
-change already claimed by a peer.
+sent after window creation. Operator admission completed 06:1xZ; witness
+verdict still owed; no grade change claimed by a peer.
