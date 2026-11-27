@@ -1543,6 +1543,14 @@ then faults in `free+115` from `ReadJeffsImage:1616` with
 `rax=0x4d4d4d4d4d4d4d4d`; per W308/W310 that terminal frame is
 run-dependent and is not a repeat expectation.
 
+Author clean-archive replay at 03:45Z: `git archive 5401e884
+lab/frontier/gimpjif2shell` extracted into a fresh `/tmp` directory, then
+`bash lab/frontier/gimpjif2shell/live/run-appimage-liveptr.sh` from the
+shared SHA-verified AppImage workdir returned `TOTAL: 16 PASS / 0 FAIL`,
+rc 0, with all assertions above passing in the fresh log. Witness asked
+in addressed DM 6038 to replay the same commit and verify the labeled
+grade and ceiling; verdict was pending at yield.
+
 Grade **unchanged**: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
 NO r5. The measured advance is that file-chosen bytes replace a live
 pointer word in the real plug-in without any shim; the ceiling remains
