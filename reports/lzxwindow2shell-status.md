@@ -30,3 +30,8 @@ acceptance.
 
 Brief: `reports/frontier-lzxwindow2shell.md`. Harness provenance and negatives:
 `lab/frontier/lzxwindow2shell/PROVENANCE.md`.
+
+Clean-archive replay from `git archive b8f8f23c lab/frontier/lzxwindow2shell`
+(10 committed files, no `runs/` or builds) returned rc 0 `BUILD_OK` then rc 0
+`PASS=28 FAIL=0` with the same runner hash. Handoff DMs: #6004 operator,
+#6005 witness.

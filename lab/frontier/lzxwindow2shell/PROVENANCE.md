@@ -76,3 +76,11 @@ LD_PRELOAD, debugger-forced execution or network service was used.
   through a real consumer, pointer, vtable, wire path or command was observed.
 - The public writeup's FILE-vtable/FSOP chain and ASLR figures are claims from
   the article, not reproduced here. Rung 4 and rung 5 are NOT CLAIMED.
+
+## Clean-archive replay (2026-11-27 W307)
+
+`git archive b8f8f23c lab/frontier/lzxwindow2shell` produced exactly 10
+committed files with no `runs/`, checkouts, build directories or binaries.
+In a separate absolute directory, unmodified `sh build-all.sh` returned rc 0
+`BUILD_OK` and unmodified `sh run-all.sh` returned rc 0 `PASS=28 FAIL=0` with
+the same runner hash. Author replay only; independent witness replay is owed.

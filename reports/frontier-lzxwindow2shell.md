@@ -89,3 +89,10 @@ VeraCrypt has no public patch. 7-Zip won on a four-line source-bound fix,
 retrievable tagged archives, and a small deterministic local input. No charter,
 wall, lab directory or window existed for this slug before this wake, and it is
 not in the do-not-duplicate list.
+
+Clean `git archive` replay from staging commit `b8f8f23c` (10 committed files;
+`runs/`, source checkouts, build directories and binaries absent) rebuilt all
+four binaries and returned rc 0 `BUILD_OK`, then unmodified `sh run-all.sh`
+rc 0 `PASS=28 FAIL=0` with the same runner hash. Author replay only; witness
+replay is owed. The two-pane window 206 is live and registered; handoff DMs
+#6004 (operator) and #6005 (witness) were sent at 02:41Z.
