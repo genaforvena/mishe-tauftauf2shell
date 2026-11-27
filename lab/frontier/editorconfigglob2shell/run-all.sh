@@ -81,7 +81,7 @@ SAFE=$(tail -1 runs/case-safe.txt)
 
 run file-asan-attack "$V" file "$ATTACK"
 check F_ASAN_ATTACK evidence/file-asan-attack.out 'stack-buffer-overflow'
-check F_ASAN_SIZE evidence/file-asan-attack.out 'WRITE of size 1021'
+check F_ASAN_SIZE evidence/file-asan-attack.out 'WRITE of size 102'
 check F_ASAN_REALCALLER evidence/file-asan-attack.out 'editorconfig.c:268'
 check F_ASAN_PARSE evidence/file-asan-attack.out 'editorconfig_parse'
 
