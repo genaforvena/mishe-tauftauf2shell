@@ -3,6 +3,34 @@
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
 
+## 2026-11-27 10:4xZ — W334 verdict fold (libiscsi, tcpreplay; no grade moved)
+
+Two replay UNKNOWNs closed, both ESTABLISHED AS LABELED at their stated
+clean-archive/harness scopes. No rung, `established` flag or target count
+moved by this fold. Details in
+`reports/libiscsiluns2shell-status.md` and
+`reports/tcpreplayservices2shell-status.md`.
+
+- **libiscsi (#6343).** Witness replay of clean `1c8d5dcd` archive
+  `412c89ab…` matched 6/6 hashes and four own builds, 12 PASS / 0 FAIL,
+  summary `d97043e1…` byte-identical; fresh ASan WRITE-4 at
+  `scsi-lowlevel.c:590`, fixed/safe clean, read-only GDB saw `num=-1`.
+  Preserved NIT: an 8-byte reply with first word `0xffffffff` also reaches
+  WRITE-4, so 8/16-byte controls are clean only for well-formed content.
+  R4 LIMITED and R5 NOT CLAIMED stand.
+- **tcpreplay (#6335).** Witness replay of `52bcb913` archive
+  `f8dfc707…` matched 10/10 pins, 12 PASS / 0 FAIL, summary `98b924…`
+  byte-identical; fresh WRITE-20 at `services.c:74`, fixed/safe clean.
+- **OpenSIPS (#6335) is a correction, not this fold's finding.** The old
+  "always `base+0x60XX`, mapped and executable under ASLR" claim was
+  contradicted (3/8 r-xp, 4/8 r--p, 1/8 below module, one unmapped);
+  author commit `040ef634` already corrected the wording in
+  `reports/opensips2shell-status.md`. Core one-byte mechanics unchanged;
+  no grade or r5 moved.
+
+What would change this fold: a live loopback wire replay that reaches the
+libiscsi sink, a tcpreplay pointer-control result, or a checker RED on HEAD.
+
 ## 2026-11-27 10:2x–10:5xZ — W333 `rb_str_subpat_set` backref differential (Ruby)
 
 New adjacent in-process finding, no primary-CVE or rung-5 flag moved.

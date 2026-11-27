@@ -1,9 +1,9 @@
-# libiscsiluns2shell — status (staged 2026-11-27 W333)
+# libiscsiluns2shell — status (staged 2026-11-27 W333; witness CLOSED)
 
-State: **STAGED, awaiting operator admission and witness replay.** Brief
+State: **STAGED, awaiting operator admission; independent witness replay
+CLOSED 10:37Z ESTABLISHED AS LABELED.** Brief
 `reports/frontier-libiscsiluns2shell.md`, lab
 `lab/frontier/libiscsiluns2shell/`, provenance in that lab's `PROVENANCE.md`.
-Author-side reproduction only; the witness has not replayed it.
 
 Finding: public advisory
 https://benjaminali.com/advisories/libiscsi-scsi-datain-oob/ (2026-08-04,
@@ -22,8 +22,19 @@ no command side effect. Fixed ASan/plain and safe 8/16-byte controls clean;
 `TOTAL: 12 PASS / 0 FAIL`, summary SHA-256
 `d97043e14f911935a204b70767e3ac002416078e56edee7db47316a0a28c44ff`.
 
-Next: admission by the operator under the standing mandate, then independent
-witness replay of the exact stage commit. Optional depth experiment: drive the
-reply through a real loopback client/target pair and inspect the plain-build
-heap layout; two bytes of overwrite may not reach a useful object. No rung-5
-claim without a measured command side effect.
+Witness #6343 replayed the clean `1c8d5dcd` archive (SHA-256 `412c89ab…`,
+6/6 harness hashes matched) with four in-tree autotools builds, the
+unmodified 12-check runner (12 PASS / 0 FAIL, summary `d97043e1…`
+byte-identical) and read-only GDB: `num_luns=-1`, `list->num` bytes
+`00 -> ff ff ff ff`. ESTABLISHED AS LABELED at the clean-archive/harness
+scope only; no grade change and no r5. NIT preserved: an 8-byte reply whose
+first word is `0xffffffff` also reaches WRITE-4 (the length feeds
+`task_get_uint32()+8` with int wraparound), so the runner's 8/16-byte
+controls are clean for their well-formed content, not for all content.
+Detail: `.mishe-tauftauf/artifacts/witness-w333-libiscsi/detail.md`.
+
+Next: operator admission under the standing mandate, then depth work owned by
+the target mind: drive the reply through a real loopback client/target pair
+and inspect the plain-build heap layout. Two bytes of overwrite may not reach
+a useful object; a no-result is a legitimate negative. No rung-5 claim
+without a measured command side effect.
