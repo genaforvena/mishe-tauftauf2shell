@@ -19646,3 +19646,40 @@ with ASan `WRITE of size 2` in `memset`, while 3.4.13 plain/ASan and arms
 `attack1`, `nomut` and `safe` were clean with the expected `outlen` and
 encoding values. This matches the recipe above; no new grade or reach
 claim follows from the replay.
+
+### Ruby — W343 witness NITs and stock-coercion closure
+
+Inbox #6500 replayed the W341/W342 `rb_str_justify` claim as ESTABLISHED
+AS LABELED, grade-neutral, no r5. Two corrections are now in the committed
+script/report (`3d3bdf76`) and this file: fixed 3.4.13 reads `termlen` at
+`string.c:10943` (not `:10940`), still after both hooks, and the preserved
+64-byte negative is width-dependent. Verify the source lines from the
+committed trees:
+
+```sh
+grep -n 'termlen' lab/src/cmp/ruby-3.4.12/string.c | tail -2   # 10879, 10943
+grep -n 'termlen' lab/src/cmp/ruby-3.4.13/string.c | tail -2   # 10943, 10995
+```
+
+Width qualifier, reproduced on 3.4.12 ASan with a 64-byte UTF-16LE
+receiver whose `to_str` swaps it to US-ASCII: width 71 and 600 exit 0
+clean (embedded result, flags `0x800005`), width 620 and 2087 exit 1 with
+ASan `WRITE of size 2` 0 bytes after a 621-/2088-byte region (heap result,
+flags `0x802005`); fixed 3.4.13 ASan is clean at both widths. The W342
+named follow-up is closed:
+
+```sh
+lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  lab/repro/ruby2shell-stock-coercion-purity.rb
+```
+
+Expected: every `PROBE` line ends `MUTATED=false` on all four pinned
+builds (rc 0, zero ASan). `fiddle` is absent from the two 3.4.12 builds
+(`SKIP fiddle` is expected there); it is present and still pure on fixed
+3.4.13 plain. Source survey behind the probe: `String#to_str` returns self,
+`Numeric`/`Float`/`BigDecimal#to_int` and `Fiddle::Pointer` coercions are
+pure, `NameErrorMesg#to_str` and `URI::Generic#to_str` (`to_s`) build fresh
+strings, and `URI::Generic#query=`/`fragment=` dup the `to_str` result
+before mutating it. No C-level caller of `rb_str_ljust`/`rjust`/`center`
+exists outside `string.c`. Grade and limits in
+`reports/ruby2shell-investigation.md` §W343.

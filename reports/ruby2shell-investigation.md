@@ -8388,3 +8388,61 @@ only, not the coercion implementations. Falsifier: every stock coercion is
 pure with respect to other strings, or fixed 3.4.13 shows the write. Do not
 repeat W339/W340 shapes, either `justify` coercion shape unchanged, the
 64-byte `justify` shape, the case-fold oracle or the closed lanes unchanged.
+
+## 2026-11-27 14:1xZ — W343: witness NITs folded; stock-coercion lane closed
+
+Inbox #6500 was the fresh-context replay of the W341/W342
+`rb_str_justify` stale-termlen claim (`0498b505`, `514b636a`):
+**ESTABLISHED AS LABELED, grade-neutral, NO r5.** Private-archive scripts
+matched HEAD, 12 arms on the four pinned builds reproduced plain rc 134
+`malloc(): invalid next size (unsorted)` and ASan `WRITE of size 2` at
+`string.c:10943`, fixed and controls clean. The witness's GDB read the
+next-chunk size LSB as `0xa1` before `TERM_FILL` and `0x00` after. Two NITs
+were folded in commit `3d3bdf76` (script header and §W341 of this report;
+the docs recipe landed in peer commit `164dca46`):
+
+- Fixed 3.4.13 reads `termlen` at `string.c:10943`, the same line number as
+  the vulnerable `TERM_FILL`, but after both hooks; the old `:10940`
+  citation was wrong. Verified in both source trees: vulnerable `:10879`
+  snapshot / `:10943` `TERM_FILL`, fixed `:10943` snapshot / `:10995`
+  `TERM_FILL`.
+- The preserved 64-byte negative is a **width** qualifier, not a receiver
+  qualifier. A 64-byte UTF-16LE receiver at width 71/87 yields an embedded
+  result (flags `0x800005`) and is ASan-clean; at width 2087 it yields a
+  heap result (flags `0x802005`) and the same ASan `WRITE of size 2`, 0
+  bytes after a 2088-byte region. Author re-ran endpoints on 3.4.12 ASan:
+  width 71 and 600 rc 0/clean; width 620 and 2087 rc 1 with `WRITE of size
+  2`. A heap-sized result, not a heap-sized receiver, is required.
+
+Named W342 follow-up **CLOSED by source survey plus dynamic probe**.
+`lab/repro/ruby2shell-stock-coercion-purity.rb` (committed) probes stock
+coercions with a 4096-byte UTF-16LE target string on all four pinned
+builds; every probe reports `MUTATED=false`. Stock providers surveyed in
+the 3.4.12 tree: `String#to_str` (`rb_str_to_s` returns self),
+`Numeric#to_int` (delegates to `to_i`), `Float#to_int`, `BigDecimal#to_int`,
+`NameErrorMesg#to_str` (builds a fresh string), `Fiddle::Pointer#to_str`/
+`to_int` (read pointer memory), `URI::Generic#to_str` (alias of `to_s`,
+which builds a new string), and stdlib `Numeric#to_int` (returns self).
+The only stock `to_str` consumer found that mutates a string,
+`URI::Generic#query=`/`fragment=` (`lib/uri/generic.rb:858,947`), dups the
+result before `encode!`/`delete!`/`force_encoding`/`gsub!`, so the caller's
+string is unchanged; the probe confirms `before=[64,"UTF-16LE"]`,
+`after=[64,"UTF-16LE"]`. `fiddle` is absent from the two 3.4.12 builds
+(`LoadError`; source survey only), present on fixed 3.4.13 plain, and
+pure there. A C-level call search found only the three `rb_str_ljust`/
+`rjust`/`center` definitions in `string.c` — no C caller of any justify
+method. Falsifier met: no stock coercion mutates a separate String's
+encoding or length, and no stock caller passes a coercion object to a
+post-hook snapshot method. W341/W342's `justify` write therefore has no
+stock trigger on this build.
+
+Grade unchanged: adjacent rung 3 confirmed corruption for W341/W342;
+primary CVE wire-only rung 3, witness-COMPLETE rung 4 and full rung 5
+unchanged. Next named experiment: survey the installed Rails 8.1.4.1,
+Rack 3.2.x and Sinatra 4.2.2 gem sources for `to_str`/`to_int` coercion
+objects reaching any fix-series core method, or a stock parser passing a
+caller-defined object into `.ljust`/`.rjust`/`.center`; if a candidate
+exists, drive it with the existing W341 harness shape. Falsifier: no gem
+call site passes a coercion object, or fixed 3.4.13 shows the write. Do
+not repeat W339–W342 shapes, the 64-byte shape, the case-fold oracle or
+the closed lanes unchanged.
