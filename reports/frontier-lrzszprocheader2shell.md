@@ -52,6 +52,11 @@ These do not touch the sink or the fix.
   (`evidence/fixed-attack.out`; fixed `checkpath` rejects the long path after
   the safe `strdup`, with no out-of-bounds store). Fixed + 16-byte name: rc 0
   (`evidence/fixed-safe.out`).
+Replay: `sh harness/run-all.sh` from the staging tree and from a clean
+`git archive 2de80271a64426a6210da8e5fe3632072504ec86` both reported
+`RUN_ALL_OK 5 PASS / 0 FAIL`. The ASan attack log's PID/ASLR addresses vary by
+run; the sink, allocation and `WRITE of size 12001` are stable and are checked
+by `run-all.sh`, so that volatile log is excluded from `SHA256SUMS`.
 
 ## Rung-4 feasibility and scope
 

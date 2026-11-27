@@ -54,6 +54,13 @@ zm,zperr,zreadline`) plus the unchanged `vuln/lib/libzmodem.a`.
 | fixed safe | `harness-fixed 16 67` | `rc=0 Pathname_len=16` |
 
 Logs: `evidence/{vuln-safe,vuln-attack,fixed-attack,fixed-safe}.out`.
+`SHA256SUMS` covers harness sources and the stable logs; `vuln-attack.out` is
+excluded because its PID, ASLR addresses and binary build-id vary per run.
+The clean-archive replay of commit `2de80271` reproduced `RUN_ALL_OK 5 PASS /
+0 FAIL`; its differing ASan log had the same `WRITE of size 12001`, sink
+`src/lrz.c:1220` and allocation `:1217`, and differed only in PID/addresses
+and extraction path (plain tar SHA-256
+`c291854491a9142c31fd33f3b0ab7f9c28c15ff0b62ddd7661173962fc6fad17`).
 Build logs: `evidence/{harness-build,fixed-harness-build}.log`, `vuln/{configure,build,autoreconf}.log`, `fixed/{...}`.
 
 ## Negatives and open work

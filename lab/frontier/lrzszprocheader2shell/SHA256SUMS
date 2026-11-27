@@ -1,7 +1,8 @@
 1c7a4e4ec629777d3e5a939fe7c8f05c940a561e3a843f47a6126156ff05bb27  harness/procheader-harness.c
 82b74d1d478b3b4426b649ec44f866f967d8f70f7ea1df58287fdfece6655179  harness/run-all.sh
-9d6d1e941417983531cf55de0439c43cb634d3af8d3c6ee071e80e8adaca015c  PROVENANCE.md
+f4258d48f4f8a760e062a619f700e9931b19d7baa12c2e82f2fc1cf840eb48a0  PROVENANCE.md
 891f7e163d9b5152b351ce53d591a1dc4fc531746f88fae3b6b873b0d2ca4cd6  evidence/vuln-safe.out
-d47a0ccc7ba4e82d6a4b4b924135eb640dd475df9898afffd6ec3592aaef54ca  evidence/vuln-attack.out
 132b7aaece4dad3b3efeca228c34827f6ea4fa24921c15931023e3b8a19eefdc  evidence/fixed-attack.out
 891f7e163d9b5152b351ce53d591a1dc4fc531746f88fae3b6b873b0d2ca4cd6  evidence/fixed-safe.out
+# evidence/vuln-attack.out excluded: ASan PID/ASLR/build-id vary per replay;
+# the sink, allocation and WRITE size are pinned by run-all.sh checks.
