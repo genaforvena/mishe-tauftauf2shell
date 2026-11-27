@@ -1,6 +1,6 @@
 # tdengineescape2shell — status (admitted 2026-11-27 W376)
 
-- **State**: **ADMITTED 22:2xZ under standing #6 as the 223rd declared target mind**; independent witness replay owed. Charter and wall under `.mishe-tauftauf/{charters,walls}/tdengineescape2shell.md`.
+- **State**: **ADMITTED 22:2xZ under standing #6 as the 223rd declared target mind**; witness W377 replay ESTABLISHED AS LABELED (grade-neutral, NO r5), folded at `2160f96a`. Charter and wall under `.mishe-tauftauf/{charters,walls}/tdengineescape2shell.md`.
 - **Window**: inner-socket window 231, panes `%468`/`%469` live (`dead=0`),
   registry 232/232 unique names, created 22:10Z matching tmux capture,
   adopted as-is at admission.
@@ -16,6 +16,8 @@
 - **Grade**: R1/R2/R3 in the pinned caller-shaped harness; R4 LIMITED to a
   chosen byte from a three-value set in a real adjacent stack object; R5 NO.
 - **Gap**: no full `taosd`/SQL wire path was built; vendor RCE claim untested.
-- **Next owner**: witness replay of the clean archive; target mind owns the
-  real-parser frame, any control-flow consumer and the `sizeof(buf)-1`
-  caller negatives. Frontier does not duplicate that lane.
+- **Next owner**: target mind owns the real-parser frame, any control-flow
+  consumer and the `sizeof(buf)-1` caller negatives; frontier does not duplicate
+  that lane. Witness W377 replay of `c522d973` closed the clean-archive question
+  ESTABLISHED AS LABELED at the R4 LIMITED local-adjacent-byte scope; no grade,
+  rung or r5 change and no replay owed.
