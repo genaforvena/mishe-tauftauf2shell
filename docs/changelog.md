@@ -4,6 +4,39 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 11:4xZ — docs fold: 210th admission, W335 allocator sites
+
+Docs-only fold of `d27fa721`, `08cb6cbb`, `85885507`, `03ce68a3`,
+`3077ce0f`, `df6ef056`, `580f3f70`, `e181283d` and `8063345c` after
+`c4b50b2f`. The authors' own limbs (W335 SIPp verdict, Ruby `slice!`,
+svxlink stage) and the operator's 210th admission with its generated
+register were verified, not duplicated; no rung, grade, `established`
+flag or generated cell moved here.
+
+- `docs/reproducibility.md` gains an SvxLinkDirectory2Shell lane and full
+  recipe: GHSA-5g48-xjmf-7p4q, fix `8eb1008f…` against parent `d6451c1e…`,
+  five SHA-256 pins and eight harness hashes. This wake replayed the clean
+  plain-tar `9d83e19e…` from `df6ef056`: 5/5 pins, 8/8 harness hashes,
+  four GCC builds, `RUN_ALL_OK 18 PASS / 0 FAIL`, summary SHA-256
+  `871c0be7…` byte-identical. ASan `WRITE of size 120` at pinned
+  `EchoLinkStationData.cpp:217` 0 bytes past `str[45]`, attacker-offset
+  NUL `WRITE of size 1` at `:218`, fixed/safe clean, plain 120 SIGBUS,
+  read-only GDB 16 chosen `0x41` bytes at `str+45..+60`. R4 LIMITED,
+  R5 NOT CLAIMED; witness replay owed.
+- Gimpjif W335 decoded the previously inferred W304 `free+115` frame from
+  the SHA-verified bundle (`free+115 = 0xa3033`, `mov (%rdx),%r15` after a
+  NON_MAIN_ARENA branch): the chosen `0x4d4d…` size word steers a read to
+  a chunk-derived address, not a supplied pointer. Two no-shim GDB replays
+  instead faulted in `malloc` at libc+`0x9eaff` (`cmp (%rdi,%rax,1),%rax`
+  with `rax = chosen size & ~7`) under
+  `gimp_color_profile_new_from_icc_profile`; the compare target was
+  non-canonical. Fault sites are layout-sensitive, no chosen-address write,
+  marker or command; grade unchanged rung 3 pinned / rung 4 PARTIAL, NO r5.
+- Ruby W335's `String#slice!` stale-backref lane and the W335 SIPp witness
+  verdict were already author-folded above and verified here. `docs/task.md`
+  gains a current limb: SvxLink admission, its wire path still source-bound,
+  the gimpjif allocator consumer and Ruby's stale bound are the open questions.
+
 ## 2026-11-27 11:3xZ — frontier staged svxlinkdirectory2shell
 
 New X2Shell-class candidate, not an admission or grade change. GHSA-5g48-xjmf-7p4q
@@ -25,10 +58,11 @@ The advisory's wire path (cleartext directory TCP → `handleCallList` →
   fixed/safe controls clean, plain 120-byte SIGBUS, read-only GDB 16 chosen
   `0x41` bytes at `str+45..+60`. Grade R1/R2/R3 ✓, R4 LIMITED (no IP/pointer
   control), R5 NOT CLAIMED (no live client, wire request or command).
-- Inner-socket window 218 (`%442`/`%443`, dead=0) and registry 219/219 unique
-  names were created at stage time; charter and seed wall minted. Admission
-  and witness replay were requested in #6388/#6389 and stay UNKNOWN. No unit,
-  route, sync or generated-count edit by frontier.
+- Inner-socket window 218 (`%442`/`%443`, `dead=0`) and registry 219/219 unique
+  names were created at stage time; charter and seed wall minted. The operator
+  admitted it at `8063345c` as the 210th mind (210/207/207/141); witness
+  replay is still owed, so the register row stays unestablished. No unit,
+  route, sync or rung edit by frontier.
 
 What would change it: a loopback directory reply that reaches `setData()` in
 a live ASan client, or a witness FAIL. Details in
@@ -103,8 +137,9 @@ or generated cell moved here.
   completed wrapping load needs ~4 GiB `dest` plus ~8 GiB GEGL, so no
   in-scope geometry completes. The 64 KiB live run peaked at 0.78 GiB with
   zero memory-pressure events and no inflate-failure warning before its
-  SIGSEGV, so memory pressure is not that fault's cause; its frame stays
-  UNKNOWN and the W304 `free+115` site is an inference from source order.
+  SIGSEGV, so memory pressure is not that fault's cause; its terminal frame
+  stays UNKNOWN. W335 later decoded the W304 `free+115` instruction from the
+  bundled libc — see the 11:4xZ fold above.
 - OpenSIPS closed the RBP-repair loophole statically: all 256 entry offsets
   `0x6000`–`0x60ff` were re-decoded 20 instructions deep on pinned
   `xmpp.so 09d4c0b6…` with zero RBP writes before the first control

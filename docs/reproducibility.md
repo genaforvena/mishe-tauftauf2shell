@@ -48,6 +48,7 @@ containers whose host ports bind only to loopback.
 | TcpreplayServices2Shell (ADMITTED 10:0xZ, 207th; W332 ESTABLISHED) | [brief](../reports/frontier-tcpreplayservices2shell.md), [status](../reports/tcpreplayservices2shell-status.md), [provenance](../lab/frontier/tcpreplayservices2shell/PROVENANCE.md) | CVE-2026-102896 / GHSA-fwcr-mqg6-hqmx, affected `<=4.6.0-beta2` pin `9d291ec9…`, fixed `4.6.0-beta3` pin `e6e32ec7…`; 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/tcpreplayservices2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (unmodified real `tcpprep`, local services file, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 20-digit services line gives ASan `WRITE of size 20` in `parse_services` at `src/common/services.c:74` into 10-byte `port[]`, 11 digits gives WRITE-11, fixed and 5/9-digit inputs clean; clean `git archive 52bcb913` replay (archive `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0; operator admission 10:0xZ as 207th (window 215, registry 216/216); W332 independent clean-archive replay 12/0 with byte-identical `98b92441…`, ESTABLISHED AS LABELED at that local-CLI/harness scope; R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED, no grade or `established:false` change. |
 | LibiscsiLuns2Shell (ADMITTED 10:4xZ, 208th; W333 ESTABLISHED) | [brief](../reports/frontier-libiscsiluns2shell.md), [status](../reports/libiscsiluns2shell-status.md), [provenance](../lab/frontier/libiscsiluns2shell/PROVENANCE.md) | Benjamin Ali advisory 2026-08-04 (no CVE/GHSA — UNKNOWN), vulnerable `ef5491376…`, fixed `eff2822fd…` (no release tag), six SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/libiscsiluns2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (direct `scsi_datain_unmarshall()` harness, four in-tree autotools builds, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 4-byte reply gives ASan `WRITE of size 4` at `lib/scsi-lowlevel.c:590` via `:3851`, 0 bytes after a 10-byte region, plain `num=4294967295 (-1)`; fixed returns NULL, 8/16-byte well-formed controls clean; summary SHA-256 `d97043e1…`; witness clean archive `412c89ab…` matched 6/6 pins, ESTABLISHED AS LABELED, R4 LIMITED, R5 NOT CLAIMED |
 | SippAuth2Shell (ADMITTED 11:0xZ, 209th; W335 ESTABLISHED) | [brief](../reports/frontier-sippauth2shell.md), [status](../reports/sippauth2shell-status.md), [provenance](../lab/frontier/sippauth2shell/PROVENANCE.md) | CVE-2026-90779 (no GHSA ID found — UNKNOWN), SIPp <=3.7.7, vulnerable v3.7.7 `369b3c187…` / fixed v3.7.8 `741ee230…`, release tarballs `e55b15f5…` / `a2519f85…`, fix `1d4a5622` is not an ancestor of the fixed tag; eight digests in `HARNESS_SHA256.txt` | `cd lab/frontier/sippauth2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (direct-call harnesses link real pinned SIPp objects, no listener) | rc 0, `TOTAL: 15 PASS / 0 FAIL`; 32-byte `algorithm=` → ASan `WRITE of size 1` at `src/auth.cpp:190`, 33/64 bytes → WRITE-33/64 at `:189` into `algo[32]`, vulnerable plain 64 bytes rc 139, fixed/safe clean. Read-only GDB shows chosen saved RBP/RIP `0x4141414141414141`; 62 chosen bytes set the six low saved-RIP bytes and the harness `mmap(MAP_FIXED)` marker prints `SIPP_AUTH_MARKER` only on the vulnerable build. R4 in-process only, R5 NOT CLAIMED; witness W335 replayed the clean archive 15/0 with no-mmap and fill-swap counterexamples, ESTABLISHED AS LABELED with no grade or flag change. Full recipe in §11:0x–11:1xZ |
+| SvxLinkDirectory2Shell W335 (ADMITTED 11:3xZ, 210th; witness owed) | [brief](../reports/frontier-svxlinkdirectory2shell.md), [status](../reports/svxlinkdirectory2shell-status.md), [provenance](../lab/frontier/svxlinkdirectory2shell/PROVENANCE.md) | GHSA-5g48-xjmf-7p4q (Critical 9.8, CWE-121; **No known CVE** — OSV mirrors `UBUNTU-CVE-2026-73154`, discrepancy UNKNOWN), fix `8eb1008f…` against parent `d6451c1e…`; five SHA-256 pins in `SHA256SUMS`, eight harness hashes in `HARNESS_SHA256.txt` | `cd lab/frontier/svxlinkdirectory2shell && sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (four GCC builds of the verbatim `#line` sink body, no listener) | rc 0, `RUN_ALL_OK 18 PASS / 0 FAIL`, summary SHA-256 `871c0be7…`; ASan `WRITE of size 120` at pinned `EchoLinkStationData.cpp:217` 0 bytes past `str[45]`, attacker-offset `WRITE of size 1` NUL at `:218`, fixed/44/31 controls clean, plain 120-byte SIGBUS, read-only GDB reads 16 chosen `0x41` bytes at `str+45..+60`. R4 LIMITED, R5 NOT CLAIMED; operator clean replay from `df6ef056` plain tar `9d83e19e…` byte-identical, witness owed. Full recipe in §11:4xZ |
 | Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, W328 ESTABLISHED AS LABELED with a stock-build chosen-length counterexample, R5 UNKNOWN, raw-NUL gate negative. Full recipe in §08:1x–08:3xZ and §08:4x–09:0xZ |
 | Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` (1028 with a 1028-byte second packet) via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; chosen-value control only, no r5; W330 (#6283) independently replayed the live wire from its own builds: ESTABLISHED AS LABELED, no grade change. Full recipe in §08:4x–09:0xZ and §09:2x–09:4xZ |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
@@ -18885,8 +18886,9 @@ UNKNOWN. Its log lacks the `Error reading inflate failed` warning present
 in the 8 KiB run, placing that fault after inflate; between the inflate
 return and `gimp_drawable_get_buffer` the source only frees `indexes` and
 `compressed` and calls `inflateEnd`, leaving W304's `free+115` frame at
-`:1616` as a source-order inference, not a fresh backtrace. No new write
-primitive, no replay owed for a grade-neutral negative, no grade change.
+`:1616` as a source-order inference then; W335 decoded that frame from the
+bundled libc (see §11:4xZ) and saw a different allocator site on replay.
+No new write primitive, no replay owed for a grade-neutral negative, no grade change.
 
 ### Opensips2Shell — RBP-repair gadget closure
 
@@ -18909,3 +18911,87 @@ unchanged heap pointer at `[rsp]`, which a staged stanza cannot replace
 without first diverting its own saved RIP at JID offsets 884–891. Static
 only: no live run, chosen code, command or side effect, no grade change,
 r5 UNKNOWN.
+
+## 2026-11-27 11:4xZ — 210th admission, W335 allocator sites and stale bounds
+
+Current limb for a reader arriving now; it supersedes the "next experiment"
+lines in the 11:0x–11:2xZ sections of this file and `docs/task.md`. The
+operator's 210th admission at `8063345c` already re-rendered the register
+(210 declared / 207 active / 207 reported / 141 established), so no rung,
+grade, `established` flag or generated cell moved here. Ruby W335's
+`String#slice!` recipe is in §W335 above; W335's SIPp witness verdict is in
+§11:0x–11:1xZ above.
+
+### SvxLinkDirectory2Shell — admitted `str[45]` write
+
+From the repository root, with the pinned source set present in the tree:
+
+```sh
+cd lab/frontier/svxlinkdirectory2shell
+sha256sum -c SHA256SUMS
+sha256sum -c HARNESS_SHA256.txt
+bash bootstrap.sh
+bash run-all.sh
+sha256sum runs/summary.txt
+```
+
+`bootstrap.sh` is provisioning only: it fetches the five public pinned
+sources/advisory/patch, verifies their SHA-256 and calls `gen_driver.py`,
+which copies the complete pinned `StationData::setData()` body verbatim
+under `#line` into vuln/fixed drivers. No target is probed and no listener
+is started; `run-all.sh` builds vuln/fixed × ASan/plain. Expected:
+`BOOTSTRAP_OK`, `GENERATED driver-vuln.cpp: sink line 184, verbatim bytes
+717`, `RUN_ALL_OK 18 PASS / 0 FAIL` and summary SHA-256
+`871c0be7fdee729bec5c96ce53f31ea577c44680f28b2bcfa71d917a7d75e6bb`.
+This wake replayed the clean `git archive --format=tar df6ef056
+lab/frontier/svxlinkdirectory2shell` (plain tar SHA-256 `9d83e19e…`, not
+the `.tar.gz` container) with 5/5 pins and 8/8 harness hashes OK and a
+byte-identical summary. The runner prints one expected `Bus error` line
+for the unprotected 120-byte arm; it is not a FAIL.
+
+ASan reports `WRITE of size 120` at pinned
+`EchoLinkStationData.cpp:217` 0 bytes past `str[45]`, and an
+attacker-chosen-offset NUL `WRITE of size 1` at `:218` for a 45-byte input.
+The 44/31-byte and fixed-build arms are clean and the vulnerable plain
+120-byte arm SIGBUSes; read-only GDB prints
+`CHOSEN_READBACK 4141414141414141` (16 chosen `0x41` bytes at
+`str+45..+60`). The advisory wire path (cleartext directory TCP →
+`Directory::ctrlSockDataReceived` → `handleCallList` at
+`EchoLinkDirectory.cpp:534` → `setData`) is source-bound only, not run.
+Grade R1/R2/R3 ✓, R4 LIMITED (no IP or pointer control), R5 NOT CLAIMED;
+the generated row stays `established:false` and witness replay is owed.
+Builds, binaries, `evidence/` and `runs/` logs are gitignored and
+regenerated by the commands above; pins, harness sources, SHA manifests
+and the normalized summary are tracked.
+
+### Gimpjif2Shell W335 — allocator fault instructions
+
+Read-only `objdump` of the SHA-verified AppImage's bundled libc (SHA-256
+`9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92`,
+`free` at `0xa2fc0`) decodes W304's `free+115` as `0xa3033`,
+`mov (%rdx),%r15` after a `test $0x4,%al` NON_MAIN_ARENA branch. The
+chosen `0x4d4d…` size word has bit 2 set, so the dereference target is
+derived from the chunk address, not supplied by the JIF. Disassembly:
+`live/evidence/w335-libc-free-disasm.txt` SHA-256 `8a3ba4ca…`. The two
+no-shim replays use the unchanged 8 KiB JIF (SHA-256 `d6556936…`) and a
+SHA256SUMS-verified GIMP 3.2.8 AppImage already provisioned under
+`$GIMPJIF_APPIMAGE_WORK` (default `/tmp/gimpjif-appimage`; the script
+refuses to run without it):
+
+```sh
+cd lab/frontier/gimpjif2shell/live
+bash run-appimage-free115.sh
+sha256sum evidence/w335-free115.log evidence/w335-free115b.log
+```
+
+Both replays printed the inflate-error warning and then faulted in
+`malloc` at libc+`0x9eaff`: `cmp (%rdi,%rax,1),%rax` with
+`rax = chosen_size & ~7`, called under
+`gimp_color_profile_new_from_icc_profile`. `*(rdi-8)` and the word before
+it were `0x4d4d…`; the compare target `0x4d4da2a2a2bd3788` is
+non-canonical, so the dereference fails. Logs SHA-256 `f3de30b7…` and
+`96b78928…`; runner `41d98865…`, reader `gdb-free115.cmd` `8a317261…`.
+Fault sites stay layout-sensitive (`free+115` in W304, `malloc` here):
+no chosen absolute address, successful dereference, control flow, marker
+or command. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
+chosen bytes, NO r5; no replay owed for this grade-neutral observation.
