@@ -98,6 +98,11 @@ executable, 4/8 nonexecutable, 1/8 below the module in W332's runs), with a
 corrupted RBP and no `ret`/`call` in its 256-byte window. Rung 5
 remains UNKNOWN without a new primitive. Any future claim needs an observed
 side effect from executed chosen code and a fresh independent replay.
-later wake:
+A static sweep of all 256 one-byte target offsets on the pinned module found
+no RBP-free route to chosen code (only relative calls to non-canonical
+addresses, conditional jumps back into rbp-relative code, and `ret imm16`
+popping a non-executable heap pointer); the staged two-stanza variant is
+closed by the single-NUL geometry. No live run, no grade change.
+Adjacent candidate recorded for a later wake:
 GHSA-qc7q-vrx3-3j4h (`sip_i` `parse_isup` length-controlled `memcpy` into
 `val[128]`), recorded from operator inbox #6227 and deliberately not worked.

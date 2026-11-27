@@ -344,6 +344,50 @@ prediction**, not an observed run: it closes the NUL-low-byte variant by
 the same RBP coupling as the one-byte case and adds no rung-5 evidence.
 No chosen code, no command, no side effect; rung 5 stays UNKNOWN.
 
+## Static closure of the one-byte gadget route (2026-11-27 10:43Z)
+
+The one-byte partial remains the strongest rung-4 mechanic: under the gdb
+default base the CPU really transfers into `xmpp.so` offset `0x60XX`. The
+open question was whether some entry offset reaches chosen code before the
+ASCII-filled saved RBP is used. This is a **static** experiment on the pinned
+stock module (sha256 `09d4c0b6…`), not a live run.
+
+Frame map from disassembly of `xmpp_send_sip_msg` (`0x9023`): prologue
+`push rbp; push r12; push rbx; sub rsp,0x380`; `buf_from` is `rbp-0x370`,
+`buf[512]` is `rbp-0x270`, `msgstr` `-0x70`, `tostr` `-0x60`, `fromstr`
+`-0x50`, `hdr` `-0x40`, `msg_type` `-0x30`; saved RBP `rbp+0`, saved RIP
+`rbp+8`. JID byte j is stored at `rbp-876+j`. The follow-up
+`ap_snprintf(buf, 512, "Contact: %s", from)` is bounded by `mov esi,0x200`
+at `0x90f6` and stops at `rbp-0x70`, so it cannot rewrite either saved slot.
+
+Sweep of all 256 possible entry offsets `0x6000`–`0x60ff` with `ndisasm`
+(12 decoded instructions per entry): 141 reach no control transfer, 65 first
+reach one after an RBP reference, and 50 first reach one without a prior RBP
+reference. Those 50 are only: relative `call`s to non-canonical
+`0xffffffff…` targets, conditional jumps back into the same rbp-relative
+`sha_hash` body, and seven `ret imm16` (`ret 0x458b`) instructions whose
+target still comes from `[rsp] = rbp+16` — baseline
+`0x0000555555a2c938`, a non-executable heap pointer. There is no `0xc3` bare
+`ret` and no indirect `jmp`/`call` through a register or `rsp`. Static
+script `gadget_sweep.py` sha256
+`032be0a001e3c4dc5763f96d728ceb3ab93ded8b7ec4a00d20fba8da428fe2e6`;
+output `artifacts-early/gadget-sweep.txt` sha256
+`09d9c491115d20e9cb439b1490943efa638da5474a54eabb0054ceee4e854bd5`;
+baseline stack evidence `artifacts-early/gdb-baseline.log` sha256
+`38d2a5cbce62a6a84c3c615b4b988ab20535d140b0ad4b1d23ab7bb3e54c9d9f`.
+
+The staged two-stanza variant is closed by construction as well. To keep
+the target mapped, the final overflow must put its NUL on RIP byte 1
+(885-byte JID), which overwrites all eight saved-RBP bytes with JID bytes.
+An earlier stanza can pre-fill bytes *past* the final NUL but cannot repair
+bytes before it, because the final `sprintf` covers them. Conversely, a
+final JID short enough to leave RBP bytes canonical leaves RIP to the
+earlier stanza, whose write also covered all RBP bytes. Making a fully
+overwritten RBP canonical needs bytes 6–7 of that slot to be `00 00` (low
+half) or `ff ff` (high half); raw NUL is rejected at the XML gate recorded
+above and UTF-8 never emits `00` or `ff`. No chosen code, no command, no
+side effect; rung 5 stays UNKNOWN.
+
 ## Reproduction
 
 ```
