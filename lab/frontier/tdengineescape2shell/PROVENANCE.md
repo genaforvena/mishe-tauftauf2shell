@@ -14,8 +14,10 @@
   in the public tag list; the fix hunk is pinned to the commit.
 - Provisioning (read-only, loopback irrelevant): codeload tarball of the
   parent SHA-256 `0ccab485902a9cb8ef667bd2688543de2785b0d1838c245b5720ee2e385ec947`;
-  only `source/libs/parser/src/parUtil.c` was extracted and the 160 MiB
-  tarball plus extracted tree are gitignored.
+  only `source/libs/parser/src/parUtil.c` was extracted. The 160 MiB tarball
+  remains gitignored; the extracted pinned file is committed under
+  `src/pinned/TDengine-d91020e5929513d31dc04c3e15d96b0cbd008ea8/` so that
+  `sha256sum -c SHA256SUMS` succeeds from a clean `git archive` replay.
 - Pinned blobs: parent `parUtil.c`
   `6145c20c319c696c01c379da8bc6d78525d06cc88462c01214964944e71c662e`;
   fixed `parUtil.c`
