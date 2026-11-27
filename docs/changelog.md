@@ -6,6 +6,73 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 17:0xZ — W351 patched branches closed, gimpjif labels repaired
+
+Docs-only fold of the six commits after `46e96ff4` through `d9707491`:
+`13c5a454` (nanomodbus clean replay), `77069c94`, `40d1b0cf` and
+`d9707491` (gimpjif W361 verdict wording, W352 layout-dependent label
+repair and brief grade summary), `fc9dc3b7` (Ruby W351 patched branches)
+and `2cd198db` (nfdump ICMP swap closure). No grade, rung cell, register
+row, count, README, results, manifest, SVG, report or lab evidence moved
+here; reports and generated files stay with their owners. Unread #6613
+and #6652 are satisfied below. #6632's R4 ✓ fold was already made in
+`46e96ff4`, so no generated cell is touched again.
+
+- **Ruby W351 closes the patched-branch half of the fix-series question,
+  grade-neutral.** Both first patched releases were provisioned from
+  `cache.ruby-lang.org` (provisioning only): 3.3.14 tarball SHA-256
+  `e24ef6d9…` and 4.0.10 `1537f7a6…`, built plain with gcc 13.3.0 and the
+  same recipe as the other builds. The source fix is the
+  `enc/iso_8859_1.c:267` guard plus the overflow-safe capacity
+  multiplication in `rb_str_casemap` (3.3.14 `:7426`/`:7429`, 4.0.10
+  `:7895`/`:7898`). The committed `ruby2shell-casemap-chain-patched.sh`
+  and six-build `...-gdb.sh` give 28 valgrind arms with `rc=0` and
+  `invalid_write=0` (including the three shapes that write once on the
+  vulnerable builds), CHAIN bytes identical to the vulnerable W350 set,
+  and 84 gdb rows: the first 56 byte-identical to W350
+  (`73fa39f8…`), each patched build row-for-row equal to fixed 3.4.13
+  (`sb21 capa=41,22 used=40,2`; `sb1041 capa=1061,1042 used=1060,1022`),
+  full matrix SHA-256 `6a514946…`. Falsifier not met; grade unchanged
+  (wire-only rung 3, witness-COMPLETE rung 4, labeled rung 5 scope only,
+  full stock rung 5 NOT ACHIEVED). Next named experiment W352 is the EOL
+  3.2.11 branch. Recipe in `docs/reproducibility.md` §17:0xZ.
+- **Gimpjif2Shell W361's counterexamples are now stable labels in the
+  author's own report.** `77069c94` repaired the stale "replay pending /
+  last verified PARTIAL" wording in `frontier-gimpjif2shell.md` and
+  `gimpjif2shell-status.md`; `40d1b0cf` recorded the witness evidence in
+  PROVENANCE: single-pointer JIF `0857219c…` gave `CHOSEN n=32`, terminal
+  `0x133e` and `rbx=0x4d4d…` (run `184ebaee…`, GDB `04202ad3…`), the W345
+  sweep `0896977e…` gave 46 chosen hits (run `f6a4314e…`, GDB
+  `273711be…`), and sparse24 `8d9ba89e…` alone stayed negative at
+  `ARR[0]`. `ARRBASE−idx` spans `0x470d0`/`0x47170`/`0x47290`, so the two
+  former negatives are layout-dependent observations, not refutations.
+  `d9707491` updated the brief header to R4 ✓ at the witness-verified
+  scope and points W351's chosen-field chain at PROVENANCE as author-only
+  pending replay (#6628); W351 is not folded into the W361 verdict.
+- **nfdump2shell's ICMP swap-to-metadata chain is closed from the pin,
+  with no new packet or build.** With flow element header at `E`,
+  `Process_nfd()` writes `srcPort`/`dstPort` at `E+44..47` and reads the
+  `proto` trigger at `E+48`. A wire-chosen trigger forces the write in
+  bounds; an out-of-bounds `dstPort` forces the trigger to allocator
+  state. At `E=65500` the measured clock word supplies both trigger and
+  `srcPort`, so the swap only reorders clock bytes; forcing `srcPort` in
+  bounds puts the trigger at `+65537`/`+65538`, outside the clock store.
+  No wire-chosen byte reaches the adjacent chunk's `size` field by this
+  route. Grade unchanged: rung 3 live / rung 4 availability plus
+  chosen-offset PARTIAL / NO r5. Source-bound; no runner to re-run.
+- **nanomodbusreg2shell records an author clean replay, grade-neutral.**
+  Private `git archive 48360585 lab/frontier/nanomodbusreg2shell` (plain
+  tar SHA-256 `d47d2b1…`) gave 11/11 pins, `RUN_ALL_OK 17 PASS / 0 FAIL`
+  and the same summary SHA-256 `c8489055…`, including the `BENIGN_MARKER`
+  arm. No witness replay, register move or admission followed.
+
+Recipes: `docs/reproducibility.md` §17:0xZ (Ruby, nfdump boundary note,
+nanomodbus clean replay, gimpjif label note). What would change this fold:
+an independent W351 replay or chosen-address write in gimpjif, a
+wire-chosen byte reaching nfdump malloc metadata by a different route, a
+live loopback consumer of nanomodbus register responses, or a checker RED
+on committed HEAD.
+
 ## 2026-11-27 16:3xZ — W361 gimpjif chosen-pointer verdict ESTABLISHED (R4 ✓, NO r5)
 
 Witness replayed the W349 dense-JIF claim from a private
@@ -29,8 +96,9 @@ sparse24 stayed negative at `ARR[0]`. Heap base and `ARRBASE−idx` vary
 the docs replays below are layout-sensitive negatives/timeout, not a
 refutation. Full evidence:
 `.mishe-tauftauf/artifacts/witness-w361/detail.md`; recipe in
-`docs/reproducibility.md` §16:3xZ. Frontier still owes PROVENANCE/
-report wording changes for the two contradicted negative labels.
+`docs/reproducibility.md` §16:3xZ. Frontier closed the owed wording in
+`77069c94`/`40d1b0cf`/`d9707491` (17:0xZ above): the two labels are now
+recorded as layout-dependent, not stable negatives.
 
 ## 2026-11-27 16:0xZ — W349 chosen-pointer dereference and case-map closure; W350 AWS witness
 
@@ -54,25 +122,27 @@ own replay was negative (see the bullet below).
   NOT ACHIEVED. Docs re-ran the valgrind matrix here: rc 0, 14 arms, six
   one-byte invalid writes, eight clean. W350 (`b68d503a`) then closed the
   3.3.13/4.0.9 branch question: 28 valgrind arms and 56 gdb rows with the
-  same buffer capacities and no chained overflow; grade unchanged. Next
-  W351: patched-branch builds 3.3.14 and 4.0.10.
+  same buffer capacities and no chained overflow; grade unchanged. W351
+  closed the patched-branch question (17:0xZ above).
 - **Gimpjif2Shell W349 measures a file-chosen pointer dereferenced in
-  the live loader (author label, replay owed).** With the unmodified
+  the live loader (author label; witnessed at W361, §16:3xZ).** With the unmodified
   no-shim runner `b047c40e…`, two read-only GDB scripts (`a397e24b…`,
   `63f30cec…`) and the SHA256SUMS-verified provisioned GIMP 3.2.8
-  AppImage, the W345 sweep JIF and three sparser variants are preserved
-  negatives: a libz SIMD store fault before the array, a shifted
-  `ARRBASE−idx` miss (`0x47170`→`0x46fc0`), and chosen pointers at
-  `ARR[6]`/`ARR[14]` without index 0. The dense 117-copy JIF `7c8b7e2b…`
+  AppImage, the W345 sweep JIF and three sparser variants were recorded as
+  run-specific negatives: a libz SIMD store fault before the array, a
+  shifted `ARRBASE−idx` miss (`0x47170`→`0x46fc0`) and chosen pointers at
+  `ARR[6]`/`ARR[14]` without index 0; W361 later showed the first two
+  labels are layout-dependent. The dense 117-copy JIF `7c8b7e2b…`
   put the mapped pointer `0x5555556c0240` at `ARR[0..2]`; GDB logged
   the loader taking it at `i=0` and reading `mem28=0x4d4d…`, and the
   terminal PC moved to `0x7ffff7fd133e` with `rbx=0x4d4d…`. No shim,
   debugger write, chosen-address write, control flow, marker or command.
   Author label: rung 4 strengthened from PARTIAL chosen bytes to a
-  measured chosen-pointer dereference in a live consumer, NO r5;
-  not independently replayed, so the last verified grade stays rung 3 /
-  rung 4 PARTIAL / NO r5. The GDB `map=[unmapped]` label for heap and
-  ld-linux addresses is a maps-classifier NIT, not a mapping fact.
+  measured chosen-pointer dereference in a live consumer, NO r5. At this
+  limb it was unreplicated, so the verified grade was still rung 3 /
+  rung 4 PARTIAL / NO r5; W361 later ESTABLISHED the label as labeled
+  (§16:3xZ) and the operator moved R4 to ✓. The GDB `map=[unmapped]`
+  label for heap and ld-linux addresses is a maps-classifier NIT.
   Docs replayed this exact JIF twice on this host at 16:0xZ with the
   pinned runner and observer. First replay reached the pinned inflate
   with `idx=0x555555678ef0`, `ARRBASE−idx=0x47170`, 32 deref hits on
@@ -82,7 +152,8 @@ own replay was negative (see the bullet below).
   before the pinned inflate, with an empty GDB log. Raw run-log SHA-256
   prefixes `d96b3718…` and `d5d4a3d7…` are gitignored under
   `/tmp/w349-docs-gimpjif{,2}/`. The author's positive run is therefore
-  unreplicated here: an author label, not a witnessed grade.
+  unreplicated here at that time; W361 (§16:3xZ) later established the
+  positive claim with its own layout.
 - **AWS SDK Base64 W350 witness verdict closes the generated-client
   replay, grade-neutral.** Witness replayed `3134d73a` from a private
   plain tar `d8d18d9e…`: 21/21 pins, unmodified `sh run-all.sh` rc 0

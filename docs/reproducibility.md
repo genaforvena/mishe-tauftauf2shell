@@ -20002,12 +20002,10 @@ used=1062,499`, UTF-8 `used < capa` in three buffers); full matrix
 SHA-256 `73fa39f8ccb404cc40d537e9999165bb98b53e27acb0c42d8ef5144dd7aa0882`.
 Raw logs are gitignored under `lab/build/evidence/casemap-chain/w350/`.
 Falsifier not met on either branch: no chained buffer has `used > capa`.
-Grade unchanged, full stock rung 5 NOT ACHIEVED. Next named experiment
-W351: provision the patched releases 3.3.14 and 4.0.10 (provisioning
-only, never a target probe), build plain debug builds and run the same
-harness; a single invalid write or changed CHAIN output would reopen
-the fix-series grade. Detail: `reports/ruby2shell-investigation.md`
-§W350.
+Grade unchanged, full stock rung 5 NOT ACHIEVED. W351 closed the named
+patched-release experiment on 3.3.14 and 4.0.10 with zero invalid writes
+and byte-identical CHAIN output (§17:0xZ); EOL 3.2.11 is W352. Detail:
+`reports/ruby2shell-investigation.md` §W350.
 
 Docs attempted this valgrind matrix twice at 16:0xZ; both runs hit the
 engine deadline (300s, then 600s) before a full matrix was written. The
@@ -20130,18 +20128,17 @@ Author log SHAs:
 `1dc9313b…` (run with `gdb-w349-deref-obs.cmd`), `4dc23eb1…` (run with
 the chosen-deref observer), GDB logs `23cdf26c…` and `53cca8cc…`.
 
-Do not repeat these negatives unchanged: W345's JIF `0896977e…` faults
-in libz's SIMD store before the array (`452d4a82…`); a single pointer at
-offset `0x47170` misses after `ARRBASE−idx` shifts to `0x46fc0`
-(`4597e2ba…`); the sparse 24-pointer JIF `8d9ba89e…` reaches `ARR[6]`/
-`ARR[14]` but index 0 stays chosen filler (`b9768628…`). The scripts'
-`map=[unmapped]` labels for heap and ld-linux addresses are a
-maps-classifier NIT: the chosen pointer is inside the heap range of the
-W345/W349 logs and the dereference succeeded in the author's run. Author
-label: rung 4 strengthened to a measured chosen-pointer dereference in
-a live consumer, NO r5; docs' two replays below were negative/timeout
-and no witness replay has been offered, so the last verified grade
-remains rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5.
+These were run-specific negatives, not stable properties of the JIFs:
+W361 later produced chosen-pointer dereferences from W345's JIF
+`0896977e…` and the single-pointer JIF `0857219c…`, while sparse24
+`8d9ba89e…` stayed negative at `ARR[0]` (§16:3xZ; the author's labels
+were repaired at `40d1b0cf`). The scripts' `map=[unmapped]` labels for
+heap and ld-linux addresses are a maps-classifier NIT: the chosen pointer
+is inside the heap range of the W345/W349 logs. Author label: rung 4
+strengthened to a measured chosen-pointer dereference in a live consumer,
+NO r5. W361 ESTABLISHED that label AS LABELED and the operator moved R4
+to ✓ (§16:3xZ); docs' own runs below remain honest layout-sensitive
+negatives/timeout, not refutations.
 Full JIF/log SHAs and scripts: `lab/frontier/gimpjif2shell/PROVENANCE.md`
 §W349.
 
@@ -20199,8 +20196,107 @@ the single-pointer JIF `0857219c…` produced an explicit chosen deref
 produced 46 chosen hits (run `f6a4314e…`, GDB `273711be…`), contradicting
 the author's negative labels; sparse24 stayed negative at `ARR[0]`
 (run `f7233116…`, GDB `03ce98e6…`). `ARRBASE−idx` varies across author,
-witness and docs runs (`0x47210`/`0x470d0`/`0x47170`), so a new attempt
-must re-measure it. Verdict: ESTABLISHED AS LABELED, grade R4 ✓ and NO
+witness, repaired author logs and docs runs
+(`0x47210`/`0x470d0`/`0x47170`/`0x47290`); frontier repaired its labels
+at `77069c94`/`40d1b0cf`/`d9707491`. A new attempt must re-measure it.
+Verdict: ESTABLISHED AS LABELED, grade R4 ✓ and NO
 r5; no chosen-address write, control-flow word, marker, socket or
 command. Operator `fbbf0ecd` moved the generated cells; docs did not.
 Full detail: `.mishe-tauftauf/artifacts/witness-w361/detail.md`.
+
+## 2026-11-27 17:0xZ — W351 patched branches, nfdump closure, nanomodbus replay
+
+### Ruby W351 — patched 3.3.14 / 4.0.10 case-map chain (CLOSED)
+
+Provisioning is public-source download only, never a target probe; from
+the repository root the pinned tarballs and builds are gitignored:
+
+```sh
+sha256sum lab/src/ruby-3.3.14.tar.xz lab/src/ruby-4.0.10.tar.xz
+tar -xJf lab/src/ruby-3.3.14.tar.xz -C lab/build/w351-src
+tar -xJf lab/src/ruby-4.0.10.tar.xz -C lab/build/w351-src
+./configure --disable-install-doc --prefix=<absolute -plain prefix> && make -j4 && make install
+bash lab/repro/ruby2shell-casemap-chain-patched.sh
+bash lab/repro/ruby2shell-casemap-chain-gdb.sh
+```
+
+Expect tarball SHA-256 `e24ef6d97095a9c42bf8259a2de33a25aac8d92bb48fefdbdc81724b87784854`
+(3.3.14) and `1537f7a6003c436546ecab6b48b6e7725a9af2328f45a8af7f42f41c5df90ab8`
+(4.0.10), installed revisions `f4c37f481b` / `a704b7cd95`, gcc 13.3.0
+plain builds with no sanitizer or allocator tunable. The fix is the
+`enc/iso_8859_1.c:267` `to_end - to > 1` guard plus the overflow-safe
+capacity multiplication in `rb_str_casemap` (3.3.14 `:7426`/`:7429`,
+4.0.10 `:7895`/`:7898`).
+
+Expect 28 valgrind lines (`rc=0 invalid_write=0` in all 14 shapes × 2
+patched builds), CHAIN bytes identical to the vulnerable W350 set, and
+84 gdb rows (six builds × 14). The first 56 gdb rows are byte-identical
+to W350's full matrix SHA-256
+`73fa39f8ccb404cc40d537e9999165bb98b53e27acb0c42d8ef5144dd7aa0882`;
+each patched build matches fixed 3.4.13 row-for-row (`sb21
+capa=41,22 used=40,2`; `sb1041 capa=1061,1042 used=1060,1022`;
+`sbmix1041 capa=1061,688 used=1060,501`), full matrix SHA-256
+`6a514946579c6c27fd230eaa958af3972b2fc8d57fa267c6c7303486de384508`.
+The patched gdb command files are
+`lab/repro/ruby2shell-casemap-chain-3.3.14.gdb` (breakpoints `:7433`/
+`:7451`) and `...-4.0.10.gdb` (`:7902`/`:7920`). Raw valgrind and gdb
+logs are gitignored under `lab/build/evidence/casemap-chain/w351/` and
+`lab/build/evidence/casemap-chain/`. Falsifier not met; grade unchanged,
+full stock rung 5 NOT ACHIEVED. W352 is the unpatched EOL 3.2.11 branch.
+Detail: `reports/ruby2shell-investigation.md` §W351.
+
+Docs re-ran both matrices on this host at 17:0xZ with the existing
+gitignored plain builds and the verified tarballs: `...-patched.sh` rc 0,
+28 lines, all `rc=0 invalid_write=0`, 14 distinct CHAIN SHA-256 prefixes
+each appearing once per patched build (`69a5885c…`, `7bbed07d…`,
+`cef0c58840…`, `65fc9683…`); `...-gdb.sh` rc 0, 84 rows with full matrix
+SHA-256 `6a514946…` byte-identical to the author's value. Raw docs logs
+are gitignored under `/tmp/w351-docs-valgrind.txt` and
+`/tmp/w351-docs-gdb.txt`.
+
+### Nfdump2Shell — ICMP swap-to-metadata chain (source-bound CLOSED)
+
+No new packet, build or runner: read
+`lab/frontier/nfdump2shell/pins/process-parent.inc:1-19` and
+`pins/nfd_raw-parent.c:250-260` with a flow element header at `E`.
+`msecReceived` is at `E+20..27`, `srcPort` at `E+44..45`, `dstPort` at
+`E+46..47`, and the `proto` switch reads `E+48`; every swap write is
+1..4 bytes before its trigger. A wire-chosen trigger implies
+`E+48 <= 65526`, hence an in-bounds write; an out-of-bounds `dstPort`
+implies `E+48 >= 65537`, hence an allocator-state trigger. The earlier
+IPv6 edge recipe `bash run-v6edge.sh` measured
+`HDR_SIZE_AFTER=00000001a219c694`, leaving `0x01` at `in_buff+65548`,
+but at `E=65500` the same clock store zeroes two `srcPort` bytes. Forcing
+`srcPort` wholly in bounds puts the trigger at `+65537/+65538`, which the
+clock store never reaches (it starts at `+65543`). No wire-chosen byte
+reaches the adjacent chunk's `size` field by this route. Grade unchanged:
+rung 3 live / rung 4 availability plus chosen-offset PARTIAL / NO r5.
+Detail: `reports/frontier-nfdump2shell.md` §"IPv6 two-packet swap closure".
+
+### NanomodbusReg2Shell — author clean replay of staging commit `48360585`
+
+```sh
+git archive --format=tar 48360585 lab/frontier/nanomodbusreg2shell | tar -x -C /tmp/w351-nanomodbus
+cd /tmp/w351-nanomodbus/lab/frontier/nanomodbusreg2shell
+sha256sum -c SHA256SUMS && sh harness/run-all.sh
+```
+
+Expect plain tar SHA-256
+`d47d2b11984cf56ab01374de7cde90f97e8583be3120758a3fb85d6e413a0252`,
+11/11 pins, rc 0, `RUN_ALL_OK 17 PASS / 0 FAIL` and summary SHA-256
+`c8489055177859c647d4718101f1feaf61dc20a7d2e6e2dfa04dcc6b33ea909d`
+including the `BENIGN_MARKER` arm. This is the author's clean-archive
+receipt (`13c5a454`), not a witness replay; no admission, register or
+grade change followed. Full lane recipe: §14:4xZ above and
+`reports/frontier-nanomodbusreg2shell.md`.
+
+### Gimpjif2Shell W352 — label repair, no new run
+
+`77069c94`, `40d1b0cf` and `d9707491` repaired the author's brief, status
+and PROVENANCE wording: W361's counterexamples make the former
+single-pointer and W345-sweep negatives layout-dependent observations;
+sparse24 `8d9ba89e…` is the only durable `ARR[0]` negative. The brief
+header now reads R4 ✓ at the witness-verified scope and the W351
+chosen-field chain remains author-only pending replay (#6628). The
+§16:0xZ and §16:3xZ recipes above are unchanged: no new JIF, runner,
+binary or hash was produced by this repair.

@@ -16456,9 +16456,57 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 17:0xZ — W351 patched branches closed; gimpjif labels repaired
+
+Current limb for a reader arriving now; it supersedes the 16:3xZ limb's
+"frontier owes report wording" line and the 16:0xZ limb's "Next W351" line.
+Docs-only fold of the six commits after `46e96ff4` through `d9707491`:
+`fc9dc3b7` (Ruby W351 patched branches), `2cd198db` (nfdump ICMP swap
+closure), `13c5a454` (nanomodbus clean replay) and `77069c94`, `40d1b0cf`,
+`d9707491` (gimpjif W361 verdict wording, W352 label repair, brief grade
+summary). No grade, rung cell, register row, count, README, results,
+manifest, SVG, report or lab evidence moved here.
+
+- **Ruby W351 closes the patched-branch half of the fix series.** Plain
+  builds of the pinned 3.3.14 (`e24ef6d9…`) and 4.0.10 (`1537f7a6…`)
+  tarballs, provisioned from `cache.ruby-lang.org` only, run the committed
+  chain harness: 28 valgrind arms `rc=0`, `invalid_write=0`, CHAIN bytes
+  identical to vulnerable W350; 84 gdb rows, the first 56 byte-identical
+  to W350 (`73fa39f8…`) and each patched build row-for-row equal to fixed
+  3.4.13, full matrix `6a514946…`. The `to_end - to > 1` guard and
+  overflow-safe capacity multiplication are present on both branches.
+  Falsifier not met; grade unchanged. Next W352: EOL 3.2.11, unpatched by
+  the fix series. Recipe in `docs/reproducibility.md` §17:0xZ.
+- **Gimpjif2Shell negative labels repaired at W352.** `40d1b0cf` records
+  W361's counterexamples in PROVENANCE: single-pointer `0857219c…` and W345
+  sweep `0896977e…` both produced chosen-pointer dereferences in that
+  layout (run/GDB `184ebaee…`/`04202ad3…` and `f6a4314e…`/`273711be…`),
+  `ARRBASE−idx` spans `0x470d0`/`0x47170`/`0x47290`, and only sparse24
+  `8d9ba89e…` stayed negative at `ARR[0]`. `77069c94` repaired the stale
+  replay-pending wording; `d9707491` moved the brief header to R4 ✓ at the
+  W361 scope and kept W351's chosen-field chain author-only pending replay
+  (#6628). NO r5 throughout.
+- **nfdump2shell ICMP-to-metadata chain CLOSED from the pin**, no new run:
+  the `srcPort`/`dstPort` writes sit at `E+44..47`, the `proto` trigger at
+  `E+48`, so a wire-chosen trigger forces in-bounds writes and an
+  out-of-bounds write forces the trigger to allocator state. The clock word
+  measured earlier supplies both at `E=65500` and only reorders its own
+  bytes; an in-bounds `srcPort` leaves the trigger at `+65537/+65538`,
+  beyond the clock store. Grade unchanged: rung 3 live / rung 4 PARTIAL /
+  NO r5.
+- **nanomodbusreg2shell author clean replay**, grade-neutral: private
+  `git archive 48360585` (tar `d47d2b1…`) gave 11/11 pins, `RUN_ALL_OK 17
+  PASS / 0 FAIL` and the same `c8489055…` summary including the
+  `BENIGN_MARKER` arm; no witness or register move followed.
+
+What would change this limb: an independent W351 replay or a chosen-address
+write in gimpjif, wire-chosen bytes reaching nfdump malloc metadata by
+another route, a live loopback nanomodbus consumer, or a checker RED on
+committed HEAD.
+
 ## 2026-11-27 16:3xZ — W361 gimpjif chosen-pointer verdict ESTABLISHED (R4 ✓, NO r5)
 
-Current limb for a reader arriving now; it supersedes the 16:0xZ limb's
+Prior limb (superseded by 17:0xZ above); it superseded the 16:0xZ limb's
 "author label unreplicated / last verified rung 4 PARTIAL" statement.
 Witness replayed the W349 claim from a private
 `git archive 417097b4 lab/frontier/gimpjif2shell/live`, using the pinned
@@ -16478,8 +16526,8 @@ dereferences in the witness layout; sparse24 stayed negative at
 `ARR[0]`. The docs' own two replays and their `0x47170` delta remain
 honest negatives, but no longer set the verified grade. Detail:
 `.mishe-tauftauf/artifacts/witness-w361/detail.md`; recipe in
-`docs/reproducibility.md` §16:3xZ. Frontier owes report/PROVENANCE
-wording changes for the contradicted labels.
+`docs/reproducibility.md` §16:3xZ. Frontier closed the owed report/
+PROVENANCE wording in `77069c94`/`40d1b0cf`/`d9707491` (17:0xZ above).
 
 What would change this limb: a shim in the witness path, a debugger
 memory or register write, a dereferenced control-flow word, a live
@@ -16487,7 +16535,7 @@ loopback command side effect, or a checker RED on committed HEAD.
 
 ## 2026-11-27 16:0xZ — W349 chosen-pointer dereference and case-map closure; W350 AWS witness
 
-Current limb for a reader arriving now; it supersedes the 15:3xZ limb's
+Prior limb; it superseded the 15:3xZ limb's
 "chaining parity owed", "mapped chosen-pointer dereference owed" and
 "witness verdict UNKNOWN" next steps. Docs-only fold of `031239f5`,
 `417097b4` and `fd33aafc`: no report, grade, rung cell, register row,
@@ -16508,13 +16556,13 @@ count, README, results, manifest, SVG or lab evidence moved here.
   witness-COMPLETE rung 4, full stock rung 5 NOT ACHIEVED. W350 closed
   the named 3.3.13/4.0.9 branch question with 28 valgrind arms and 56
   gdb rows: same buffer capacities, no chained overflow, grade unchanged.
-  Next W351: patched-branch builds 3.3.14 and 4.0.10. Recipe in
-  `docs/reproducibility.md` §W349.
+  W351 closed the patched-branch question (17:0xZ above); recipe in
+  `docs/reproducibility.md` §17:0xZ.
 - **Gimpjif2Shell W349 measures a file-chosen pointer dereferenced in the
-  live loader (author label; replay not yet witnessed).** Five no-shim
+  live loader (author label; witnessed at W361, §16:3xZ).** Five no-shim
   runs of the unmodified runner `b047c40e…` with two read-only GDB scripts
   (`a397e24b…`, `63f30cec…`) and the SHA256SUMS-verified provisioned
-  GIMP 3.2.8 AppImage preserve the earlier negatives: W345's sweep
+  GIMP 3.2.8 AppImage recorded run-specific negatives: W345's sweep
   JIF faulted in a libz SIMD store before reaching the array, a single
   pointer at the old delta missed after `ARRBASE−idx` shifted
   `0x47170`→`0x46fc0`, and a sparse 24-pointer sweep reached `ARR[6]`/
