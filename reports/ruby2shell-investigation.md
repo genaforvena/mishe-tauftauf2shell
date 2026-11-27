@@ -8809,3 +8809,70 @@ claims 3.2-and-older unfixed), build it plain and ASan, extract its
 chain and rung-1 harnesses. Prediction: the unpatched guard and one-byte
 write are present; falsifier: an already-fixed guard or zero invalid
 writes on that branch. Do not repeat the 3.3/3.4/4.0 matrices unchanged.
+
+## 2026-11-27 17:3xZ — W352: EOL Ruby 3.2.11 case-map primitive CLOSED
+
+The vendor claim lists 3.2-and-older as unfixed, outside all three
+patched ranges. This wake tests that claim on the last 3.2 release
+with the already-committed rung-1 and chain harnesses. Tarball
+`ruby-3.2.11.tar.xz` was provisioned from cache.ruby-lang.org
+(provisioning only, no target probe) into gitignored `lab/src/` with
+SHA-256 `c13aec0c206725d5d356acbae6e5fd8bffd92dc325aec14fd5dd7795d4b763d2`,
+extracted under gitignored `lab/build/w352-src/`.
+
+Source lines (from that exact tree): `enc/iso_8859_1.c:267` still reads
+`while (*pp < end && to < to_end)` — the UNPATCHED guard — and its
+sharp-s output store is `:293`; `string.c:7336` is the buffer `xmalloc`,
+`:7341` the `case_map` call, `:7352` the `used` assignment. There is no
+overflow-safe multiplication or sized-free correction in this tree,
+unlike the patched 3.3.14 / 4.0.10 builds of W351.
+
+Plain build: `./configure --disable-install-doc --prefix=<absolute
+-plain prefix>; make -j4; make install`, gcc 13.3.0, default CFLAGS /
+LDFLAGS, stock glibc 2.39. Installed version
+`ruby 3.2.11 (2026-03-27 revision 5483bfc1ae) [x86_64-linux]`.
+`lab/build/plain/ruby-3.2.11-plain/bin/ruby
+lab/repro/ruby2shell-rung1.rb` returns `upcase returned, out len=42`
+from 21 `ß` bytes, the predicted 2N output into capa N+20 = 41.
+
+1. Valgrind, 14 arms via `bash lab/repro/ruby2shell-casemap-chain-eol.sh`:
+   exactly one `Invalid write of size 1` on `sb21`, `sb1041` and
+   `sbmix1041` × {upcase, fold} (6/14), zero on `sb2100` (even first
+   capa) and all eight UTF-8 arms. Representative stack:
+   `case_map (iso_8859_1.c:293)` ← `rb_str_casemap (string.c:7341)`
+   ← `rb_str_upcase (string.c:7519)`. All 14 `CHAIN` hashes are
+   byte-identical to the vulnerable W350 set (`sb21` upcase
+   `69a5885c909c4195`, fold `7bbed07d913f65ba`; `sb1041` upcase
+   `cef0c58840d955e6`, fold `4062f6cbdf8621c8`; `u03901041` upcase
+   `65fc96834c82024e`). Raw logs: gitignored
+   `lab/build/evidence/casemap-chain/w352/`.
+2. gdb, 14 rows with the new committed
+   `ruby2shell-casemap-chain-3.2.11.gdb` (breakpoints `:7336` and
+   `:7352`), all `rc=0`: `sb21` `capa=41, used=42`; `sb1041`
+   `capa=1061,1040, used=1062,1020`; `sb2100`
+   `capa=2120,2100, used=2120,2080`; `sbmix1041`
+   `capa=1061,686, used=1062,499`; every UTF-8 arm `used < capa`.
+   Replay-stable digest (PIDs and rc normalised away)
+   `a532614a92de5639f9b97f1c110c7fced50e3659527a283eb7e51776621c0704`.
+
+ASan was attempted three times and is an honest NOT OBSERVED, not a
+pass: `-fsanitize=address,undefined` and address-only builds both abort
+during their own bootstrap while generating `builtin_binary.inc` /
+`miniprelude.c`, in `add_delayed_token (parse.y:7032)` with an unrelated
+heap-use-after-free; a third configure initially lacked a usable host
+`--with-baseruby`. No 3.2.11 ASan binary was produced, so the rung-2
+ASan report exists only for the 3.4 branch. The committed EOL driver
+therefore uses plain + valgrind + gdb and documents the reason.
+
+Prediction confirmed; falsifier (already-fixed guard or zero invalid
+writes) not met. The one-byte write and its single-buffer parity/slack
+limit are real on the EOL branch too. Grade unchanged: primary
+wire-only rung 3, W341/W342 adjacent rung 3, witness-COMPLETE rung 4,
+harness-condition rung 5 ESTABLISHED at its labeled scope, full stock
+rung 5 NOT ACHIEVED. Next named experiment W353: on the same 3.2.11
+plain build, run the mixed-parity geometry (one leading 1-byte char,
+N ≡ 11 mod 16, i.e. 27/43/59) that on 3.4.12 placed 0x53 exactly on
+the next glibc chunk's size LSB; predict the same valgrind stack plus
+a glibc metadata abort in fresh processes, falsifier = no invalid
+write at that offset or zero glibc diagnostics across the sweep.
+Do not repeat the seven-shape chain matrix unchanged.
