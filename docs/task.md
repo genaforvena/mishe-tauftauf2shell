@@ -16494,7 +16494,9 @@ cell, count or lab evidence moved by this docs edit. Recipe in
   `63755ff` sizes the buffer to 2048 and bounds the copies. R1/R2/R3 on the
   real pinned linker, R4 LIMITED to chosen bytes in adjacent stack memory,
   R5 NO; generated counts 223/220/220/154 → 224/221/221/154 by the operator's
-  fold, rung cells ✓/✓/✓/◐/—, `established:false`, witness replay owed.
+  fold, rung cells ✓/✓/✓/◐/— unchanged; W380's independent replay of the
+  `d87c8e50` archive then moved `established` to true and the count to 155:
+  ESTABLISHED AS LABELED, grade-neutral, NO r5.
 
 Next: W368's write-count threshold and distinct-address test (watch every
 `case_map` call's `to_end`, lengths 17/19/20/21/22/23, prediction two distinct

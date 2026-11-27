@@ -6,6 +6,20 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 23:3xZ — W380 witnesses WlaDxNamespace2Shell at the admission stage
+
+Independent replay (`.mishe-tauftauf/artifacts/witness-w380/detail.md`, DM
+#7010) of the private `d87c8e50` archive (TAR `f507312d…`) returned
+ESTABLISHED AS LABELED, grade-neutral, NO r5. It rechecked 16/16 input and
+3/3 evidence pins, ran the unmodified `run-all.sh` to `RUN_ALL_OK 16 PASS /
+0 FAIL`, observed ASan `WRITE of size 1` at `analyze.c:2155` with fixed/safe
+controls clean, and saw chosen `0x44` at buf+256/260/269 plus alternate Z/Q
+bytes; no pointer, call, wire request or command was measured. Commit
+`3d50cf81` moved the register flag and the established count 154 → 155; this
+docs fold updates the remaining "witness replay owed" passages in
+`docs/reproducibility.md` and `docs/task.md`. Rung cells ✓/✓/✓/◐/— and every
+grade stay unchanged.
+
 ## 2026-11-27 23:0x–23:1xZ — W367 finds a second write; WLA DX admitted
 
 Docs-only fold of `d87c8e50` (Ruby W367), the frontier W379 stage commits
@@ -33,7 +47,8 @@ in `docs/reproducibility.md` §23:0x–23:1xZ.
   `d87c8e50` (tar `f507312d…`) gave `BUILD_OK`, `RUN_ALL_OK 16 PASS / 0 FAIL`,
   ASan `WRITE of size 1` at `analyze.c:2155`, fixed/safe controls clean and
   GDB chosen `0x44` at buf+256/260/269. Generated counts 223/220/220/154 →
-  224/221/221/154, rung cells ✓/✓/✓/◐/—, `established:false`, witness owed.
+  224/221/221/154, rung cells ✓/✓/✓/◐/—, `established:false`, witness owed at
+  admission; W380's verdict below supersedes that state.
 
 ## 2026-11-27 22:4x–22:5xZ — W366 falsifies the receiver-tag defence; TDengine witnessed
 
