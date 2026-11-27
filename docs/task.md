@@ -15503,9 +15503,50 @@ vulnerable; plain vulnerable replay exits 0. Runner `a89a11cb…` gave
 `BUILD_OK` / `PASS=28 FAIL=0` in-tree and from `git archive b8f8f23c` (10
 lab files). Grade R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —: no real CAB consumer,
 chosen-byte readback, pointer, wire path, marker or command; the writeup's
-FSOP/RCE chain is an untested claim. Independent witness replay is still
-owed; author and operator replays are not acceptance. Recipes in
+FSOP/RCE chain is an untested claim. W308 witness replay #6013 returned
+ESTABLISHED AS LABELED at that scope (§03:0xZ below); author and operator
+replays alone are not acceptance. Recipes in
 `docs/reproducibility.md` §02:3xZ. What would change these limbs: a witness
 verdict contradicting either scope, a report misquoting these receipts, or a
+checker RED on committed HEAD. No generated cell, count, grade or report moved
+here.
+
+## 2026-11-27 03:0xZ — W308 lzxwindow verdict, W307 gimpjif watch, W309 rpm boundary
+
+`6379d9bd` folded the W308 witness verdict for lzxwindow2shell: clean
+`b8f8f23c` replay matched runner `a89a11cb…`, `BUILD_OK` / `PASS=28 FAIL=0`,
+and both published geometries reproduced at raw `LzxDecoder.cpp:1396`.
+ESTABLISHED AS LABELED at R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —; no grade change,
+no real CAB consumer, chosen-byte readback or r5. The earlier "witness owed"
+wording in §02:3xZ is superseded.
+
+`0a4168f5` watched the real-libz OOB store inside the live GIMP 3.2.8 plug-in
+under a no-shim AppRun: `indexes+264`, the following chunk's size word, takes
+chosen `0x4d` bytes over `0x21` with backtraces through bundled `libz.so.1`
+`inflate` to `ReadJeffsImage` at `file-gif-load.c:1613`, and the later `free`
+faults at `:1616` with `rax=0x4d4d…`; safe JIF clean, 13 PASS / 0 FAIL. This is
+allocator metadata, not a named-object write, chosen address or successful
+dereference; the following chunk's owner is UNKNOWN. Grade stays rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes, no r5.
+
+`2d2e540e` already wrote its own coherent briefs for the Ruby W306
+`repeat_range[mem]` census (§02:5xZ); no duplicate was added. The wrapped-ID
+qword is a stack-pointer split that differentiates `regexec.c:3846/3881/3884`
+but carries no wire-influenced bytes under pads or extra form fields: CLOSED
+as an attacker-steered primitive, grade unchanged.
+
+`85786f56` and `31046ece` bounded rpm2shell W307's non-PIE GC target. A fresh
+compile preserves `nm` symbol `0x4063a0`, the chosen copy-site value and
+5/5 fixed-target installs rc 1 with a clean fixed ASan control, but the live
+GC dereference does not survive: 9/4, 11/2, 12/1 and 10/3 PASS/FAIL, with
+A-filler faults only 2/5, 3/5, 4/5 and 3/5. Binary/path crossover put the
+author binary at 13/0 in 4/4 runs and the fresh binary at failures in 8/8, so
+the divergence tracks the compiled binary. The reproducible datum is the
+chosen fixed-address write plus the controls; the semantic dereference is
+layout-specific and the build-time cause UNKNOWN. Grade and real-consumer
+witness UNKNOWN unchanged, no r5. The 13/0 wording in §02:3xZ is the author
+binary's result, not a fresh-build invariant. Recipes in
+`docs/reproducibility.md` §03:0xZ. What would change these limbs: a witness
+verdict contradicting these scopes, a report misquoting the receipts, or a
 checker RED on committed HEAD. No generated cell, count, grade or report moved
 here.

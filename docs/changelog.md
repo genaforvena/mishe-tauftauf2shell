@@ -1,6 +1,52 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+
+## 2026-11-27 03:0xZ — W308 lzxwindow verdict, W307 gimpjif watch, W309 rpm boundary
+
+This fold covers `6379d9bd`, `0a4168f5`, `2d2e540e`, `85786f56` and
+`31046ece`, five commits past `1c571ce6`. `2d2e540e` already carried coherent
+briefs in all three docs; those were verified and not duplicated. Explanation
+and recipes only: no generated cell, register row, grade, count, report or lab
+evidence moved.
+
+- `6379d9bd` folded the W308 independent witness verdict for lzxwindow2shell.
+  Clean `git archive b8f8f23c lab/frontier/lzxwindow2shell` (10 files) matched
+  runner `a89a11cb…`; `sh build-all.sh` rc 0 `BUILD_OK` and `sh run-all.sh`
+  rc 0 `PASS=28 FAIL=0`. Both published `0x14A420` and near `0x9000` geometries
+  reproduced at raw `LzxDecoder.cpp:1396` (near case ASan `WRITE of size 4096`,
+  4064 bytes past a 32800-byte region); fixed clean, plain vulnerable exits 0.
+  Verdict ESTABLISHED AS LABELED at R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —, no grade
+  change, no r5, no real CAB consumer and no chosen-byte readback. Detail:
+  `.mishe-tauftauf/artifacts/witness-w308-lzxwindow/detail.md` (gitignored).
+- `0a4168f5` watched the real-libz OOB store inside the live GIMP 3.2.8
+  plug-in under a regenerated no-shim AppRun. `live/gdb-watch.cmd` identifies
+  the wrapped `inflate()` by `avail_out=0x80000082` and watches `indexes+264`,
+  the following chunk's size word; chosen `0x4d` bytes replace `0x21` through
+  `0x4d4d4d4d4d4d4d4d`, backtraces reach `ReadJeffsImage` at
+  `file-gif-load.c:1613`, and the later `free` faults at `:1616` with
+  `rax=0x4d4d…`. `bash live/run-appimage-watch.sh`: 13 PASS / 0 FAIL; the safe
+  4x4 JIF raises no watch hit. The following chunk is allocator metadata, not
+  a named live object, chosen address or successful dereference; its original
+  owner stays UNKNOWN after a tracer stalled the plug-in before `inflate`.
+  Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+- `2d2e540e` censused the wrapped-ID `reg->repeat_range[mem]` read: at ID
+  `−32767` its qword is a stack-pointer split that differentiates
+  `regexec.c:3846/3881/3884`, but pads and extra wire fields do not change its
+  bytes; live ID `−8` reads zeros and hits only `3846`. CLOSED as an
+  attacker-steered primitive, grade unchanged. Briefs already at §02:5xZ.
+- `85786f56` and `31046ece` bounded rpm2shell W307's non-PIE GC target. A
+  fresh compile of the pinned parent keeps `nm` symbol `0x4063a0` and the
+  chosen copy-site value with 5/5 fixed-target installs rc 1 and a clean fixed
+  ASan control, but the live GC assertion does not survive: 9/4, 11/2, 12/1,
+  10/3 PASS/FAIL and A-filler faults 2/5, 3/5, 4/5, 3/5. Binary/path crossover
+  gave the author binary 13/0 in 4/4 runs and the fresh binary failures in 8/8,
+  so the divergence tracks the compiled binary, not checkout path, config or
+  ASLR noise. The write plus vulnerable/fixed/safe controls are the
+  reproducible datum; the semantic dereference is layout-specific. Build-path
+  strings are a candidate cause, not a finding; grade and real-consumer
+  witness verdict UNKNOWN are unchanged, no r5.
+
 ## 2026-11-27 02:5xZ — W306 repeat_range OOB metadata CLOSED (Ruby)
 
 - New `lab/repro/ruby2shell-onigmo-watch-repeat-range.{py,gdb}` dumps the

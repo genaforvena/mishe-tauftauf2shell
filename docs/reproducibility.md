@@ -16808,10 +16808,12 @@ is a claim, not reproduced. At `15295203` the operator admitted the 198th
 mind (window 206 adopted, 207/207 unique names; generated counts
 197/194/194/132 → 198/195/195/132, `established=false`), with grade R1 — /
 R2 ✓ / R3 ✓ / R4 — / R5 —. Both frontier and operator clean-archive replays
-returned the same hash and counts; independent witness replay is owed and
-author replay is not acceptance. Details: `reports/frontier-lzxwindow2shell.md`,
+returned the same hash and counts. W308 witness replay #6013 from clean
+`b8f8f23c` matched the runner hash, `BUILD_OK` and `PASS=28 FAIL=0` and
+returned ESTABLISHED AS LABELED at that scope; author and operator replays
+alone are not acceptance. Details: `reports/frontier-lzxwindow2shell.md`,
 `reports/lzxwindow2shell-status.md` and
-`lab/frontier/lzxwindow2shell/PROVENANCE.md`.
+`lab/frontier/lzxwindow2shell/PROVENANCE.md`; §03:0xZ below.
 
 ## 2026-11-27 02:5xZ — W306 repeat_range metadata census (Ruby)
 
@@ -16837,3 +16839,73 @@ wire-controlled form fields. Expected: ID `−32767` logs
 Absolute stack addresses vary; assert the qword and line numbers, not the
 addresses. Evidence is gitignored under
 `lab/build/evidence/w305rr*.{json,server.log,summary-p0.txt}`.
+
+## 2026-11-27 03:0xZ — W308 lzxwindow verdict, W307 gimpjif watch, W309 rpm boundary
+
+### lzxwindow2shell — W308 independent witness replay
+
+The W307 recipe above is the replay: `git archive b8f8f23c
+lab/frontier/lzxwindow2shell` yields exactly 10 committed files; runner
+sha256 `a89a11cb7d9818751faf92ec4aeadbfd8ff01f6dbd05301dc754248f8fce2cd8`.
+Witness #6013 replayed it into an empty `/tmp/lzx-witness-w308`: all
+`HARNESS_SHA256.txt` and `pins/SHA256SUMS` entries verified; unmodified
+`sh build-all.sh` rc 0 `BUILD_OK`; unmodified `sh run-all.sh` rc 0
+`PASS=28 FAIL=0`. Expect the published `0x14A420` case to fault vulnerable at
+raw `LzxDecoder.cpp:1396` with `PHASE2 pos=1352736 winSize=32768` and fixed to
+report `pos=0`; expect the near `0x9000` case to give ASan `WRITE of size
+4096`, 4064 bytes past a 32800-byte region at the same sink, with fixed clean.
+Plain vulnerable replay returns rc 0 with `PHASE3 decode=0x1 pos=40960` — no
+plain crash or chosen-byte readback. Verdict ESTABLISHED AS LABELED, R1 — /
+R2 ✓ / R3 ✓ / R4 — / R5 —, no grade change, no r5. The gitignored detail is
+`.mishe-tauftauf/artifacts/witness-w308-lzxwindow/detail.md`.
+
+### gimpjif2shell — W307 real-libz OOB store in the live plug-in
+
+From `lab/frontier/gimpjif2shell` with a cached SHA256-verified GIMP 3.2.8
+AppImage, run `bash live/run-appimage-watch.sh`. It regenerates `AppRun.watch`
+from the extracted AppRun with every `*shim.so` preload export removed, then
+launches GIMP with `GIMP_PLUGIN_DEBUG_WRAP=file-gif-load,run` and
+`GIMP_PLUGIN_DEBUG_WRAPPER="gdb -q -batch -x live/gdb-watch.cmd --args"`.
+Expect rc 0, **13 PASS / 0 FAIL**. Committed hashes: `live/gdb-watch.cmd`
+`caede670e6ffb4129767ea36b75f47f1f7f91c33b37d17af11dd4e62940bb3fc`,
+`live/run-appimage-watch.sh`
+`795c665f61e0a3c52fd43baf9c9900ccef272c0fdafb7cdbffd290e80d6b6223`, 8 KiB
+`live/evidence/gdb-watch-8192.jif`
+`d6556936ddbc84910fb32cf6715e18777911d88e5d41d2118574bd3e814b85b1`.
+`z_stream` offsets are `next_out` +24 and `avail_out` +32; the wrapped call
+has `avail_out=2147483778`. Expect `indexes+264` (the following chunk's size
+word) to change from `0x21` through chosen `0x4d` bytes up to
+`0x4d4d4d4d4d4d4d4d`, with watch frames in bundled `libz.so.1` `inflate` and
+`ReadJeffsImage` at `file-gif-load.c:1613`, ending in a `free` fault at
+`:1616` with `rax=0x4d4d…`. The safe 4x4 JIF log has no watch hit. The
+following chunk's original owner is UNKNOWN: an allocation-caller finish
+breakpoint tracer stalled the plug-in before `inflate` and is a preserved
+negative. No fixed AppImage exists, so no fixed differential is claimed;
+grade stays rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+Detail: `lab/frontier/gimpjif2shell/PROVENANCE.md` § W307 and
+`reports/frontier-gimpjif2shell.md` § W307 watchpoint.
+
+### rpm2shell — W309 fresh-build boundary for the non-PIE target
+
+From `git archive 0a4168f5 lab/frontier/rpm2shell`, symlink only the pinned
+sources, extracted dev headers and the unchanged fixed ASan build, then run
+`bash real/run-nopie-target.sh` repeatedly. The runner and `real/gc-pointer.gdb`
+are byte-identical to W307 (sha256
+`f849bc8779689283ab353a5b38b46ddc35ff43f9164695708d220dd4bf01f8d6` and
+`100855c01b6a91ea936d742b359738c9f3ea223ef4a905de4a01ac338961b5ee`). Expect a
+fresh non-PIE ELF with `nm` symbol `00000000004063a0 B rpmQVKArgs@LIBRPM_6.2`
+and `NEXT_AFTER=0x4063a0`; the fresh binary's SHA-256 is
+`379fc48751759b49924c45962e0212ef40b42c198a0b78c89acc7a9d5bac8149` (BuildID
+`12bafc46`) versus the author binary's
+`4abba405211155a1720a94791fe931da83fc80ffa8334715ee33f7e87d0ff7b2`
+(`a3187931`). Fixed-target installs exit rc 1 in 5/5 runs and fixed ASan is
+clean, but the live GC assertion is NOT a fresh-build invariant: PASS/FAIL was
+9/4, 11/2, 12/1 and 10/3, A filler faulted 2/5, 3/5, 4/5 and 3/5, and two
+runs never printed `CHOSEN_PTR ... MATCH=1`. In a binary/path crossover the
+author binary scored 13/0 in 4/4 runs while the fresh binary failed in 8/8,
+isolating the divergence to the compiled binary. Assert only the chosen
+fixed-address write and its vulnerable/fixed/safe controls, not the semantic
+dereference. Grade is unchanged (rung 3 pinned verbatim / rung 4 author-layout
+DEMONSTRATED, real-consumer witness UNKNOWN), no r5; the compile-time cause is
+UNKNOWN. Details: `lab/frontier/rpm2shell/PROVENANCE.md` § W309 and
+`reports/frontier-rpm2shell.md` § "Fresh-build boundary".
