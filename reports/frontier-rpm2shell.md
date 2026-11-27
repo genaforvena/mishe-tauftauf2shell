@@ -5,8 +5,10 @@ the pinned function and real rpm; rung 4 is DEMONSTRATED by a crafted RPM
 writing 64 chosen bytes past a 1-byte allocation in real `rpm2cpio` and
 `rpm2archive`, and on plain `rpm -i` by chosen bytes becoming a live liblua
 GC pointer that is dereferenced; under GDB's deterministic layout a chosen
-live heap address survives that dereference. Independent witness replay of
-this new lane is pending. No ASLR-stable target, wire target, command or r5.
+live heap address survives that dereference. A loopback wire delivery path
+for the corruption is measured; no chosen pointer, ASLR-stable target or
+benign command side effect was observed on it. Independent witness replay
+of the real-consumer lane is pending; no r5.
 
 ## Claim and scope
 
@@ -209,8 +211,9 @@ bytes therefore decide whether the *unmodified plain* install process faults
 at teardown — no `LD_PRELOAD`, allocator seam or debugger-forced execution.
 Safe-newc and stripped controls also return 1 without a fault.
 At teardown the chosen bytes become a live GC pointer (next subsection), so
-this is not merely a value-independent crash. Valid-target redirection, a
-loopback wire path and command execution are not demonstrated. Install uses
+this is not merely a value-independent crash. Valid-target redirection and
+command execution are not demonstrated; loopback wire delivery is measured
+later in this report. Install uses
 a private `--dbpath` and four guarded, cleaned `/tmp` names; no other
 filesystem location is written.
 
@@ -242,7 +245,8 @@ without a fault, and the fixed ASan build rejects the attack (rc 1,
 ASan-clean). The overwritten object is a liblua collectable whose first
 qword is its `next` pointer; chosen bytes therefore replace a live pointer
 that liblua dereferences during teardown. A second chosen dereference at a
-chosen valid target, a wire path and any command remain UNKNOWN/NO.
+chosen valid target and any command remain UNKNOWN/NO; loopback wire
+delivery is measured later in this report.
 Evidence: `real/gc-pointer/{A,B,V}.log`, `real/gc-pointer.gdb`.
 Replay note (2026-11-26 18:40Z): the V fixture's fixed address is
 layout-dependent. GDB's heap layout varies across runs even with ASLR
@@ -311,7 +315,7 @@ ASan report. A full eight-byte write of the fixed vsyscall address
 read faults. No package-controlled state supplies an ASLR-stable live
 GCObject address in these runs. This is a measured negative, not a claim
 that no other consumer or layout could offer a target; grade stays rung 4
-DEMONSTRATED with no wire path, command or r5.
+author-layout DEMONSTRATED with no command or r5.
 
 ### Live GCObjects in the copy window: partial-overwrite ceiling (2026-11-26 18:24Z)
 
@@ -334,8 +338,9 @@ writes of 1185 bytes or more. A 289-byte package write still reaches the
 natural liblua teardown fault (2/2 rc 139), but a 1377-byte write aborts
 in glibc with `double free or corruption (out)` (2/2 rc 134) before any GC
 walk. The fixed build rejects the 1377-byte package with rc 1 and no ASan
-report. No chosen ASLR-stable target, wire path, command or r5; the grade
-stays rung 4 DEMONSTRATED with this ceiling attached. Artifacts:
+report. No chosen ASLR-stable target or command; loopback wire delivery is
+measured later in this report and yields no r5. The grade stays rung 4
+author-layout DEMONSTRATED with this ceiling attached. Artifacts:
 `lab/frontier/rpm2shell/real/aslr-window/{probe.gdb,probe-1.log,len289-1.log,len1377-1.log,fixed-len1377.log}`.
 
 ### Redirect candidates beyond the 289-byte bound (2026-11-26 18:43Z)
@@ -361,7 +366,8 @@ write aborts in glibc 10/10 plain runs, and a GDB run with ASLR on logged
 visit inside the controlled window before the abort. Rewriting the
 corrupted chunk-size qwords at `buf+0x18`, or every `buf+0x18+0x10k` size
 field up to `0x300`, with plausible values left 5/5 aborts at 1441 bytes.
-No chosen ASLR-stable target, wire path, command or r5; grade unchanged.
+No chosen ASLR-stable target or command; grade unchanged (loopback wire
+delivery is measured later in this report and is not r5).
 
 ## Witness replay (W238, 2026-11-26)
 
@@ -396,11 +402,13 @@ above is later work and still lacks an independent witness. Full W238 detail:
   ASLR-disabled layout; the same bytes fault (rc 139) in a plain ASLR
   process. Under `setarch -R` the chosen-pointer fault also reproduces in
   a plain no-debugger process, but no live-target address redirection
-  survives there. An ASLR-stable target, wire path, command and command
-  side effect remain UNKNOWN/NO. No natural semantic dereference was seen
-  in 52 plain `rpm2cpio` runs (above); this dereference is on `rpm -i` only.
-- **Not rung 5:** no loopback service or wire request, no ASLR-stable target
-  redirection, no command and no observed command side effect.
+  survives there. An ASLR-stable target, command and command side effect
+  remain UNKNOWN/NO. No natural semantic dereference was seen in 52 plain
+  `rpm2cpio` runs (above); this dereference is on `rpm -i` only.
+- **Not rung 5:** a loopback-only HTTP wire delivery path does carry the
+  crafted package into real `rpm -i` (`run-wire-consumer.sh`, below), but
+  it yields no chosen pointer, no ASLR-stable target redirection, no
+  command and no observed command side effect. Wire delivery is not r5.
 
 Next experiment: a different consumer, allocator layout or an information
 leak would be needed for an ASLR-stable GC target; the package-only partial
@@ -445,7 +453,7 @@ ASLR-random. Truncating a main-header digest string instead gives
 `hdr load: BAD`, and a two-package `rpm -i` verifies both packages before
 installing either, so the disclosure cannot be fed back into the crafted
 package in this consumer. No delta to the cpio buffer or GC object was
-measured; grade unchanged, no wire path or r5. Evidence and hashes in
+measured; grade unchanged, no command or r5. Evidence and hashes in
 `lab/frontier/rpm2shell/PROVENANCE.md` and `real/leak-probe/`.
 
 ### Debugger-free ASLR-off run (2026-11-26 22:36–22:44Z)
