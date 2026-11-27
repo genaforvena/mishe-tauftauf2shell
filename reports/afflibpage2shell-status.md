@@ -1,12 +1,13 @@
-# afflibpage2shell — staged status (2026-11-27)
+# afflibpage2shell — admitted status (197th, 2026-11-27)
 
 Staged by frontier W303 from CVE-2026-119601 / GHSA-cmx5-359p-fw39 (CWE-787,
 CVSS 6.9 v4.0, affected `<= 3.7.22`, `AV:L/UI:P`). Vulnerable tag `v3.7.22`
 is commit `f6e51a8367cff73ea24c0adf09e533483c80ecd4`; fixed tag `v3.7.23` is
 commit `a1d6b350d283f4f5bff2afece8f5247b0c438a34`; verbatim one-file fix
 `04e75b65257c8e43cd911cb669b49b26edd4283e` is pinned at
-`lab/frontier/afflibpage2shell/pins/fix.patch`. The two-pane window 205 was
-created on the inner socket and registered once with no duplicate CVE/GHSA or
+`lab/frontier/afflibpage2shell/pins/fix.patch`. ADMITTED 02:2xZ under standing
+#6 as the 197th declared target mind; staged two-pane window 205 was adopted
+as-is, registered once among 206 unique names with no duplicate CVE/GHSA or
 sink lane.
 
 A crafted 617-byte AFF image declares `pagesize=100` and `sectorsize=4096`.
@@ -26,12 +27,16 @@ wire/request path, marker or command was observed.
 
 `sh build-all.sh && sh run-all.sh`: rc 0 `BUILD_OK` then `PASS=29 FAIL=0`.
 Runner SHA-256 `f2e166d0907e746dfcd2382e51ede996cc8d8269538519ab500896633f9339ff`.
-Clean-archive replay from `git archive dce931cf lab/frontier/afflibpage2shell`
-(7 entries, no `runs/`, checkouts, builds or binaries) rebuilt both pins and
-returned rc 0 `BUILD_OK` then unmodified `sh run-all.sh` rc 0 `PASS=29 FAIL=0`
-with the same runner hash above.
-Operator admission under standing #6 and independent witness replay are owed;
-this author report is not acceptance.
+Operator clean-archive replay at 02:2xZ from
+`git archive dce931cf lab/frontier/afflibpage2shell` (11 committed lab files;
+`runs/`, source checkouts, build directories and binaries absent) rebuilt all
+four pins, matched the runner hash, and returned rc 0 `BUILD_OK` then
+unmodified `sh run-all.sh` rc 0 `PASS=29 FAIL=0`. Fresh raw output repeated
+`LOADED pagesize=100 sectorsize=4096`, ASan `WRITE of size 4096` 0 bytes after
+the 100-byte region at verbatim raw `afflib_pages.cpp:187`; the fixed pin
+loaded `pagesize=0` with `rc=-1 errno=2`, safe geometry and plain canary
+controls were clean. Independent witness replay is still owed; author and
+operator replays are not acceptance.
 
 Brief: `reports/frontier-afflibpage2shell.md`. Harness provenance and
 negatives: `lab/frontier/afflibpage2shell/PROVENANCE.md`.

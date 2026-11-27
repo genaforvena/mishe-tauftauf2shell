@@ -1,9 +1,9 @@
 # Frontier brief: afflibpage2shell — CVE-2026-119601 (af_get_page badblock-fill geometry OOB write)
 
-**Status: STAGED 2026-11-27 W303, unowned. Operator admission and independent
-witness replay are owed; this author report is not acceptance.** The two-pane
-window 205 (panes on the inner socket) is live and registered. Grade at
-handoff: **R1 — / R2 ✓ / R3 ✓ (GCC ASan WRITE of 4096 at the raw pinned sink,
+**Status: ADMITTED 02:2xZ under standing #6 as the 197th declared target mind.
+Independent witness replay is owed; this author report is not acceptance.**
+The two-pane window 205 was adopted as-is at admission. Grade at handoff:
+**R1 — / R2 ✓ / R3 ✓ (GCC ASan WRITE of 4096 at the raw pinned sink,
 caller buffer supplied by the harness) / R4 — / R5 —**. Claims below are tied
 to pinned bytes and local observations; advisory prose is labeled as claim.
 
@@ -64,10 +64,11 @@ Observed raw report: `ERROR: AddressSanitizer: heap-buffer-overflow`,
 (`sector=512`, `page=4096`) reads a full page on both pins with no finding.
 Plain vulnerable mode faults before readback, so chosen-byte control is NOT
 claimed. Full provenance and negatives: `lab/frontier/afflibpage2shell/PROVENANCE.md`.
-Clean `git archive` replay from staging commit `dce931cf` (7 committed
-entries; `runs/`, source checkouts, build directories and binaries absent)
+Clean `git archive` replay from staging commit `dce931cf` (11 committed lab
+files; `runs/`, source checkouts, build directories and binaries absent)
 rebuilt all four libraries and returned rc 0 `BUILD_OK` then unmodified
-`sh run-all.sh` rc 0 `PASS=29 FAIL=0` with the same runner hash. Author and
+`sh run-all.sh` rc 0 `PASS=29 FAIL=0` with the same runner hash. The operator
+replayed the same clean archive at 02:2xZ with the same result. Author and
 operator replays are not independent acceptance; witness verdict is owed.
 
 ## Rung-4 feasibility and cheapest next experiment
