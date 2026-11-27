@@ -393,9 +393,10 @@ GCC and Clang ASan -O0 logs show `WRITE of size 64`, 0 bytes after the
 and allocation frame `:60`; fixed attack `RET=-15`, both safe runs `RET=0`,
 plain attack `RET=-13` with the canary hex above. The claim's `-O1` negative
 was reproduced independently: GCC 13.3.0 `-O1 -fsanitize=address` exits 0
-with `RET=-13` and no report. At W238 time there was no real rpm build,
-crafted package, wire input, pointer, command or r5; the real-consumer lane
-above is later work and still lacks an independent witness. Full W238 detail:
+with `RET=-13` and no report.
+At W238 time there was no real rpm build, crafted package, wire input,
+pointer, command or r5; the real-consumer lane above is later work and is
+independently verified by the W314 verdict below. Full W238 detail:
 `.mishe-tauftauf/artifacts/witness-w238-rpm2shell/detail.md`.
 
 ## Grade and tractability
@@ -447,7 +448,8 @@ does not align). Fresh builds embed different debug paths, so heap layout
 is a different lab condition. Rung 4 is therefore **author-layout
 DEMONSTRATED**, not a layout-independent replay claim; the fresh-build
 negative is preserved in `lab/frontier/rpm2shell/PROVENANCE.md`. Grade is
-unchanged in the committed layout; independent witness verdict still UNKNOWN.
+unchanged in the committed layout; the independent witness verdict was
+UNKNOWN at that time (see W314 verdict below).
 
 A second end-to-end wrapper run at 20:57–20:59Z (fresh rebuild again)
 returned `WITNESS_REAL_TOTAL PASS=60 FAIL=4`: scaled payloads again 21 / 0,
@@ -566,6 +568,39 @@ embedded-path build. No useful object, code pointer, command or side effect;
 NO r5. This verdict covers the *label only*: the witness has not replayed
 the standing real-consumer asks #5630/#5669/#5729, so that acceptance stays
 UNKNOWN/open. The grade wording above is therefore read with that qualifier.
+
+### Witness replay (W314, 2026-11-27 04:14–04:15Z) — real consumers
+
+ESTABLISHED AS LABELED; no grade change, NO r5. This closes the standing
+real-consumer asks #5630 / #5669 / #5729 / #5731 at the labeled scope. All
+four runner sha256 pins matched (`run-real.sh` `1ba873e6…`,
+`run-scaled-payload.sh` `d0540006…`, `run-install-consumer.sh` `79f2784b…`,
+`run-gc-pointer.sh` `e8e4b5f8…`), as did the vulnerable/fixed source and
+excerpt pins. The witness ran the four unmodified runners from the mandated
+shared worktree path `lab/frontier/rpm2shell/real`:
+
+| runner | rc | counts |
+| --- | --- | --- |
+| `bash run-real.sh` | 0 | `REAL_CONSUMER_PASS=21 REAL_CONSUMER_FAIL=0` |
+| `bash run-scaled-payload.sh` | 0 | `SCALED_PAYLOAD_PASS=21 SCALED_PAYLOAD_FAIL=0` |
+| `bash run-install-consumer.sh` | 0 | `INSTALL_CONSUMER_PASS=14 INSTALL_CONSUMER_FAIL=0` |
+| `bash run-gc-pointer.sh` | 0 | `GC_POINTER_PASS=10 GC_POINTER_FAIL=0`, zero INFO (V aligned) |
+
+Substantively, not just counters: in those replays ASan `WRITE of size 64`, zero bytes
+after the 1-byte region at `rpmfi.cc:2242` in `rpm2cpio` and `rpm2archive`,
+with fixed attack rc 1 ASan-clean and all safe controls rc 0; scaled
+`WRITE of size 64/512/4096`; plain `rpm -i` SIGSEGV in `liblua5.2.so.0` via
+`rpmluaFree` (`rpmio/rpmlua.cc:153`); A/B/V `CHOSEN_PTR ... MATCH=1` at a
+real liblua GC visit (`lua_resume+0x206`, `movzbl 0x9(%r14)`), with `stepi`
+faulting on the chosen pointer — not a debugger-forced call.
+
+Qualifier preserved by the witness: runners 1-2 consume the prebuilt
+matched-layout worktree binaries rather than rebuilding from pinned trees;
+the fresh-build negative (13/1 and 6/2, PROVENANCE W309/W310) remains. Rung
+4 here is author-layout DEMONSTRATED, not a fresh-build invariant. No useful
+object, code pointer, marker, command, side effect or wire path; no chosen
+address dereference of a remote-controlled value. Detail:
+`.mishe-tauftauf/artifacts/witness-w314-rpm2shell/detail.md`.
 
 ### Loopback wire delivery (2026-11-26 22:56Z)
 

@@ -993,3 +993,47 @@ no r5. No runner, source or package byte changed.
 
 Chat check at 04:06Z: #6048 (consolidated real-consumer replay request) still
 unopened by the witness; #5630/#5669/#5729 still owed. Acceptance UNKNOWN.
+
+## W315 (2026-11-27 04:41Z) — witness W314 real-consumer acceptance
+
+Chat #6061 (witness verdict on the consolidated #6048 replay request):
+**ESTABLISHED AS LABELED**, no grade change, NO r5. It closes the standing
+real-consumer asks #5630 / #5669 / #5729 / #5731 at the labeled scope. The
+witness opened the verdict at 04:13:01Z and replayed 04:14–04:15Z. All four
+runner sha256 pins matched the author's (`run-real.sh` `1ba873e6…`,
+`run-scaled-payload.sh` `d0540006…`, `run-install-consumer.sh` `79f2784b…`,
+`run-gc-pointer.sh` `e8e4b5f8…`), as did the pins under `pins/`
+(vulnerable `51d5d7c9…`, fixed `eaca65fd…`, vulnerable excerpt `dd72be1b…`,
+fixed excerpt `0c00ded1…`). All four runners were executed unmodified from
+the exact shared worktree path `lab/frontier/rpm2shell/real`, as #5731
+required.
+
+Observed: `run-real.sh` rc 0 `REAL_CONSUMER_PASS=21 REAL_CONSUMER_FAIL=0`;
+`run-scaled-payload.sh` rc 0 `21/0`; `run-install-consumer.sh` rc 0 `14/0`;
+`run-gc-pointer.sh` rc 0 `GC_POINTER_PASS=10 GC_POINTER_FAIL=0` with zero
+INFO (V aligned). Substantive bytes: fresh ASan `WRITE of size 64`, 0 bytes
+after the 1-byte region `[0x5020000009b0,0x5020000009b1)` at
+`iterReadArchiveNext … rpmfi.cc:2242` in both `rpm2cpio` and `rpm2archive`;
+fixed attack rc 1 ASan-clean, all safe controls rc 0; scaled
+`WRITE of size 64/512/4096`; plain `rpm -i` SIGSEGV in `liblua5.2.so.0` via
+`rpmluaFree … rpmio/rpmlua.cc:153`; `gc-pointer/A.log`
+`NEXT_AFTER=0x4141414141414141` then
+`CHOSEN_PTR=0x4141414141414141 … MATCH=1` at `*(&lua_resume+0x206)`,
+`movzbl 0x9(%r14),%r13d`, with `stepi` faulting on the chosen pointer — a
+breakpoint on a real liblua GC visit, not a debugger-forced call. B repeats
+with `0x4242…`; V is the live discovered target `0x5555555aa190`. Raw
+witness stdout in `/tmp/w314-{run-real,scaled,install,gc}.log` (throwaway);
+detail `.mishe-tauftauf/artifacts/witness-w314-rpm2shell/detail.md`.
+
+Qualifiers the witness preserved: runners 1-2 consume the prebuilt
+`build-vuln-asan`/`build-fixed-asan`/`build-vuln-plain` binaries rather than
+rebuilding from pinned trees — that is the intended matched embedded-path
+layout condition; the clean-archive fresh-build negatives (13/1 and 6/2,
+W309/W310) remain preserved. The `4abba405…` binary hash belongs to the
+separate non-PIE lane (`build-vuln-nopie/tools/rpm`), not to
+`build-vuln-plain/tools/rpm` (`e4a090e7…`) used by these four runners; no
+contradiction. Grade unchanged: rung 3 pinned verbatim / rung 4 author-layout
+DEMONSTRATED in real rpm consumers; no useful object, code pointer, marker,
+command, side effect or wire path; no chosen-address dereference of a
+remote-controlled value; NO r5. No runner, source or package byte changed
+with this note.
