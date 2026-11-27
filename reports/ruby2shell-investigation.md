@@ -9663,3 +9663,61 @@ parity/geometry produces a second independent one-byte write; zero on
 3.4.13. Falsifier: exactly one write for every receiver N, or any patched
 write. First command:
 `valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 'a=("a"+"\xDF"*27).force_encoding(Encoding::ISO_8859_1); t=("a"+"\xDF"*43).force_encoding(Encoding::ISO_8859_1); p a.casecmp?(t)'`.
+
+## 2026-11-27 23:0xZ — W367: both operands overflow; the oracle reports only one
+
+W367 swept the receiver's and the argument's sharp-s counts independently
+(`n1`, `n2` ∈ {27, 43, 59}) with both operands tagged ISO-8859-1. Committed
+`lab/repro/ruby2shell-twofold.rb`, `lab/repro/ruby2shell-twofold-matrix.sh`
+and `lab/repro/ruby2shell-twofold-watch.gdb`; raw evidence is gitignored
+under `lab/build/evidence/casemap-chain/w367/` (`matrix.txt`, one valgrind
+output per arm, gdb transcripts).
+
+The inherited premise was wrong: W364's `both_l` arm did **not** fold two
+sharp-s-bearing operands. `lab/repro/ruby2shell-rung3-cross-encoding.rb:29`
+paired `latin_folded` (`"a"+"s"*2n`, already lowercase) with `latin`;
+only the argument entered `case_map`, so one write was expected there.
+
+Valgrind: 18/18 arms observed, all rc=0. On 3.4.12 every arm shows
+exactly one `Invalid write of size 1` plus one copy-out `Invalid read of
+size 1`, always at the **receiver's** block size (72/88/104 for n1
+27/43/59), never at n2's. On 3.4.13 all nine arms show zero writes and
+zero reads. Plain reruns: 54/54 observed, all rc=0, no glibc diagnostic
+on either build. The valgrind-only prediction (two reported writes at
+both block sizes) is therefore FALSIFIED.
+
+The direct debugger observation contradicts the oracle count. Under
+gdb on 3.4.12 with (n1,n2)=(27,43), `str_casecmp_p` makes four
+`case_map` calls; the `capa`/`used` pairs at `string.c:7850` are 48/49,
+26/6, 64/65 and 42/22. Both first passes therefore return one byte more
+than their allocation. A hardware watchpoint armed on the **second**
+call's `to_end` trapped inside `case_map (enc/iso_8859_1.c:293)` with
+`*to_end == 0x73`: an independently observed second one-byte write, at
+the argument's buffer, of the fold byte. The same driver under ASan 3.4.12
+reports one `heap-buffer-overflow` and stops; memcheck reports one.
+An oracle count of one does not bound the number of writes per call.
+
+Patched control under the same debugger script: `capa`/`used` 48/47 and
+64/63 on 3.4.13 — the fix at `enc/iso_8859_1.c:267` changes
+`to < to_end` to `to_end - to > 1`, so the loop stops with two bytes
+free and neither operand overshoots. This matches the zero-write valgrind
+matrix.
+
+Grade unchanged: no wire request, chosen address, marker or command.
+Rung 4 remains witness-COMPLETE; harness-condition rung 5
+witness-ESTABLISHED at its labeled scope; full
+stock/oracle-free/persistent rung 5 NOT ACHIEVED. Both observed bytes are
+the fixed fold byte 0x73, so two writes per comparison do not by
+themselves widen the byte alphabet or grant address choice.
+
+Next named experiment W368: write-count threshold and distinct-address
+test. Extend the committed watch script to arm a watchpoint on every
+`case_map` call's `to_end` and sweep operand lengths that straddle the
+one-byte-of-room condition (17/19/20/21/22/23 with the leading `'a'`
+prefix). Prediction: the number of traps equals the number of operands
+whose length makes `capa` even (odd sharp-s count here), at most two per
+comparison, each byte 0x73 at a distinct address. Falsifier: a trap for
+an even sharp-s count, a byte other than 0x73, or both traps at the
+same address. First command:
+`gdb -q -batch -x lab/repro/ruby2shell-twofold-watch-all.gdb lab/build/plain/ruby-3.4.12-plain/bin/ruby`
+(the watch-all script is to be added in W368).
