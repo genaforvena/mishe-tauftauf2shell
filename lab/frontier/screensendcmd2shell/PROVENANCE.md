@@ -80,10 +80,18 @@
   `attach_tty_name_in_ns` bytes at offsets 0, 16, 32, 48, 64, 100, 200, 239
   and 240 all read `0x43`, the chosen `STY` byte.
 - `RUN_ALL_OK 13 PASS / 0 FAIL` on two consecutive runs.
-- Clean `git archive --format=tar HEAD lab/frontier/screensendcmd2shell` TAR
-  SHA-256 `6b9dc4e877de427ebcfcfe7fd2ae3078f99ceb1c3952e922c00a3f1bfb9109c7`
+- Clean-archive replay at 21:42:48Z used `git archive --format=tar HEAD
+  lab/frontier/screensendcmd2shell` with HEAD at the intervening docs commit
+  `2ce0b99f` (same lab tree as `6ff9dcaf`, different commit timestamp); its
+  TAR SHA-256 `6b9dc4e877de427ebcfcfe7fd2ae3078f99ceb1c3952e922c00a3f1bfb9109c7`
   matched 6/6 input pins and replayed `RUN_ALL_OK 13 PASS / 0 FAIL` from a
-  fresh extraction; only the tarballs, not extracted source trees, are tracked.
+  fresh extraction. Only tarballs, not extracted source trees, are tracked.
+- `git archive` writes the commit timestamp into every TAR header, so that
+  hash belongs to `2ce0b99f`, not to any screensendcmd2shell commit. W371
+  recomputed all five archives: `4c00e1a5` `43cc6cd0…`, `6ff9dcaf`
+  `89424ab9…`, `95161177` and operator replay `519f6fde…`. The final staged
+  archive `519f6fde02eebd02da0bc1857cddb9a61a3d5c9494aa3ebacfabeda02bf2bb42`
+  verified 6/6 pins, `BUILD_OK` and `RUN_ALL_OK 13 PASS / 0 FAIL` at 21:47Z.
 
 ## Scope limits
 

@@ -8,7 +8,12 @@
   `lab/frontier/screensendcmd2shell/SHA256SUMS`, eight evidence pins in
   `evidence/SHA256SUMS`. Exact fix hunk in `src/fix.patch`.
 - **Replay**: staged twice `RUN_ALL_OK 13 PASS / 0 FAIL`; operator's own clean replay 21:47Z from `git archive --format=tar HEAD lab/frontier/screensendcmd2shell` (plain-tar SHA-256 `519f6fde02eebd02da0bc1857cddb9a61a3d5c9494aa3ebacfabeda02bf2bb42`) verified 6/6 input pins, own `BUILD_OK` and unmodified `./harness/run-all.sh` again `13 PASS / 0 FAIL`.
-- **Provenance NIT**: the staged `6b9dc4e8…` archive SHA-256 does not match archives of the staging commits (`4c00e1a5` `43cc6cd0…`, `6ff9dcaf` `89424ab9…`, `95161177` `519f6fde…`); input pins and the replay are source-true, frontier was asked to explain the recorded hash.
+- **Provenance hash resolved W371**: recorded `6b9dc4e8…` was the TAR of the
+  intervening HEAD `2ce0b99f` at 21:42:48Z (same lab tree as `6ff9dcaf`,
+  different commit timestamp), not of a stage commit; `git archive` embeds
+  the commit time. `4c00e1a5` `43cc6cd0…`, `6ff9dcaf` `89424ab9…`, `95161177`
+  `519f6fde…`; all five recomputed and detailed in `PROVENANCE.md`. Input
+  pins and both clean replays are source-true.
 - **Evidence**: real 5.0.1 `screen -X` ASan `global-buffer-overflow`,
   `WRITE of size 302`, 0 bytes after the 4098-byte `SocketPath` and 62 bytes
   before the real global `attach_tty_name_in_ns`, at `attacher.c:434` ←
