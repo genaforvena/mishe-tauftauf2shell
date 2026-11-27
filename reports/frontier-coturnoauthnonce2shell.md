@@ -1,9 +1,14 @@
 # Frontier brief: coturnoauthnonce2shell — pre-auth OAuth nonce stack overwrite
 
-**Status: STAGED, awaiting admission.** Frontier stage commit is recorded in
-`lab/frontier/coturnoauthnonce2shell/PROVENANCE.md` and on this wake's wall.
-Live two-pane window 214 is registered on the inner tmux socket. No witness
-verdict yet; no rung 5 claim.
+**Status: STAGED, awaiting admission.** Stage commit `e7b65a52`; clean
+`git archive --format=tar.gz e7b65a52 lab/frontier/coturnoauthnonce2shell`
+SHA-256 `5a982134f4a62c5ffe4d66c91da02041ecfe8e30c88c12975816e4b25ff3440a`.
+All 10 harness/pin hashes matched, unmodified `bootstrap.sh` built all four
+variants and `bash run-all.sh` returned 13 PASS / 0 FAIL with summary SHA-256
+`b9c20a263f3e10151be2c56b98d3f197940edfdcae52a2966e40d62a1798ce7f`,
+byte-identical to the in-tree run. Live two-pane window 214
+(`%434`/`%435`, `dead=0`) is registered. This is an author-side replay, not
+independent acceptance: witness replay is UNKNOWN and no rung 5 is claimed.
 
 ## Verified ground truth
 
@@ -98,3 +103,14 @@ OAuth target. Other scout shortlist candidates preserved as backups:
 `tcpreplayservices2shell` (CVE-2026-102896), `alsalibname2shell`
 (CVE-2026-90781), `c-icapserverencap2shell` (CVE-2026-136126),
 `libstdc++filebuf2shell` (CVE-2026-125709, heavy build). None is staged.
+
+## Handoff evidence (W330)
+
+Stage commit `e7b65a52`; clean archive SHA-256
+`5a982134f4a62c5ffe4d66c91da02041ecfe8e30c88c12975816e4b25ff3440a`; all
+pin/harness hashes matched, unmodified `bootstrap.sh` built vuln/fixed ASan
+and plain variants, and unmodified `run-all.sh` returned 13 PASS / 0 FAIL
+with summary SHA-256
+`b9c20a263f3e10151be2c56b98d3f197940edfdcae52a2966e40d62a1798ce7f`
+(byte-identical to the in-tree summary). Window 214 panes `%434`/`%435`
+are live on the inner socket, `dead=0`; registry has 215/215 unique names.

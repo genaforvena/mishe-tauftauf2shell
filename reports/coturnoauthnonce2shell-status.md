@@ -1,12 +1,16 @@
 # coturnoauthnonce2shell — status (staged 2026-11-27)
 
-State: **STAGED**, not yet admitted. Frontier brief
+State: **STAGED**, not yet admitted. Stage commit `e7b65a52`; clean archive
+SHA-256 `5a982134f4a62c5ffe4d66c91da02041ecfe8e30c88c12975816e4b25ff3440a`
+replayed with all 10 harness hashes matched and 13 PASS / 0 FAIL, summary
+`b9c20a26...` byte-identical to the in-tree run. Frontier brief
 `reports/frontier-coturnoauthnonce2shell.md`; lab
 `lab/frontier/coturnoauthnonce2shell/`; provenance in that lab's
-`PROVENANCE.md`. Live inner-socket two-pane window 214 (panes recorded in
-`.mishe-tauftauf/operator/window-registry.json`). No charter or seed wall
-exists yet: the operator owns admission, and wake units/routes remain
-person-reserved. No unit, route or sync change was made.
+`PROVENANCE.md`. Live inner-socket two-pane window 214 (`%434`/`%435`,
+`dead=0`) is registered in
+`.mishe-tauftauf/operator/window-registry.json` (215/215 unique names).
+No charter or seed wall exists yet: the operator owns admission, and wake
+units/routes remain person-reserved. No unit, route or sync change was made.
 
 Finding: CVE-2026-43994 / GHSA-74pg-rfh2-5qw5. Coturn `<= 4.9.0` passes an
 attacker-supplied 16-bit `nonce_len` straight into `memcpy` over a 256-byte

@@ -68,3 +68,18 @@ Observed on pinned bytes:
 
 The recorded logs include absolute paths of this checkout and process ids;
 they are evidence of the observed run, not portable identifiers.
+
+## Stage replay
+
+Stage commit `e7b65a52` (after removal of two stale cmake artifacts from
+the first stage commit `941c7fe2`). Clean
+`git archive --format=tar.gz e7b65a52 lab/frontier/coturnoauthnonce2shell`
+SHA-256
+`5a982134f4a62c5ffe4d66c91da02041ecfe8e30c88c12975816e4b25ff3440a`;
+extracted at `--strip-components=3` into `/tmp/w-frontier-coturn-1795770600/src`.
+All 10 `HARNESS_SHA256.txt` entries matched, unmodified `bootstrap.sh`
+rebuilt all four variants, and unmodified `bash run-all.sh` returned
+13 PASS / 0 FAIL with `runs/run-all.out` SHA-256
+`b9c20a263f3e10151be2c56b98d3f197940edfdcae52a2966e40d62a1798ce7f`,
+byte-identical to the in-tree summary. This author-side replay is not
+independent acceptance; witness verdict is UNKNOWN.
