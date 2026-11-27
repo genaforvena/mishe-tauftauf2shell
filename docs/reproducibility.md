@@ -20448,6 +20448,103 @@ count 149 are operator-owned. Live loopback ZFILE remains owed. Detail:
 `lab/frontier/lrzszprocheader2shell/PROVENANCE.md` and
 `reports/frontier-lrzszprocheader2shell.md` §Rung-4 feasibility.
 
+## 2026-11-27 20:0x–20:2xZ — Ruby W358–W360; gimpjif W357 controls; Checkmk 220th
+
+### Ruby2Shell W358/W360 — case-map byte alphabet CLOSED
+
+W358 and W360 reuse the six plain builds and the case-map sink of §20:0xZ.
+The two survey scripts are gitignored raw evidence under
+`lab/build/evidence/casemap-chain/w358/` (`survey.rb`, `survey-fold.rb`);
+regenerate them against the same pinned plain 3.4.12 interpreter from
+`lab/ruby2shell/provision.sh` before reusing these counts. Each enumerates
+the 99 non-dummy, ASCII-compatible single-byte encodings, every byte
+`0x80..0xff` and every case operation. W358 covers `upcase`, `downcase`
+and `swapcase`; W360 adds `downcase(:fold)`. Expect
+`single_byte_encodings=99`, `expansions_total=56`, `first=53 count=56` in
+W358 and `expansions_total=28`, `first=73 count=28` in W360: all expansions
+are `0xDF -> 0x53 0x53` or `0xDF -> 0x73 0x73`. The OOB alphabet is
+exactly `{0x53, 0x73}`; both bytes set glibc's IS_MMAPPED bit `0x2`, so
+neither can put a size LSB on the non-abort path. No wire request, chosen
+address or command; primary grade and rung-5 ceiling unchanged. Detail:
+`reports/ruby2shell-investigation.md` §20:0xZ and §20:1xZ.
+
+### Ruby2Shell W359 — successor `prev_size` bytes 2/4/6 CLOSED
+
+The §20:0xZ W357 closing geometry sentence is corrected here. For request
+`R`, stock glibc chunk size `C=ceil((R+8)/16)*16` puts the successor header
+at `buffer+C-16`, so the OOB slot `buffer+R` reaches successor `prev_size`
+bytes 0..7 for `R mod 16 == 0..7`, its size LSB for 8, and current-chunk
+padding for 9..15. Even `capa` and `R=capa+24` make only residues
+0/2/4/6/8/10/12/14 reachable; W356/W357 covered 0/10, W353–W355 covered 8
+and W359 adds 2/4/6. From the repository root with the six gitignored
+plain builds of §20:0xZ and the committed mixed driver:
+
+```sh
+sha256sum lab/repro/ruby2shell-rung3-mixed.rb \
+  lab/repro/ruby2shell-mixed-prevsize-upper.gdb
+builds="ruby-3.4.12-plain ruby-3.3.13-plain ruby-4.0.9-plain ruby-3.4.13-plain ruby-3.3.14-plain ruby-4.0.10-plain"
+for ver in $builds; do
+  for n in 20 21 23 25; do
+    valgrind --error-limit=no "lab/build/plain/$ver/bin/ruby" \
+      lab/repro/ruby2shell-rung3-mixed.rb "$n"
+  done
+done
+for ver in $builds; do
+  for n in 20 21 23 25; do
+    for rep in 1 2 3; do
+      "lab/build/plain/$ver/bin/ruby" lab/repro/ruby2shell-rung3-mixed.rb "$n"
+    done
+  done
+done
+gdb -q -batch -x lab/repro/ruby2shell-mixed-prevsize-upper.gdb --args \
+  lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  lab/repro/ruby2shell-rung3-mixed.rb 23
+```
+
+Expect driver SHA-256
+`42997e67604c579a70119ce942209efc22b4023652b0cca9ddf4ec514e60f94c` and
+GDB script SHA-256
+`eba23f5b8d6dcfb2f0b580b1cc18e5bcc4430411c2b7e665560c093db94289b1`.
+N=21/23/25 give `R=66/68/70` (residues 2/4/6): each of nine vulnerable
+valgrind arms has exactly one `Invalid write of size 1` at
+`case_map (iso_8859_1.c:293)` plus the known copy-out invalid read, 0
+bytes after a 66/68/70-byte block; the nine patched arms have zero
+invalid writes/reads. N=20 has no valid overflow window and is clean on
+all six builds; all 30 valgrind arms return rc 0. All 72 fresh plain
+processes return rc 0 without `munmap_chunk`, `corrupted size`,
+`invalid next size` or abort diagnostics. GDB at 3.4.12 N=23 reads
+`(prev_size, size) = (0x40, 0x50)`, slot `buffer+68` changing
+`0x00 -> 0x53`, successor size LSB at `+72` staying `0x21` and `prev_size`
+byte 5 staying `0x00`. An in-use `prev_size` byte is inert on stock glibc;
+no grade change and no wire/address/marker/command. Raw logs are
+gitignored under `lab/build/evidence/casemap-chain/w359/`; the loops
+regenerate them. Detail: `reports/ruby2shell-investigation.md` §20:1xZ.
+
+### Gimpjif2Shell W357 — ASLR-off and CPU-pin negatives
+
+The §20:0xZ W356 fake-map recipe is unchanged; W357 only wraps the
+unmodified W353 runner and its JIFs in `setarch -R` and, in a second
+pair of forged runs, `taskset -c 0`. Exact JIFs, hashes and logs are in
+`lab/frontier/gimpjif2shell/PROVENANCE.md` §W357. Expect two W353 runs to
+hold `idx=0x555555679070`, but forged replays to drift
+`0x679050 -> 0x679060` (delta observer `0x6790b0`,
+`ARRBASE−idx=0x47210`), and CPU pinning to spread `idx` by `0x350`.
+Only genuine resolutions and the genuine GOT write occur: no chosen-map
+hit, `l_used` store or chosen GOT value. Neither control makes `idx`
+deterministic; grade and NO-r5 ceiling unchanged.
+
+### Checkmk2Shell — 220th admission and W368 witness verdict
+
+The §20:0xZ clean-archive recipe (`git archive --format=tar b902273f
+lab/frontier/checkmk2shell`, TAR SHA-256
+`3a5b3ef20bbf9bcbf3efa6c68fdbbcba9b45fb343de41d92d5be3126f25cab52`,
+12/12 pins, `RUN_ALL_OK 11 PASS / 0 FAIL`) is unchanged. `4bfa93b8` added
+the 220th row to `docs/results.md` and `research-manifest.json` with rung
+cells ✓/✓/✓/◐/—; `5f12fca6` folded witness W368's ESTABLISHED AS LABELED
+verdict into that row's `established` flag only (150 → 151), grade-neutral
+and NO r5. No new harness, boundary widening or R5 claim; the real-parser
+return-path transfer and loopback spooler replay remain UNKNOWN.
+
 ## 2026-11-27 20:0xZ — Ruby W367/W357; gimpjif W356; nfdump; Checkmk replay
 
 ### Ruby2Shell W356 — W367 witness verdict (no new harness)
@@ -20506,10 +20603,11 @@ site. All 72 plain processes must return rc 0 without `munmap_chunk`,
 `corrupted size`, `invalid next size` or double-free diagnostics. GDB must
 print `capa=50`, `slot=current_buffer+74`, `AFTER used=51`, with the slot
 byte changing `0x00 -> 0x53` and the successor boundary at
-`current_buffer+80` unchanged. The request is `R=capa+24`; stock glibc
-sizes the chunk `C=ceil((R+8)/16)*16`, so only `R==0` or `R==8` (mod 16)
-can reach successor prev_size or size LSB. Every other residue is current
-chunk padding. Raw logs are gitignored under
+`current_buffer+80` unchanged. For N=27 the request is `R=capa+24=74`, so
+`R mod 16 == 10` and the slot is current-chunk padding. W359 corrected the
+general residue claim: residues 0..7 reach successor `prev_size` bytes,
+8 reaches its size LSB, and only 9..15 are padding (odd residues are
+unreachable for even `capa`); see §20:0x–20:2xZ. Raw logs are gitignored
 `lab/build/evidence/casemap-chain/w357/`; the failed first-sweep logs are
 historical evidence, while the loops regenerate the corrected matrix.
 No wire request, chosen address, marker or command; grades unchanged.

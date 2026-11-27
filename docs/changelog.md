@@ -6,6 +6,54 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 20:0x–20:2xZ — Ruby W358–W360; Checkmk 220th; gimpjif W357 negatives
+
+Second docs-only fold of `4bfa93b8`, `969a81be`, `61905ace`, `5f12fca6`
+and `c22f37d4` after the §20:0xZ fold. No grade, rung cell, generated
+count, README, results, manifest, SVG, report or lab evidence moved here:
+the operator's re-render was verified, not duplicated. Recipes are in
+`docs/reproducibility.md` §20:0x–20:2xZ.
+
+- **Ruby W358/W360 close the case-map byte alphabet** (`969a81be`). W358
+  enumerated 99 single-byte encodings, all `0x80..0xff` bytes and three
+  case operations: all 56 two-byte expansions are `0xDF -> 0x53 0x53`.
+  W360 added `downcase(:fold)`: all 28 expansions are
+  `0xDF -> 0x73 0x73`. The OOB byte alphabet is exactly `{0x53, 0x73}`;
+  both bytes carry glibc's IS_MMAPPED bit, so neither puts a size LSB on
+  the non-abort path. No wire request, chosen address or command; grade
+  unchanged. The survey scripts are gitignored raw evidence and must be
+  regenerated against the pinned plain 3.4.12 interpreter.
+- **Ruby W359 corrects W357's residue claim and closes upper `prev_size`
+  bytes** (`969a81be`). Even `capa` makes `R=capa+24` even: residues
+  0/2/4/6 reach successor `prev_size` bytes 0/2/4/6, residue 8 its size
+  LSB, 10/12/14 current-chunk padding; odd residues are unreachable.
+  The new N=21/23/25 arms gave 9/9 vulnerable valgrind writes at
+  R=66/68/70 and 9/9 patched clean (30/30 arms with even-N controls), all
+  rc 0; 72 fresh plain processes were rc 0 with no glibc diagnostic. GDB
+  on 3.4.12 N=23 saw slot `buffer+68` change `0x00 -> 0x53` with successor
+  size LSB at `+72` still `0x21`. Grade unchanged: the `prev_size` byte is
+  inert while the chunk is in use.
+- **Checkmk2Shell is the 220th declared target mind and has a witness
+  verdict** (`4bfa93b8`, `5f12fca6`). CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq
+  mkevent `message[8192]` overflow; clean `b902273f` archive replay gave
+  12/12 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`. R3 is on the real pinned
+  parser, R4 LIMITED to the isolated verbatim sink, R5 not claimed;
+  witness W368 is ESTABLISHED AS LABELED, grade-neutral and NO r5. Only
+  the `established` flag moved (150 → 151); cells remain ✓/✓/✓/◐/—.
+- **Gimpjif W357 preserves two `idx`-stabilization negatives**
+  (`61905ace`, `c22f37d4`). `setarch -R` held `idx` in two W353 runs but
+  forged replays still drifted `0x679050 -> 0x679060` (delta observer
+  `0x6790b0`); `taskset -c 0` spread it by `0x350`. Only genuine
+  resolutions and the genuine GOT write occurred: no chosen-map hit,
+  `l_used` store or chosen GOT value. Grade and NO-r5 ceiling unchanged;
+  a coherent static fake map still needs a deterministic `idx`.
+
+What would change this fold: W361's fold-byte size-LSB differential, a
+Checkmk real-parser return-path or loopback spooler replay, a gimpjif
+`idx`-independent map or chosen-address store, or a checker RED on
+committed HEAD.
+
+
 ## 2026-11-27 20:0xZ — Ruby W367/W357; Checkmk replay; gimpjif/nfdump closures
 
 Docs-only fold of the six commits after `cc777e1a` through `e8d4c27b`:
@@ -33,10 +81,11 @@ smoke observations are in `docs/reproducibility.md` §20:0xZ.
   without glibc metadata diagnostics. GDB on 3.4.12 N=27 reads `capa=50`,
   `slot=current_buffer+74`, `used=51`: the slot changes `0x00 -> 0x53` while
   the successor boundary at `current_buffer+80` is unchanged. The write is
-  in current-chunk padding; under this allocation shape only R == 0 or 8
-  (mod 16) can reach successor prev_size or size LSB. No grade change, wire
-  request, chosen address, marker or command. Next named experiment W358:
-  survey two-byte uppercase expansions for a byte other than fixed `0x53`.
+  in current-chunk padding for N=27; W359 below corrects the general claim:
+  residues 0..7 reach successor `prev_size` bytes and 8 reaches its size
+  LSB, while odd residues are unreachable for even `capa`. No grade
+  change, wire request, chosen address, marker or command. W358's
+  byte-alphabet survey is closed in the next dated fold.
 - **Gimpjif W356 preserves the split-map negative** (`27d64eb8`). Moving a
   coherent fake map to `ARRBASE-0x800` and filling 256 loader-array slots
   still failed in two unmodified-runner replays: runtime `idx` drifted

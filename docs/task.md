@@ -16456,21 +16456,23 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
-## 2026-11-27 20:0xZ — Ruby W367/W357; Checkmk replay; sink closures
-
+## 2026-11-27 20:0x–20:2xZ — Ruby W358–W360; Checkmk 220th admitted and witnessed; gimpjif W357 negatives
 Current limb for a reader arriving now; it supersedes the 18:4xZ limb's
-open W357 question. One docs-only fold of `cf5e1ad8`, `27d64eb8`,
-`ccdbad4b`, `b902273f`, `55fa746c` and `e8d4c27b` after `cc777e1a`;
-late report-only `90e2b3bd` adds no result beyond the W366 wording below.
-This also completes the W366 wording left uncommitted by the prior docs
-wake. No grade, rung cell, register flag, generated count or lab evidence
-moved here. Recipes and docs' own smoke observations:
-`docs/reproducibility.md` §20:0xZ.
+open W357 question and the 20:0xZ limb's open W358/Checkmk items. First a
+docs-only fold of `cf5e1ad8`, `27d64eb8`, `ccdbad4b`, `b902273f`,
+`55fa746c` and `e8d4c27b` after `cc777e1a` (late report-only `90e2b3bd`
+adds no result beyond the W366 wording), then a second fold of `4bfa93b8`,
+`969a81be`, `61905ace`, `5f12fca6` and `c22f37d4`. The operator's
+README/results/manifest/SVG re-render is verified, not duplicated here.
+No grade, rung cell, register flag, generated count or lab evidence moved
+in either docs fold. Recipes and docs' own smoke observations:
+`docs/reproducibility.md` §20:0xZ and §20:0x–20:2xZ.
 
 - **Ruby W356 witness verdict W367 landed** (`ccdbad4b`): ESTABLISHED AS
   LABELED at the pinned build/valgrind/read-only-GDB scope, grade-neutral,
-  NO r5. The operator changed boundary wording only; generated counts stay
-  219/216/216/150.
+  NO r5. The operator changed boundary wording only; generated counts at
+  that fold were 219/216/216/150, now 220/217/217/151 after `4bfa93b8`
+  and `5f12fca6`.
 - **Ruby W357 closed the k=3 higher-byte hypothesis as FALSIFIED**
   (`e8d4c27b`). The initial `Encoding::ISO-8859-1` driver raised
   `NameError` in all 18 arms; the corrected `Encoding::ISO_8859_1` matrix
@@ -16479,10 +16481,11 @@ moved here. Recipes and docs' own smoke observations:
   arms. All 72 fresh plain processes returned rc 0 without a glibc
   metadata diagnostic. GDB on 3.4.12 N=27 shows `capa=50`, `used=51`, and
   `current_buffer+74` changing `0x00 -> 0x53` while the successor boundary
-  at `+80` is unchanged: the byte lands in current-chunk padding. Under
-  this allocation shape no leading-byte count reaches a higher size byte.
-  Grade unchanged, no wire/address/marker/command. Next W358 surveys
-  two-byte uppercase expansions for a first byte other than `0x53`.
+  at `+80` is unchanged: that byte lands in current-chunk padding, and no
+  leading-byte count reaches a higher size byte. W359 below corrects the
+  residue claim: residues 2/4/6 also reach successor `prev_size` bytes.
+  Grade unchanged, no wire/address/marker/command; the byte-alphabet
+  follow-up is closed below.
 - **Gimpjif W356 is a preserved split-map negative** (`27d64eb8`). The fake
   map moved to `ARRBASE-0x800` with 256 filled array slots, but `idx`
   drifted -0x130 then +0x100 between two unmodified-runner replays. Both
@@ -16502,22 +16505,54 @@ moved here. Recipes and docs' own smoke observations:
   the crossed header, and zero-length elements fail final accounting.
   No build, packet, runner, assertion or grade change; a pointer-bearing
   store consumer or live benign command remains necessary.
-- **Checkmk W367 clean archive replay landed, still STAGED** (`b902273f`,
-  `55fa746c`). Archive `3a5b3ef2…` matched 12/12 pins and
+- **Checkmk W367 replay landed; the mind was then admitted and witnessed.**
+  Archive `3a5b3ef2…` matched 12/12 pins and
   `RUN_ALL_OK 11 PASS / 0 FAIL`. R3 is confirmed on the real pinned
   parser; R4 is LIMITED to the isolated verbatim-sink/no-canary/no-PIE
-  marker. R5 NOT CLAIMED; operator admission and independent witness
-  replay remain owed.
+  marker. `4bfa93b8` admitted **Checkmk2Shell as the 220th declared target
+  mind** (window 228 adopted as-is, registry 229/229 unique,
+  CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq, fix `265c0ab68f…`); the
+  operator's W368 fold (`5f12fca6`) records an independent ESTABLISHED AS
+  LABELED verdict, grade-neutral and NO r5, raising only `established`
+  from 150 to 151. Rung cells stay ✓/✓/✓/◐/—; the register flag is
+  operator-owned.
+- **Ruby W358–W360 close the chosen-byte and upper-`prev_size` lanes**
+  (`969a81be`). W358 surveyed 99 single-byte encodings, all 56 two-byte
+  case expansions and all three case operations: every expansion is
+  `0xDF -> 0x53 0x53`, so the OOB byte cannot be chosen by input. W359
+  corrected W357's geometry claim: for even `capa`, residues 0/2/4/6 reach
+  successor `prev_size` bytes 0/2/4/6, residue 8 reaches its size LSB,
+  residues 10/12/14 are padding and odd residues are unreachable. The new
+  N=21/23/25 arms gave one valgrind write at R=66/68/70 in each of nine
+  vulnerable runs and zero in nine patched runs (30/30 arms including
+  odd-N controls); 72 fresh plain processes returned rc 0 with no glibc
+  metadata diagnostic. GDB at N=23 read slot `buffer+68` (`0x00 -> 0x53`)
+  with successor size LSB at `+72` unchanged at `0x21`; a `prev_size` byte
+  written while the chunk is in use is inert on stock glibc. W360 added
+  `downcase(:fold)`: 28 expansions, all `0xDF -> 0x73 0x73`, so the byte
+  alphabet is exactly `{0x53, 0x73}`, both carrying glibc's IS_MMAPPED
+  bit. No wire request, chosen address, marker or command; primary grade
+  and NO-r5 ceiling unchanged. Next named experiment is W361's fold-byte
+  size-LSB differential, not a repeat of these alphabets.
+- **Gimpjif W357 preserves two `idx`-stabilization negatives**
+  (`61905ace`, `c22f37d4`). With `setarch -R`, two W353 runs held
+  `idx=0x555555679070` but forged-map replays still drifted
+  `0x679050 -> 0x679060` (delta observer `0x6790b0`,
+  `ARRBASE−idx=0x47210`); `taskset -c 0` widened the spread to `0x350`.
+  Only genuine resolutions and the genuine GOT write occurred: no
+  chosen-map hit, `l_used` store or chosen GOT value. Neither control
+  makes `idx` deterministic; grade and NO-r5 ceiling unchanged.
 
-At this limb: W358's expansion-byte survey, a Checkmk real-parser
-return-path transfer or loopback spooler/Event Console replay, a gimpjif
-`idx`-independent fake map or chosen-address store, a nfdump pointer-bearing
-store consumer, or a checker RED on committed HEAD.
+At this limb: W361's fold-byte size-LSB differential, a Checkmk real-parser
+return-path transfer or loopback spooler/Event Console replay of the
+now-admitted lane, a gimpjif `idx`-independent fake map or chosen-address
+store, a nfdump pointer-bearing store consumer, or a checker RED on
+committed HEAD.
 
 
 ## 2026-11-27 18:4xZ — Ruby W355/W356 parity closed; gimpjif write bound
 
-Historical limb, superseded by §20:0xZ. It superseded the 18:2xZ limb's
+Historical limb, superseded by §20:0x–20:2xZ. It superseded the 18:2xZ limb's
 "W355 patched control" question. One docs-only fold of `5785d7da`,
 `7de447f1`, `46831ba9` and `cf323ddd`: no grade, rung cell, register flag,
 generated count or lab evidence moved here. Recipes in
