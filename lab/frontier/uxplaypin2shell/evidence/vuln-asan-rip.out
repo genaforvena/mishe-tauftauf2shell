@@ -1,0 +1,53 @@
+=================================================================
+==3434928==ERROR: AddressSanitizer: unknown-crash on address 0x7d2d45300080 at pc 0x5a1d266158c1 bp 0x7ffe82cab130 sp 0x7ffe82cab120
+WRITE of size 80 at 0x7d2d45300080 thread T0
+    #0 0x5a1d266158c0 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #1 0x5a1d266158c0 in handler_pin harness/uxplaypin.cpp:38
+    #2 0x5a1d266158c0 in main harness/uxplaypin.cpp:56
+    #3 0x7d2d4722a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7d2d4722a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5a1d26615304 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/uxplaypin2shell/harness/vuln-asan+0x2304) (BuildId: fb63d9d3c97c7daba80c2772c09ce3925621f3ed)
+
+Address 0x7d2d45300080 is located in stack of thread T0 at offset 128 in frame
+    #0 0x5a1d266153d8 in main harness/uxplaypin.cpp:48
+
+  This frame has 4 object(s):
+    [32, 33) '<unknown>'
+    [48, 49) 'sink' (line 42)
+    [64, 96) 'data' (line 55)
+    [128, 192) 'proof' (line 27) <== Memory access at offset 128 partially overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: unknown-crash /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29 in memcpy
+Shadow bytes around the buggy address:
+  0x7d2d452ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d2d452ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d2d452fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d2d452fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d2d45300000: f1 f1 f1 f1 f8 f2 01 f2 00 00 00 00 f2 f2 f2 f2
+=>0x7d2d45300080:[00]00 00 00 00 00 00 00 f3 f3 f3 f3 00 00 00 00
+  0x7d2d45300100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d2d45300180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d2d45300200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d2d45300280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d2d45300300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3434928==ABORTING

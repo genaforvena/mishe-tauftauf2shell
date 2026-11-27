@@ -1,0 +1,15 @@
+Breakpoint 1 at 0x4013e2: file harness/uxplaypin.cpp, line 38.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, handler_pin (proof_data='C' <repeats 128 times>) at harness/uxplaypin.cpp:38
+38		memcpy(proof, client_proof, (int) client_proof_len);
+42		volatile unsigned char sink = proof[0] ^ proof[63];
+Stack level 0, frame at 0x7fffffffe0c0:
+ rip = 0x4013fc in handler_pin (harness/uxplaypin.cpp:42); saved rip = 0x4343434343434343
+ called by frame at 0x7fffffffe0c8
+ source language c++.
+ Arglist at 0x7fffffffe0b0, args: proof_data=<error: Cannot access memory at address 0x4343434343434343>
+ Locals at 0x7fffffffe0b0, Previous frame's sp is 0x7fffffffe0c0
+ Saved registers:
+  rbp at 0x7fffffffe0b0, rip at 0x7fffffffe0b8

@@ -1,0 +1,21 @@
+== pins ==
+src/raop_handlers-v1.73.6.h: OK
+src/raop_handlers-v1.73.7.h: OK
+harness/uxplaypin.cpp: OK
+harness/run-all.sh: OK
+== build ==
+== vulnerable arm ==
+PASS: vuln attack ASan stack-buffer-overflow
+PASS: vuln attack WRITE size 128
+PASS: vuln attack sink frame
+PASS: vuln rip WRITE size 80
+PASS: vuln safe clean
+PASS: vuln safe decoded
+== fixed arm ==
+PASS: fixed attack clean
+PASS: fixed rip clean
+PASS: fixed safe clean
+== saved-RIP control ==
+PASS: chosen 0x43 at saved RIP
+RUN_ALL_OK 10 PASS / 0 FAIL
+SUMMARY_SHA256 2c0ecad3a7c06dfd9fda9a1bc9faad51142bca913a32bca15de24743c2b89254

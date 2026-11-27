@@ -1,0 +1,53 @@
+=================================================================
+==3447072==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x75d177b000c0 at pc 0x75d17a2fb303 bp 0x7fff0a445600 sp 0x7fff0a444da8
+WRITE of size 80 at 0x75d177b000c0 thread T0
+    #0 0x75d17a2fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x59f7f75ca769 in handler_pin harness/uxplaypin.cpp:38
+    #2 0x59f7f75caa37 in main harness/uxplaypin.cpp:56
+    #3 0x75d179a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x75d179a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x59f7f75ca384 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/uxplaypin2shell/harness/vuln-asan0+0x2384) (BuildId: d7c2b393ae0b3c659f852a3fcb10600efae37fd4)
+
+Address 0x75d177b000c0 is located in stack of thread T0 at offset 192 in frame
+    #0 0x59f7f75ca53d in handler_pin harness/uxplaypin.cpp:24
+
+  This frame has 4 object(s):
+    [48, 49) 'sink' (line 42)
+    [64, 72) 'client_proof' (line 26)
+    [96, 104) 'client_proof_len' (line 29)
+    [128, 192) 'proof' (line 27) <== Memory access at offset 192 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x75d177affe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75d177affe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75d177afff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75d177afff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75d177b00000: f1 f1 f1 f1 f1 f1 01 f2 00 f2 f2 f2 00 f2 f2 f2
+=>0x75d177b00080: 00 00 00 00 00 00 00 00[f3]f3 f3 f3 00 00 00 00
+  0x75d177b00100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75d177b00180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75d177b00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75d177b00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75d177b00300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3447072==ABORTING

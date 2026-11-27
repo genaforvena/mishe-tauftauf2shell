@@ -1,0 +1,20 @@
+Breakpoint 1 at 0x4013e2: file harness/uxplaypin.cpp, line 38.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, handler_pin (proof_data='C' <repeats 80 times>) at harness/uxplaypin.cpp:38
+38		memcpy(proof, client_proof, (int) client_proof_len);
+$1 = (unsigned char (*)[64]) 0x7fffffffe080
+$2 = 64
+$3 = (void *) 0x7fffffffe060
+0x7fffffffe060:	0x000000000000004c	0x00007fffffffe0f0
+0x7fffffffe070:	0x0000000000000000	0x0000000000000050
+0x7fffffffe080:	0x0000000000000000	0x0000000000000000
+0x7fffffffe090:	0x0000000000000000	0x0000000000000000
+0x7fffffffe0a0:	0x0000000000000000	0x0000000000000000
+0x7fffffffe0b0:	0x0000000000000000	0x0000000000000000
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff78ade35 in __GI___libc_free (mem=0x4343434343434343) at ./malloc/malloc.c:3375
+warning: 3375	./malloc/malloc.c: No such file or directory
+rip            0x7ffff78ade35      0x7ffff78ade35 <__GI___libc_free+37>
