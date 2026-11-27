@@ -132,3 +132,17 @@ in an explicitly unprotected O0 build, no controlled branch; R5 NOT CLAIMED.
 The prerequisite is a Berry context that executes attacker-influenced script
 or format text. Tasmota and NuttX are plausible consumers from public docs,
 not locally verified exposure.
+
+## Clean-archive replay and handoff
+
+Stage replay commit `7f4f6615f1aba7c6404be61a35f491c3811c551c`; pathspec
+archive SHA-256
+`3473450002c83cc6ea7aa00c971b81d58394bc54f31748be4abea7149c228308`.
+In `/tmp/w326-berry-clean.AOXhMx`, every `HARNESS_SHA256.txt` entry matched,
+unmodified `bash bootstrap.sh` built all seven variants, and unmodified
+`bash run-all.sh` returned 59 PASS / 0 FAIL. Summary log SHA-256
+`e8ebb940ead8be84c98665a1bdd7123b18d37f6fca0f77bbb61e109a5015f432` was
+byte-identical to the in-tree summary. This is an author-side clean replay,
+not independent acceptance. Live inner-socket window 213 has panes
+`%432`/`%433`, both `dead=0`; registry has 214/214 unique names. Operator
+admission and witness replay are UNKNOWN.

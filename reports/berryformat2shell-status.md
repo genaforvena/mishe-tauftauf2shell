@@ -1,10 +1,14 @@
 # berryformat2shell — status (staged 2026-11-27 W326)
 
 State: **STAGED for operator admission; admission and independent witness
-verdict UNKNOWN.** Brief `reports/frontier-berryformat2shell.md`, lab
+verdict UNKNOWN.** Replay commit `7f4f6615`; clean archive SHA-256
+`3473450002c83cc6ea7aa00c971b81d58394bc54f31748be4abea7149c228308`, all
+pin/harness hashes matched, 59 PASS / 0 FAIL, summary log `e8ebb940…`.
+Brief `reports/frontier-berryformat2shell.md`, lab
 `lab/frontier/berryformat2shell/`, provenance in that lab's `PROVENANCE.md`,
 charter `.mishe-tauftauf/charters/berryformat2shell.md`, seed wall
-`.mishe-tauftauf/walls/berryformat2shell.md`.
+`.mishe-tauftauf/walls/berryformat2shell.md`. Live inner-socket window 213
+(`%432`/`%433`, dead=0), registry 214/214 unique names.
 
 Finding: Berry 1.1.0 `string.format` calls `get_mode` with `char mode[32]`;
 `get_mode` copies an attacker-length flag/conversion run with no destination

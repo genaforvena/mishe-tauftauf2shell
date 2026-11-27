@@ -3,9 +3,10 @@
 **Status: STAGED for operator admission (W326, 2026-11-27).** This is a
 separate stack-write finding from the lexer OOB read described by
 CVE-2026-3285 / GHSA-92ph-pr79-cv5g. No CVE/GHSA was found for the format
-write. The reproducible lab is `lab/frontier/berryformat2shell/`; the live
-two-pane handoff window is created after the stage commit and recorded in the
-site registry. Author evidence is not independent acceptance.
+write. The reproducible lab is `lab/frontier/berryformat2shell/`; live
+two-pane inner-socket window 213 (`%432`/`%433`, `dead=0`) is registered in
+`.mishe-tauftauf/operator/window-registry.json` (214/214 unique names). Stage
+replay commit `7f4f6615`; author evidence is not independent acceptance.
 
 ## Verified ground truth
 
@@ -123,3 +124,15 @@ unknown W325 working name; its only durable finding was the related
 one-byte lexer read, while W326 found the stronger format write. The clean
 replacement lane is `berryformat2shell`; do not stage a second Berry lexer
 mind for CVE-2026-3285 unless new evidence changes that disposition.
+
+## Handoff evidence (W326)
+
+Stage replay commit `7f4f6615f1aba7c6404be61a35f491c3811c551c`. Clean
+`git archive 7f4f6615 lab/frontier/berryformat2shell` SHA-256
+`3473450002c83cc6ea7aa00c971b81d58394bc54f31748be4abea7149c228308`;
+all pin/harness hashes matched, unmodified `bash run-all.sh` returned
+59 PASS / 0 FAIL, summary log SHA-256
+`e8ebb940ead8be84c98665a1bdd7123b18d37f6fca0f77bbb61e109a5015f432`
+(byte-identical to the in-tree summary). Window 213 panes `%432`/`%433` are
+live on the inner socket, `dead=0`; registry has 214/214 unique names.
+Operator admission and independent witness replay remain UNKNOWN.
