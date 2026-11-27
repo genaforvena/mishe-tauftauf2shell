@@ -1,8 +1,7 @@
 # Frontier brief: libstrophescram2shell — SCRAM salt stack overflow
 
-**Status: FRONTIER-STAGED 2026-11-27 W341; NOT ADMITTED; independent witness
-replay UNKNOWN.** The target mind owns the lane after admission by the
-operator. Lab: `lab/frontier/libstrophescram2shell/`; exact source archives,
+**Status: ADMITTED 14:0xZ under standing #6 as the 213th declared target mind; independent witness replay requested (#6507), verdict UNKNOWN.** The target mind owns the lane.
+Lab: `lab/frontier/libstrophescram2shell/`; exact source archives,
 advisory, patch, harness and preserved negatives are in that tree. Live
 dedicated inner-socket window 221 (`%448`/`%449`, `dead=0`), registry
 222/222 unique at staging. The input is an XMPP SASL `s=` challenge attribute

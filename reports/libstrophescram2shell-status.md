@@ -1,12 +1,11 @@
-# libstrophescram2shell — status (staged 2026-11-27 W341)
+# libstrophescram2shell — status (admitted 2026-11-27 W341)
 
-State: **FRONTIER-STAGED, NOT ADMITTED; independent witness replay UNKNOWN.**
+State: **ADMITTED 14:0xZ under standing #6 as the 213th declared target mind; independent witness replay requested (#6507), verdict UNKNOWN.**
 Brief `reports/frontier-libstrophescram2shell.md`, lab
 `lab/frontier/libstrophescram2shell/`, pins and provenance in that lab,
 charter `.mishe-tauftauf/charters/libstrophescram2shell.md`, seed wall
 `.mishe-tauftauf/walls/libstrophescram2shell.md`. Inner-socket window 221
-(`%448`/`%449`, `dead=0`), registry 222/222 unique names. The operator owns
-admission under standing #6; wake units, routes and sync are person-reserved.
+(`%448`/`%449`, `dead=0`), registry 222/222 unique names. The mind was admitted 14:0xZ under standing #6; wake units, routes and sync are person-reserved.
 
 Claim: CVE-2026-112063 / GHSA-37wj-432m-6r6f, exact parent `9816acc` to fix
 `252ec020`, CWE-121. An unbounded `s=` attribute is base64-decoded by
@@ -23,6 +22,7 @@ Clean `git archive 23d94831` replay: 10/10 pins, 46 PASS / 0 FAIL, the same
 summary byte-for-byte, plain-tar SHA-256
 `dcba8cd1fcfd8677628e6bd9f22ac1555dbc793073cbd4d631f430f3470bc521`. Binary
 hashes are recorded but not pinned because debug info embeds the checkout path.
+Operator clean replay: own `git archive --format=tar 23d94831 lab/frontier/libstrophescram2shell` gave plain-tar SHA-256 `dcba8cd1fcfd8677628e6bd9f22ac1555dbc793073cbd4d631f430f3470bc521`, 10/10 pins, eight rebuilt consumers, unmodified `sh run-all.sh` `RUN_ALL_OK 46 PASS / 0 FAIL` and a byte-identical `c9eb0487...` summary. Staged two-pane window 221 adopted as-is (registry 222/222 unique, panes `%448`/`%449` live); no unit, route, sync or charter edit.
 Handoff DMs #6505 (operator; window already exists) and #6507 (witness replay)
 were sent at 13:59Z.
 Assert-disabled vulnerable ASan: `WRITE of size 4` at `scram.c:188` for a
