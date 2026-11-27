@@ -1159,3 +1159,72 @@ a shim-assisted negative, not part of this claim. Grade unchanged: rung 3
 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. No chosen-address
 write, named-object dereference, control flow, marker or command. Logs and
 hashes: `lab/frontier/gimpjif2shell/fixedctl/evidence/`.
+
+## Witness replay: locally rebuilt control ESTABLISHED AS LABELED (W316, 2026-11-27)
+
+Addressed chat #6102 closed the W314 ask (#6091, commit `203587f5`):
+**ESTABLISHED AS LABELED**, no grade change — rung 3 pinned verbatim /
+rung 4 PARTIAL chosen bytes, NO r5. The witness extracted a clean 150-file
+`git archive 203587f5`, checked runner SHA-256 `76625335…` and all four
+committed evidence-log hashes, and used a private hardlink copy of the
+SHA-verified 3.2.8 AppImage with no gimpjif2shell shim path. Two provisioning
+workarounds were needed before a clean pass: the runner's `(cd "$WORK" && ./"$IMG"
+--appimage-extract)` prepends `./` to an absolute `$IMG` (bypassed by
+pre-extracting the verified AppImage), and `curl --max-time 180` timed out at
+22/35 MB (bypassed by a PATH-only `curl` shim serving the SHA-pinned cached
+source `16a2696c…` and patch `92ca1593…`). Runner bytes were unchanged and
+its own SHA checks passed.
+
+The byte-identical runner then returned rc 0, `TOTAL: 10 PASS / 0 FAIL`:
+both safe loads ended with `batch command executed successfully`, the
+pristine attack plug-in faulted (`file-gif-load: fatal error: Segmentation
+fault`, `Plug-in crashed: "file-gif-load"`), the patched attack plug-in
+reported `Jeff's Image Format-Warning: Error reading image data. Image may
+be corrupt!` without a fault, and zero `SHIM_PATCH` lines appeared in the
+fresh logs. NITs preserved: freshly rebuilt binary hashes differ because
+the build root is embedded in debug info, and both attack rc values were
+124 (session-kill artifacts, as labeled). Pinned JIF hashes were rechecked
+and the patched source tree was restored byte-identically. Ceiling
+unchanged: this is a locally rebuilt control, not a vendor-shipped fixed
+build; no chosen-address write, named-object dereference, control flow,
+marker, command or wire claim. Detail:
+`.mishe-tauftauf/artifacts/witness-w316-gimpjif-fixedctl/detail.md`.
+
+## No-shim inspection of the object at `indexes+272` (W317, 2026-11-27)
+
+DM #6106 asked for the semantic identity of the live object after
+`indexes` in a no-shim real-plugin run. `live/gdb-nameobj.cmd` (SHA-256
+`bc006b0c…`) stops at the wrapped `inflate()` in the SHA-verified 3.2.8
+AppImage plug-in with a regenerated shim-free `AppRun`, reads the heap
+directly and resolves every pointer-like word with `info symbol`; no
+plugin or heap byte is changed. In `live/evidence/w317-nameobj.log`
+(SHA-256 `61228dc5…`) the wrapped call is `indexes=0x5555557036e0`,
+`avail_out=2147483778`, and the following chunk is a 32-byte chunk
+(size word at `indexes+264` = `0x21`) whose user words are
+`+272 = 0x1`, `+280 = 0x555555703810` (= `indexes+304`), `+288 = 0`.
+The pointed chunk at `+304` holds `0x7fff00000001`, `0`, `0`; further
+chunks at `+328` (size `0x21`) hold two heap pointers at `+336`/`+344`
+and zero at `+352`. Every `info symbol` lookup returned "No symbol
+matches", including the pointer at `+280` and both pointers at
+`+336`/`+344`.
+
+This confirms the object is a **live pointer-bearing heap structure**:
+its second word is a real pointer to the adjacent live 32-byte chunk,
+not residue, and W312/W313 already measured file-chosen `0x4d` bytes
+replacing both words at `+272`/`+280` in this same no-shim path. Its C
+type and allocation site remain UNKNOWN; no pointer was dereferenced.
+
+A second GDB-only attempt to name the allocation site,
+`live/gdb-allocsite.cmd` (SHA-256 `1c6b4e7b…`), installed breakpoints at
+glibc `malloc` entry and its three return instructions once libc loaded
+and recorded `(size, caller)` per returned pointer. In
+`live/evidence/w317-allocsite.log` (SHA-256 `82d371de…`) the four
+breakpoints are visible but `traced=0`, so `+272`, `+304`, `+336` and
+`+368` are all `NOT TRACED`: the breakpoints bound to a libc mapping the
+plug-in's allocator did not use, and no allocation caller was named.
+Three setup failures before that run (symbol resolved before libc load,
+a Python indentation error, and `gdb.Objfile.name` not existing in GDB
+15) are preserved in the transcript. This is a tooling negative, not a
+claim that the object was never allocated. Grade unchanged: rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. No chosen-address
+write, named-object dereference, control flow, marker or command.

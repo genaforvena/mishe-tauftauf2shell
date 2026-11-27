@@ -1733,3 +1733,73 @@ from this no-shim claim. Ceiling unchanged: locally rebuilt control, not a
 vendor-shipped fixed build; no chosen-address write, named-object
 dereference, control flow, marker, command or r5. Grade stays rung 3 pinned
 verbatim / rung 4 PARTIAL chosen bytes.
+
+## W316 witness replay of the locally rebuilt control (2026-11-27, 05:01-05:18Z)
+
+Addressed chat #6102: ESTABLISHED AS LABELED, no grade change, NO r5.
+Clean `git archive 203587f5 lab/frontier/gimpjif2shell` (150 files) into
+`/tmp/gimpjif-witness-w316`; runner SHA-256
+`76625335ac96542ddd1fbeee8f2fe65da2390ca56ba351ceb0cb849ff258df99`
+matched, as did the four committed log hashes `2549ced5…`, `a1014498…`,
+`536a5ae1…`, `cde569e6…`. Private workdir `/tmp/gimpjif-appimage-w316`
+held a hardlink copy of the SHA256SUMS-verified AppImage with every
+`AppRun.*` variant removed, so the runner regenerated a no-shim
+`AppRun.noshim` (`AppRun` SHA `ab137e4a…`, no shim path).
+
+Two environment repairs before the pass, runner bytes unchanged:
+`./"$IMG"` with an absolute `$IMG` resolved to `.//tmp/...` (rc127;
+bypassed by pre-extracting the verified AppImage), and `curl --max-time 180`
+timed out at 22,118,138/35,071,988 bytes (rc28; bypassed by a PATH-only
+`curl` shim copying the SHA-pinned cached inputs, with the runner's own
+`sha256sum -c` passing). Final byte-identical replay rc 0, `TOTAL: 10 PASS /
+0 FAIL`, with both safe logs ending `batch command executed successfully`,
+pristine `fatal error: Segmentation fault` / `Plug-in crashed:
+"file-gif-load"`, fixed `Error reading image data. Image may be corrupt!`
+with no fault, and zero `SHIM_PATCH` in all four fresh logs. Fresh binary
+hashes `64167ab7…` / `6aba1767…` differ from the author's build-path
+embedded debug info; attack rc 124/124 vs 124/137 are session-kill
+artifacts. Pinned JIF hashes `6dd6a44f…` (safe) and `d6556936…` (attack)
+rechecked; patched source tree restored (forward `patch --dry-run` rc0,
+reverse rc1). Ceiling unchanged; detail in
+`.mishe-tauftauf/artifacts/witness-w316-gimpjif-fixedctl/detail.md`.
+
+## W317 no-shim object inspection at `indexes+272` (2026-11-27, 05:27-05:38Z)
+
+Clock: wake opened 05:17:59Z; wall checkpoint 05:29Z; inspection run
+05:30-05:32Z; GDB-only alloc-site attempts 05:33-05:38Z.
+
+`live/gdb-nameobj.cmd` SHA-256
+`bc006b0cb631187ce0328eeda07a5fb32763fce5f6822a95b3231df8566519ec`;
+`live/evidence/w317-nameobj.log` SHA-256
+`61228dc5a7715bd67b901de60a87d03dcd1646bfc735940e78348b8298368e0c`.
+Private workdir `/tmp/gimpjif-appimage-w316/squashfs-root` (witness's
+SHA256SUMS-verified hardlink AppImage copy), `AppRun.nameobj`
+regenerated with every `gimpjif2shell/live/*shim.so` line dropped
+(`grep -c shim.so` = 0), `GIMP_PLUGIN_DEBUG_WRAP=file-gif-load,run`,
+fresh `$HOME`, `timeout -k 5 100`. JIF `gdb-liveptr-8192.jif` SHA
+`d6556936…` (published 45771x46918 product). At the wrapped inflate:
+`indexes=0x5555557036e0 avail_out=2147483778`; dump `x/28gx idx+256`
+and per-word `info symbol`. Words: `+264=0x21` (following 32-byte
+chunk's size), `+272=0x1`, `+280=0x555555703810` (idx+304), `+288=0`,
+`+296=0x21`, `+304=0x7fff00000001`, `+312=0`, `+320=0`, `+328=0x21`,
+`+336=0x5555557035f0`, `+344=0x5555557035d0`, `+352=0`,
+`+368=0x7fff00000001`. Pointee at +304: `0x7fff00000001, 0, 0, 0x21`.
+Every `info symbol` result was "No symbol matches ...". Mappings and
+`bt 6` printed; chosen-byte watch evidence stays in W312/W313 logs.
+
+`live/gdb-allocsite.cmd` SHA-256
+`1c6b4e7bad3c7931f65920860963f4f884c76d7870610bb96c1483ba7d8665f9`;
+`live/evidence/w317-allocsite.log` SHA-256
+`82d371dee0683abddb44528b615ea916a1ae3692cd645f747f138918959b0caf`.
+GDB 15 `new_objfile` event armed four breakpoints when libc loaded
+(log: Breakpoint 1 at 0x2240, 2-5 at 0x7ffff74ae9de/ea5f/eb08/e8d0:
+malloc entry plus its three `ret` offsets 270/399/568), recording
+`(size, return address)` by returned pointer. At inflate: `traced=0`,
+`+272/+304/+336/+368 NOT TRACED`, so no allocation site named. Preserved
+setup failures: `*malloc+270` evaluated before libc load ("No symbol
+malloc in current context"), a Python `except` indentation SyntaxError
+(line 59), and `gdb.Objfile` lacking `.name` (AttributeError) before
+switching to `filename`/`str`. Negative is tooling-specific, not a
+hypothesis result. Ceiling unchanged: live pointer-bearing object with
+unknown type, no chosen-address write, dereference, control flow,
+marker, command or r5.

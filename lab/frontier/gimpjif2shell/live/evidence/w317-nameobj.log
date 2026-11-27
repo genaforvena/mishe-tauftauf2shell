@@ -1,0 +1,945 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage-w316/squashfs-root
+GLib-GIO-Message: 05:30:28.840: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 05:30:28.840: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 05:30:43.089: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 05:30:43.089: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 05:30:43.091: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 05:30:43.122: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 05:30:43.124: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 05:30:43.126: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 05:30:43.126: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 05:30:43.127: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 05:30:43.127: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 05:30:43.129: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 05:30:43.136: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 05:30:43.140: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 05:30:43.141: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+Breakpoint 1 at 0x2240
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+=== W317 PRE-INFLATE indexes=0x5555557036e0 avail_out=2147483778 ===
+0x5555557037e0:	0x00005555557038c0	0x0000000000000021
+0x5555557037f0:	0x0000000000000001	0x0000555555703810
+0x555555703800:	0x0000000000000000	0x0000000000000021
+0x555555703810:	0x00007fff00000001	0x0000000000000000
+0x555555703820:	0x0000000000000000	0x0000000000000021
+0x555555703830:	0x00005555557035f0	0x00005555557035d0
+0x555555703840:	0x0000000000000000	0x0000000000000071
+0x555555703850:	0x00007fff00000001	0x00005555557038c0
+0x555555703860:	0x00005555556bcca0	0x0000000000000190
+0x555555703870:	0x0000000000000000	0x0000000000000000
+0x555555703880:	0x00007ffff02a08e0	0x00007ffff02a0380
+0x555555703890:	0x0000000000000000	0x0000555500000028
+0x5555557038a0:	0x00007ffff02a0390	0x0000000000000000
+0x5555557038b0:	0x0000000000000000	0x0000000000000081
+=== W317 word+264 @0x5555557037e8 = 0x0000000000000021 sym=[No symbol matches 0x21.] ===
+=== W317 word+272 @0x5555557037f0 = 0x0000000000000001 sym=[No symbol matches 0x1.] ===
+=== W317 word+280 @0x5555557037f8 = 0x0000555555703810 sym=[No symbol matches 0x555555703810.] ===
+=== W317 word+288 @0x555555703800 = 0x0000000000000000 sym=[No symbol matches 0x0.] ===
+=== W317 word+296 @0x555555703808 = 0x0000000000000021 sym=[No symbol matches 0x21.] ===
+=== W317 word+304 @0x555555703810 = 0x00007fff00000001 sym=[No symbol matches 0x7fff00000001.] ===
+=== W317 word+312 @0x555555703818 = 0x0000000000000000 sym=[No symbol matches 0x0.] ===
+=== W317 word+320 @0x555555703820 = 0x0000000000000000 sym=[No symbol matches 0x0.] ===
+=== W317 word+328 @0x555555703828 = 0x0000000000000021 sym=[No symbol matches 0x21.] ===
+=== W317 word+336 @0x555555703830 = 0x00005555557035f0 sym=[No symbol matches 0x5555557035f0.] ===
+=== W317 word+344 @0x555555703838 = 0x00005555557035d0 sym=[No symbol matches 0x5555557035d0.] ===
+=== W317 word+352 @0x555555703840 = 0x0000000000000000 sym=[No symbol matches 0x0.] ===
+=== W317 word+368 @0x555555703850 = 0x00007fff00000001 sym=[No symbol matches 0x7fff00000001.] ===
+=== W317 FIELDS flags=0x1 ptr=0x555555703810 delta=304 ===
+=== W317 POINTED CHUNK ===
+0x555555703810:	0x00007fff00000001	0x0000000000000000
+0x555555703820:	0x0000000000000000	0x0000000000000021
+0x555555703830:	0x00005555557035f0	0x00005555557035d0
+0x555555703840:	0x0000000000000000	0x0000000000000071
+=== W317 pointee+0 @0x555555703810 = 0x00007fff00000001 sym=[No symbol matches 0x7fff00000001.] ===
+=== W317 pointee+8 @0x555555703818 = 0x0000000000000000 sym=[No symbol matches 0x0.] ===
+=== W317 pointee+16 @0x555555703820 = 0x0000000000000000 sym=[No symbol matches 0x0.] ===
+=== W317 pointee+24 @0x555555703828 = 0x0000000000000021 sym=[No symbol matches 0x21.] ===
+=== W317 MAPPINGS ===
+process 3301376
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x555555556000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load
+      0x555555556000     0x555555559000     0x3000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load
+      0x555555559000     0x55555555a000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load
+      0x55555555a000     0x55555555b000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load
+      0x55555555b000     0x55555555c000     0x1000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load
+      0x55555555c000     0x55555556c000    0x10000        0x0  rw-p   
+      0x55555556c000     0x555555570000     0x4000    0x16000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load
+      0x555555570000     0x555555753000   0x1e3000        0x0  rw-p   [heap]
+      0x7ffee1c3f000     0x7fffe1c40000 0x100001000        0x0  rw-p   
+      0x7fffe1c40000     0x7fffe1c63000    0x23000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libssl.so.3
+      0x7fffe1c63000     0x7fffe1d0e000    0xab000    0x23000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libssl.so.3
+      0x7fffe1d0e000     0x7fffe1d41000    0x33000    0xce000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libssl.so.3
+      0x7fffe1d41000     0x7fffe1d4c000     0xb000   0x100000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libssl.so.3
+      0x7fffe1d4c000     0x7fffe1d5a000     0xe000   0x10b000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libssl.so.3
+      0x7fffe1e5b000     0x7fffe1e94000    0x39000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libp11-kit.so.0
+      0x7fffe1e94000     0x7fffe1f67000    0xd3000    0x39000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libp11-kit.so.0
+      0x7fffe1f67000     0x7fffe1fe1000    0x7a000   0x10c000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libp11-kit.so.0
+      0x7fffe1fe1000     0x7fffe1fee000     0xd000   0x186000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libp11-kit.so.0
+      0x7fffe1fee000     0x7fffe1ffb000     0xd000   0x193000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libp11-kit.so.0
+      0x7fffe1ffb000     0x7fffe1ffc000     0x1000        0x0  rw-p   
+      0x7fffe1ffc000     0x7fffe2000000     0x4000   0x1a1000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libp11-kit.so.0
+      0x7fffe2000000     0x7fffe20f7000    0xf7000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x7fffe20f7000     0x7fffe247b000   0x384000    0xf7000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x7fffe247b000     0x7fffe25b2000   0x137000   0x47b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x7fffe25b2000     0x7fffe2635000    0x83000   0x5b2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x7fffe2635000     0x7fffe2638000     0x3000   0x635000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x7fffe2638000     0x7fffe263b000     0x3000        0x0  rw-p   
+      0x7fffe263b000     0x7fffe2667000    0x2c000   0x639000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x7fffe2b32000     0x7fffe2b37000     0x5000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libzstd.so.1
+      0x7fffe2b37000     0x7fffe2be6000    0xaf000     0x5000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libzstd.so.1
+      0x7fffe2be6000     0x7fffe2bfa000    0x14000    0xb4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libzstd.so.1
+      0x7fffe2bfa000     0x7fffe2bfb000     0x1000    0xc8000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libzstd.so.1
+      0x7fffe2bfb000     0x7fffe2c00000     0x5000    0xc9000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libzstd.so.1
+      0x7fffe37f7000     0x7fffe37f8000     0x1000        0x0  ---p   
+      0x7fffe37f8000     0x7fffe3ff8000   0x800000        0x0  rw-p   
+      0x7fffe3ff8000     0x7fffe3ff9000     0x1000        0x0  ---p   
+      0x7fffe3ff9000     0x7fffe47f9000   0x800000        0x0  rw-p   
+      0x7fffe47f9000     0x7fffe47fa000     0x1000        0x0  ---p   
+      0x7fffe47fa000     0x7fffe4ffa000   0x800000        0x0  rw-p   
+      0x7fffe4ffa000     0x7fffe4ffb000     0x1000        0x0  ---p   
+      0x7fffe4ffb000     0x7fffe57fb000   0x800000        0x0  rw-p   
+      0x7fffe57fb000     0x7fffe57fc000     0x1000        0x0  ---p   
+      0x7fffe57fc000     0x7fffe5ffc000   0x800000        0x0  rw-p   
+      0x7fffe5ffc000     0x7fffe5ffd000     0x1000        0x0  ---p   
+      0x7fffe5ffd000     0x7fffe67fd000   0x800000        0x0  rw-p   
+      0x7fffe67fd000     0x7fffe67fe000     0x1000        0x0  ---p   
+      0x7fffe67fe000     0x7fffe6ffe000   0x800000        0x0  rw-p   
+      0x7fffe6ffe000     0x7fffe6fff000     0x1000        0x0  ---p   
+      0x7fffe6fff000     0x7fffe77ff000   0x800000        0x0  rw-p   
+      0x7fffe77ff000     0x7fffe7800000     0x1000        0x0  ---p   
+      0x7fffe7800000     0x7fffe8000000   0x800000        0x0  rw-p   
+      0x7fffe8000000     0x7fffe8021000    0x21000        0x0  rw-p   
+      0x7fffe8021000     0x7fffec000000  0x3fdf000        0x0  ---p   
+      0x7fffec000000     0x7fffec021000    0x21000        0x0  rw-p   
+      0x7fffec021000     0x7ffff0000000  0x3fdf000        0x0  ---p   
+      0x7ffff02ad000     0x7ffff02b6000     0x9000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libjson-glib-1.0.so.0
+      0x7ffff02b6000     0x7ffff02cc000    0x16000     0x9000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libjson-glib-1.0.so.0
+      0x7ffff02cc000     0x7ffff02d6000     0xa000    0x1f000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libjson-glib-1.0.so.0
+      0x7ffff02d6000     0x7ffff02d7000     0x1000    0x29000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libjson-glib-1.0.so.0
+      0x7ffff02d7000     0x7ffff02de000     0x7000    0x2a000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libjson-glib-1.0.so.0
+      0x7ffff02de000     0x7ffff02e2000     0x4000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gegl-0.4/gegl-core.so
+      0x7ffff02e2000     0x7ffff02ea000     0x8000     0x4000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gegl-0.4/gegl-core.so
+      0x7ffff02ea000     0x7ffff02ee000     0x4000     0xc000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gegl-0.4/gegl-core.so
+      0x7ffff02ee000     0x7ffff02ef000     0x1000     0xf000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gegl-0.4/gegl-core.so
+      0x7ffff02ef000     0x7ffff02f0000     0x1000    0x10000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gegl-0.4/gegl-core.so
+      0x7ffff02f0000     0x7ffff02f3000     0x3000    0x4b000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gegl-0.4/gegl-core.so
+      0x7ffff02f3000     0x7ffff02f4000     0x1000        0x0  ---p   
+      0x7ffff02f4000     0x7ffff0af4000   0x800000        0x0  rw-p   
+      0x7ffff0af4000     0x7ffff0af5000     0x1000        0x0  ---p   
+      0x7ffff0af5000     0x7ffff12f5000   0x800000        0x0  rw-p   
+      0x7ffff12f5000     0x7ffff12f6000     0x1000        0x0  ---p   
+      0x7ffff12f6000     0x7ffff1af6000   0x800000        0x0  rw-p   
+      0x7ffff1af6000     0x7ffff1af7000     0x1000        0x0  ---p   
+      0x7ffff1af7000     0x7ffff22f7000   0x800000        0x0  rw-p   
+      0x7ffff22f7000     0x7ffff22f8000     0x1000        0x0  ---p   
+      0x7ffff22f8000     0x7ffff2af8000   0x800000        0x0  rw-p   
+      0x7ffff2af8000     0x7ffff2af9000     0x1000        0x0  ---p   
+      0x7ffff2af9000     0x7ffff32f9000   0x800000        0x0  rw-p   
+      0x7ffff32f9000     0x7ffff3379000    0x80000        0x0  rw-s   /SYSV00000000 (deleted)
+      0x7ffff3379000     0x7ffff337a000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl.so
+      0x7ffff337a000     0x7ffff337f000     0x5000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl.so
+      0x7ffff337f000     0x7ffff3380000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl.so
+      0x7ffff3380000     0x7ffff3381000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl.so
+      0x7ffff3381000     0x7ffff3382000     0x1000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl.so
+      0x7ffff3382000     0x7ffff3384000     0x2000    0x14000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl.so
+      0x7ffff3384000     0x7ffff3385000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/two-table.so
+      0x7ffff3385000     0x7ffff3386000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/two-table.so
+      0x7ffff3386000     0x7ffff3387000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/two-table.so
+      0x7ffff3387000     0x7ffff3388000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/two-table.so
+      0x7ffff3388000     0x7ffff3389000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/two-table.so
+      0x7ffff3389000     0x7ffff338b000     0x2000    0x15000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/two-table.so
+      0x7ffff338b000     0x7ffff338c000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-lies.so
+      0x7ffff338c000     0x7ffff3390000     0x4000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-lies.so
+      0x7ffff3390000     0x7ffff3391000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-lies.so
+      0x7ffff3391000     0x7ffff3392000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-lies.so
+      0x7ffff3392000     0x7ffff3393000     0x1000     0x6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-lies.so
+      0x7ffff3393000     0x7ffff3395000     0x2000    0x11000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-lies.so
+      0x7ffff3395000     0x7ffff3396000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/float.so
+      0x7ffff3396000     0x7ffff3398000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/float.so
+      0x7ffff3398000     0x7ffff3399000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/float.so
+      0x7ffff3399000     0x7ffff339a000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/float.so
+      0x7ffff339a000     0x7ffff339b000     0x1000     0x4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/float.so
+      0x7ffff339b000     0x7ffff339d000     0x2000     0xe000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/float.so
+      0x7ffff339d000     0x7ffff339e000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-double.so
+      0x7ffff339e000     0x7ffff339f000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-double.so
+      0x7ffff339f000     0x7ffff33a0000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-double.so
+      0x7ffff33a0000     0x7ffff33a1000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-double.so
+      0x7ffff33a1000     0x7ffff33a2000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-double.so
+      0x7ffff33a2000     0x7ffff33a4000     0x2000     0xa000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-double.so
+      0x7ffff33a4000     0x7ffff33a5000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/grey.so
+      0x7ffff33a5000     0x7ffff33a6000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/grey.so
+      0x7ffff33a6000     0x7ffff33a7000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/grey.so
+      0x7ffff33a7000     0x7ffff33a8000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/grey.so
+      0x7ffff33a8000     0x7ffff33a9000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/grey.so
+      0x7ffff33a9000     0x7ffff33ab000     0x2000     0x8000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/grey.so
+      0x7ffff33ab000     0x7ffff33ac000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table.so
+      0x7ffff33ac000     0x7ffff33ae000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table.so
+      0x7ffff33ae000     0x7ffff33af000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table.so
+      0x7ffff33af000     0x7ffff33b0000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table.so
+      0x7ffff33b0000     0x7ffff33b1000     0x1000     0x4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table.so
+      0x7ffff33b1000     0x7ffff3421000    0x70000        0x0  rw-p   
+      0x7ffff3421000     0x7ffff3423000     0x2000     0xc000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table.so
+      0x7ffff3423000     0x7ffff3424000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/double.so
+      0x7ffff3424000     0x7ffff3425000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/double.so
+      0x7ffff3425000     0x7ffff3426000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/double.so
+      0x7ffff3426000     0x7ffff3427000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/double.so
+      0x7ffff3427000     0x7ffff3428000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/double.so
+      0x7ffff3428000     0x7ffff342a000     0x2000     0xa000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/double.so
+      0x7ffff342a000     0x7ffff342b000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/simple.so
+      0x7ffff342b000     0x7ffff342f000     0x4000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/simple.so
+      0x7ffff342f000     0x7ffff3430000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/simple.so
+      0x7ffff3430000     0x7ffff3431000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/simple.so
+      0x7ffff3431000     0x7ffff3432000     0x1000     0x6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/simple.so
+      0x7ffff3432000     0x7ffff3434000     0x2000    0x11000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/simple.so
+      0x7ffff3434000     0x7ffff3435000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/formats.so
+      0x7ffff3435000     0x7ffff3436000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/formats.so
+      0x7ffff3436000     0x7ffff3437000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/formats.so
+      0x7ffff3437000     0x7ffff3438000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/formats.so
+      0x7ffff3438000     0x7ffff3439000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/formats.so
+      0x7ffff3439000     0x7ffff343b000     0x2000     0x5000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/formats.so
+      0x7ffff343b000     0x7ffff343c000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse-half.so
+      0x7ffff343c000     0x7ffff343d000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse-half.so
+      0x7ffff343d000     0x7ffff343e000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse-half.so
+      0x7ffff343e000     0x7ffff343f000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse-half.so
+      0x7ffff343f000     0x7ffff3440000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse-half.so
+      0x7ffff3440000     0x7ffff3442000     0x2000     0xa000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse-half.so
+      0x7ffff3442000     0x7ffff3443000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSL.so
+      0x7ffff3443000     0x7ffff3446000     0x3000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSL.so
+      0x7ffff3446000     0x7ffff3447000     0x1000     0x4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSL.so
+      0x7ffff3447000     0x7ffff3448000     0x1000     0x4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSL.so
+      0x7ffff3448000     0x7ffff3449000     0x1000     0x5000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSL.so
+      0x7ffff3449000     0x7ffff344b000     0x2000     0xe000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSL.so
+      0x7ffff344b000     0x7ffff344c000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-ycbcr.so
+      0x7ffff344c000     0x7ffff344d000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-ycbcr.so
+      0x7ffff344d000     0x7ffff344e000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-ycbcr.so
+      0x7ffff344e000     0x7ffff344f000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-ycbcr.so
+      0x7ffff344f000     0x7ffff3450000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-ycbcr.so
+      0x7ffff3450000     0x7ffff3452000     0x2000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-ycbcr.so
+      0x7ffff3452000     0x7ffff3453000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-cairo.so
+      0x7ffff3453000     0x7ffff3459000     0x6000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-cairo.so
+      0x7ffff3459000     0x7ffff345a000     0x1000     0x7000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-cairo.so
+      0x7ffff345a000     0x7ffff345b000     0x1000     0x8000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-cairo.so
+      0x7ffff345b000     0x7ffff345c000     0x1000     0x9000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-cairo.so
+      0x7ffff345c000     0x7ffff345e000     0x2000    0x13000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-cairo.so
+      0x7ffff345e000     0x7ffff345f000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-float.so
+      0x7ffff345f000     0x7ffff3465000     0x6000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-float.so
+      0x7ffff3465000     0x7ffff3466000     0x1000     0x7000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-float.so
+      0x7ffff3466000     0x7ffff3467000     0x1000     0x7000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-float.so
+      0x7ffff3467000     0x7ffff3468000     0x1000     0x8000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-float.so
+      0x7ffff3468000     0x7ffff346a000     0x2000    0x23000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-float.so
+      0x7ffff346a000     0x7ffff346b000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/CIE.so
+      0x7ffff346b000     0x7ffff3474000     0x9000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/CIE.so
+      0x7ffff3474000     0x7ffff3476000     0x2000     0xa000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/CIE.so
+      0x7ffff3476000     0x7ffff3477000     0x1000     0xb000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/CIE.so
+      0x7ffff3477000     0x7ffff3478000     0x1000     0xc000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/CIE.so
+      0x7ffff3478000     0x7ffff347a000     0x2000    0x35000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/CIE.so
+      0x7ffff347a000     0x7ffff347b000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int16.so
+      0x7ffff347b000     0x7ffff347c000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int16.so
+      0x7ffff347c000     0x7ffff347d000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int16.so
+      0x7ffff347d000     0x7ffff347e000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int16.so
+      0x7ffff347e000     0x7ffff347f000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int16.so
+      0x7ffff347f000     0x7ffff3481000     0x2000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int16.so
+      0x7ffff3481000     0x7ffff3482000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/half.so
+      0x7ffff3482000     0x7ffff3484000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/half.so
+      0x7ffff3484000     0x7ffff3485000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/half.so
+      0x7ffff3485000     0x7ffff3486000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/half.so
+      0x7ffff3486000     0x7ffff3487000     0x1000     0x4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/half.so
+      0x7ffff3487000     0x7ffff34c7000    0x40000        0x0  rw-p   
+      0x7ffff34c7000     0x7ffff34c9000     0x2000     0xc000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/half.so
+      0x7ffff34c9000     0x7ffff34ca000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gimp-8bit.so
+      0x7ffff34ca000     0x7ffff34cc000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gimp-8bit.so
+      0x7ffff34cc000     0x7ffff34cd000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gimp-8bit.so
+      0x7ffff34cd000     0x7ffff34ce000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gimp-8bit.so
+      0x7ffff34ce000     0x7ffff34cf000     0x1000     0x4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gimp-8bit.so
+      0x7ffff34cf000     0x7ffff34d7000     0x8000        0x0  rw-p   
+      0x7ffff34d7000     0x7ffff34d9000     0x2000     0xc000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gimp-8bit.so
+      0x7ffff34d9000     0x7ffff34da000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u16.so
+      0x7ffff34da000     0x7ffff34db000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u16.so
+      0x7ffff34db000     0x7ffff34dc000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u16.so
+      0x7ffff34dc000     0x7ffff34dd000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u16.so
+      0x7ffff34dd000     0x7ffff34de000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u16.so
+      0x7ffff34de000     0x7ffff34e0000     0x2000     0x6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u16.so
+      0x7ffff34e0000     0x7ffff34e1000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u32.so
+      0x7ffff34e1000     0x7ffff34e3000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u32.so
+      0x7ffff34e3000     0x7ffff34e4000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u32.so
+      0x7ffff34e4000     0x7ffff34e5000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u32.so
+      0x7ffff34e5000     0x7ffff34e6000     0x1000     0x4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u32.so
+      0x7ffff34e6000     0x7ffff34e8000     0x2000     0x9000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/u32.so
+      0x7ffff34e8000     0x7ffff34e9000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-CIE.so
+      0x7ffff34e9000     0x7ffff34f1000     0x8000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-CIE.so
+      0x7ffff34f1000     0x7ffff34f3000     0x2000     0x9000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-CIE.so
+      0x7ffff34f3000     0x7ffff34f4000     0x1000     0xa000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-CIE.so
+      0x7ffff34f4000     0x7ffff34f5000     0x1000     0xb000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-CIE.so
+      0x7ffff34f5000     0x7ffff34f7000     0x2000    0x32000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-CIE.so
+      0x7ffff34f7000     0x7ffff34f8000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gegl-fixups.so
+      0x7ffff34f8000     0x7ffff34fb000     0x3000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gegl-fixups.so
+      0x7ffff34fb000     0x7ffff34fc000     0x1000     0x4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gegl-fixups.so
+      0x7ffff34fc000     0x7ffff34fd000     0x1000     0x4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gegl-fixups.so
+      0x7ffff34fd000     0x7ffff34fe000     0x1000     0x5000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gegl-fixups.so
+      0x7ffff34fe000     0x7ffff353e000    0x40000        0x0  rw-p   
+      0x7ffff353e000     0x7ffff3540000     0x2000     0xb000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gegl-fixups.so
+      0x7ffff3540000     0x7ffff3541000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gegl-fixups.so
+      0x7ffff3541000     0x7ffff3543000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gegl-fixups.so
+      0x7ffff3543000     0x7ffff3544000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gegl-fixups.so
+      0x7ffff3544000     0x7ffff3545000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gegl-fixups.so
+      0x7ffff3545000     0x7ffff3546000     0x1000     0x4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gegl-fixups.so
+      0x7ffff3546000     0x7ffff3586000    0x40000        0x0  rw-p   
+      0x7ffff3586000     0x7ffff3588000     0x2000     0xa000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gegl-fixups.so
+      0x7ffff3588000     0x7ffff3589000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table-lies.so
+      0x7ffff3589000     0x7ffff358b000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table-lies.so
+      0x7ffff358b000     0x7ffff358c000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table-lies.so
+      0x7ffff358c000     0x7ffff358d000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table-lies.so
+      0x7ffff358d000     0x7ffff358e000     0x1000     0x4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table-lies.so
+      0x7ffff358e000     0x7ffff35fe000    0x70000        0x0  rw-p   
+      0x7ffff35fe000     0x7ffff3600000     0x2000     0xc000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/gggl-table-lies.so
+      0x7ffff3600000     0x7ffff38eb000   0x2eb000        0x0  r--p   /usr/lib/locale/locale-archive
+      0x7ffff38ef000     0x7ffff38f0000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/fast-float.so
+      0x7ffff38f0000     0x7ffff38f1000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/fast-float.so
+      0x7ffff38f1000     0x7ffff38f2000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/fast-float.so
+      0x7ffff38f2000     0x7ffff38f3000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/fast-float.so
+      0x7ffff38f3000     0x7ffff38f4000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/fast-float.so
+      0x7ffff38f4000     0x7ffff38f6000     0x2000     0x6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/fast-float.so
+      0x7ffff38f6000     0x7ffff38f7000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u32.so
+      0x7ffff38f7000     0x7ffff38f9000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u32.so
+      0x7ffff38f9000     0x7ffff38fa000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u32.so
+      0x7ffff38fa000     0x7ffff38fb000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u32.so
+      0x7ffff38fb000     0x7ffff38fc000     0x1000     0x4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u32.so
+      0x7ffff38fc000     0x7ffff38fe000     0x2000     0xa000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u32.so
+      0x7ffff38fe000     0x7ffff38ff000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HCY.so
+      0x7ffff38ff000     0x7ffff3900000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HCY.so
+      0x7ffff3900000     0x7ffff3901000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HCY.so
+      0x7ffff3901000     0x7ffff3902000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HCY.so
+      0x7ffff3902000     0x7ffff3903000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HCY.so
+      0x7ffff3903000     0x7ffff3905000     0x2000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HCY.so
+      0x7ffff3905000     0x7ffff3906000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse4-int8.so
+      0x7ffff3906000     0x7ffff3907000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse4-int8.so
+      0x7ffff3907000     0x7ffff3908000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse4-int8.so
+      0x7ffff3908000     0x7ffff3909000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse4-int8.so
+      0x7ffff3909000     0x7ffff390a000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse4-int8.so
+      0x7ffff390a000     0x7ffff390c000     0x2000     0x8000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse4-int8.so
+      0x7ffff390c000     0x7ffff390d000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl-lies.so
+      0x7ffff390d000     0x7ffff3912000     0x5000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl-lies.so
+      0x7ffff3912000     0x7ffff3913000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl-lies.so
+      0x7ffff3913000     0x7ffff3914000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl-lies.so
+      0x7ffff3914000     0x7ffff3915000     0x1000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl-lies.so
+      0x7ffff3915000     0x7ffff3917000     0x2000    0x12000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl-lies.so
+      0x7ffff3917000     0x7ffff3918000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/cairo.so
+      0x7ffff3918000     0x7ffff391c000     0x4000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/cairo.so
+      0x7ffff391c000     0x7ffff391d000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/cairo.so
+      0x7ffff391d000     0x7ffff391e000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/cairo.so
+      0x7ffff391e000     0x7ffff391f000     0x1000     0x6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/cairo.so
+      0x7ffff391f000     0x7ffff3921000     0x2000     0xf000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/cairo.so
+      0x7ffff3921000     0x7ffff3922000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/oklab.so
+      0x7ffff3922000     0x7ffff3927000     0x5000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/oklab.so
+      0x7ffff3927000     0x7ffff3928000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/oklab.so
+      0x7ffff3928000     0x7ffff3929000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/oklab.so
+      0x7ffff3929000     0x7ffff392a000     0x1000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/oklab.so
+      0x7ffff392a000     0x7ffff392c000     0x2000    0x1e000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/oklab.so
+      0x7ffff392c000     0x7ffff392d000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl.so
+      0x7ffff392d000     0x7ffff3933000     0x6000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl.so
+      0x7ffff3933000     0x7ffff3934000     0x1000     0x7000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl.so
+      0x7ffff3934000     0x7ffff3935000     0x1000     0x8000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl.so
+      0x7ffff3935000     0x7ffff3936000     0x1000     0x9000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl.so
+      0x7ffff3936000     0x7ffff3938000     0x2000    0x17000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-gggl.so
+      0x7ffff3938000     0x7ffff3939000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u16.so
+      0x7ffff3939000     0x7ffff393a000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u16.so
+      0x7ffff393a000     0x7ffff393b000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u16.so
+      0x7ffff393b000     0x7ffff393c000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u16.so
+      0x7ffff393c000     0x7ffff393d000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u16.so
+      0x7ffff393d000     0x7ffff393f000     0x2000     0x6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-u16.so
+      0x7ffff393f000     0x7ffff3940000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-simple.so
+      0x7ffff3940000     0x7ffff3944000     0x4000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-simple.so
+      0x7ffff3944000     0x7ffff3945000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-simple.so
+      0x7ffff3945000     0x7ffff3946000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-simple.so
+      0x7ffff3946000     0x7ffff3947000     0x1000     0x6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-simple.so
+      0x7ffff3947000     0x7ffff3949000     0x2000    0x11000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-simple.so
+      0x7ffff3949000     0x7ffff394a000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/ycbcr.so
+      0x7ffff394a000     0x7ffff394b000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/ycbcr.so
+      0x7ffff394b000     0x7ffff394c000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/ycbcr.so
+      0x7ffff394c000     0x7ffff394d000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/ycbcr.so
+      0x7ffff394d000     0x7ffff394e000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/ycbcr.so
+      0x7ffff394e000     0x7ffff3950000     0x2000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/ycbcr.so
+      0x7ffff3950000     0x7ffff3951000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSV.so
+      0x7ffff3951000     0x7ffff3952000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSV.so
+      0x7ffff3952000     0x7ffff3953000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSV.so
+      0x7ffff3953000     0x7ffff3954000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSV.so
+      0x7ffff3954000     0x7ffff3955000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSV.so
+      0x7ffff3955000     0x7ffff3957000     0x2000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/HSV.so
+      0x7ffff3957000     0x7ffff3958000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-float.so
+      0x7ffff3958000     0x7ffff395a000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-float.so
+      0x7ffff395a000     0x7ffff395b000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-float.so
+      0x7ffff395b000     0x7ffff395c000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-float.so
+      0x7ffff395c000     0x7ffff395d000     0x1000     0x4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-float.so
+      0x7ffff395d000     0x7ffff395f000     0x2000     0xe000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-float.so
+      0x7ffff395f000     0x7ffff3960000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-grey.so
+      0x7ffff3960000     0x7ffff3961000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-grey.so
+      0x7ffff3961000     0x7ffff3962000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-grey.so
+      0x7ffff3962000     0x7ffff3963000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-grey.so
+      0x7ffff3963000     0x7ffff3964000     0x1000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-grey.so
+      0x7ffff3964000     0x7ffff3966000     0x2000     0x8000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/x86-64-v3-grey.so
+      0x7ffff3966000     0x7ffff3967000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/avx2-int8.so
+      0x7ffff3967000     0x7ffff3969000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/avx2-int8.so
+      0x7ffff3969000     0x7ffff39aa000    0x41000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/avx2-int8.so
+      0x7ffff39aa000     0x7ffff39ab000     0x1000    0x43000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/avx2-int8.so
+      0x7ffff39ab000     0x7ffff39ac000     0x1000    0x44000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/avx2-int8.so
+      0x7ffff39ac000     0x7ffff39ae000     0x2000    0x4d000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/avx2-int8.so
+      0x7ffff39ae000     0x7ffff39af000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/naive-CMYK.so
+      0x7ffff39af000     0x7ffff39b0000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/naive-CMYK.so
+      0x7ffff39b0000     0x7ffff39b1000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/naive-CMYK.so
+      0x7ffff39b1000     0x7ffff39b2000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/naive-CMYK.so
+      0x7ffff39b2000     0x7ffff39b5000     0x3000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/naive-CMYK.so
+      0x7ffff39b5000     0x7ffff39b6000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int8.so
+      0x7ffff39b6000     0x7ffff39b8000     0x2000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int8.so
+      0x7ffff39b8000     0x7ffff39b9000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int8.so
+      0x7ffff39b9000     0x7ffff39ba000     0x1000     0x3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int8.so
+      0x7ffff39ba000     0x7ffff39bb000     0x1000     0x4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int8.so
+      0x7ffff39bb000     0x7ffff39bd000     0x2000     0xc000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/babl-0.1/sse2-int8.so
+      0x7ffff39bd000     0x7ffff39be000     0x1000        0x0  ---p   
+      0x7ffff39be000     0x7ffff41be000   0x800000        0x0  rw-p   
+      0x7ffff41be000     0x7ffff41c5000     0x7000        0x0  r--s   /usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache
+      0x7ffff41c5000     0x7ffff41c6000     0x1000        0x0  ---p   
+      0x7ffff41c6000     0x7ffff49c6000   0x800000        0x0  rw-p   
+      0x7ffff49c6000     0x7ffff49c7000     0x1000        0x0  ---p   
+      0x7ffff49c7000     0x7ffff51c7000   0x800000        0x0  rw-p   
+      0x7ffff51c7000     0x7ffff51da000    0x13000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gvfs/libgvfscommon.so
+      0x7ffff51da000     0x7ffff51f4000    0x1a000    0x13000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gvfs/libgvfscommon.so
+      0x7ffff51f4000     0x7ffff5202000     0xe000    0x2d000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gvfs/libgvfscommon.so
+      0x7ffff5202000     0x7ffff5208000     0x6000    0x3b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gvfs/libgvfscommon.so
+      0x7ffff5208000     0x7ffff5212000     0xa000    0x41000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gvfs/libgvfscommon.so
+      0x7ffff5212000     0x7ffff521d000     0xb000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so
+      0x7ffff521d000     0x7ffff523c000    0x1f000     0xb000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so
+      0x7ffff523c000     0x7ffff5247000     0xb000    0x2a000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so
+      0x7ffff5247000     0x7ffff5249000     0x2000    0x35000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so
+      0x7ffff5249000     0x7ffff524f000     0x6000    0x37000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so
+      0x7ffff524f000     0x7ffff525a000     0xb000        0x0  rw-p   
+      0x7ffff525a000     0x7ffff525d000     0x3000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcap.so.2
+      0x7ffff525d000     0x7ffff5262000     0x5000     0x3000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcap.so.2
+      0x7ffff5262000     0x7ffff5264000     0x2000     0x8000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcap.so.2
+      0x7ffff5264000     0x7ffff5265000     0x1000     0xa000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcap.so.2
+      0x7ffff5265000     0x7ffff5269000     0x4000     0xb000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcap.so.2
+      0x7ffff5269000     0x7ffff527d000    0x14000        0x0  rw-p   
+      0x7ffff527d000     0x7ffff5299000    0x1c000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libsystemd.so.0
+      0x7ffff5299000     0x7ffff5348000    0xaf000    0x1c000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libsystemd.so.0
+      0x7ffff5348000     0x7ffff5384000    0x3c000    0xcb000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libsystemd.so.0
+      0x7ffff5384000     0x7ffff5391000     0xd000   0x106000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libsystemd.so.0
+      0x7ffff5391000     0x7ffff5392000     0x1000   0x113000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libsystemd.so.0
+      0x7ffff5392000     0x7ffff5393000     0x1000        0x0  rw-p   
+      0x7ffff5393000     0x7ffff539e000     0xb000   0x115000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libsystemd.so.0
+      0x7ffff539e000     0x7ffff53a2000     0x4000        0x0  rw-p   
+      0x7ffff53a2000     0x7ffff53a3000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libinih.so.1
+      0x7ffff53a3000     0x7ffff53a4000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libinih.so.1
+      0x7ffff53a4000     0x7ffff53a5000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libinih.so.1
+      0x7ffff53a5000     0x7ffff53a6000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libinih.so.1
+      0x7ffff53a6000     0x7ffff53aa000     0x4000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libinih.so.1
+      0x7ffff53aa000     0x7ffff53ae000     0x4000        0x0  rw-p   
+      0x7ffff53ae000     0x7ffff53af000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1
+      0x7ffff53af000     0x7ffff53b0000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1
+      0x7ffff53b0000     0x7ffff53cf000    0x1f000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1
+      0x7ffff53cf000     0x7ffff53d0000     0x1000    0x21000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1
+      0x7ffff53d0000     0x7ffff53d4000     0x4000    0x22000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1
+      0x7ffff53d4000     0x7ffff53e6000    0x12000        0x0  rw-p   
+      0x7ffff53e6000     0x7ffff53f4000     0xe000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libdbus-1.so.3
+      0x7ffff53f4000     0x7ffff5425000    0x31000     0xe000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libdbus-1.so.3
+      0x7ffff5425000     0x7ffff543a000    0x15000    0x3f000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libdbus-1.so.3
+      0x7ffff543a000     0x7ffff543c000     0x2000    0x53000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libdbus-1.so.3
+      0x7ffff543c000     0x7ffff5445000     0x9000    0x55000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libdbus-1.so.3
+      0x7ffff5445000     0x7ffff5456000    0x11000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatspi.so.0
+      0x7ffff5456000     0x7ffff5470000    0x1a000    0x11000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatspi.so.0
+      0x7ffff5470000     0x7ffff547e000     0xe000    0x2b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatspi.so.0
+      0x7ffff547e000     0x7ffff5482000     0x4000    0x39000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatspi.so.0
+      0x7ffff5482000     0x7ffff548b000     0x9000    0x3d000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatspi.so.0
+      0x7ffff548b000     0x7ffff548f000     0x4000        0x0  rw-p   
+      0x7ffff548f000     0x7ffff5492000     0x3000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgraphite2.so.3
+      0x7ffff5492000     0x7ffff54b1000    0x1f000     0x3000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgraphite2.so.3
+      0x7ffff54b1000     0x7ffff54b6000     0x5000    0x22000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgraphite2.so.3
+      0x7ffff54b6000     0x7ffff54b8000     0x2000    0x26000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgraphite2.so.3
+      0x7ffff54b8000     0x7ffff54bc000     0x4000    0x28000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgraphite2.so.3
+      0x7ffff54bc000     0x7ffff54c0000     0x4000        0x0  rw-p   
+      0x7ffff54c0000     0x7ffff54c2000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libdatrie.so.1
+      0x7ffff54c2000     0x7ffff54c6000     0x4000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libdatrie.so.1
+      0x7ffff54c6000     0x7ffff54c8000     0x2000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libdatrie.so.1
+      0x7ffff54c8000     0x7ffff54c9000     0x1000     0x7000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libdatrie.so.1
+      0x7ffff54c9000     0x7ffff54cd000     0x4000     0x8000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libdatrie.so.1
+      0x7ffff54cd000     0x7ffff54d1000     0x4000        0x0  rw-p   
+      0x7ffff54d1000     0x7ffff54d3000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libINIReader.so.0
+      0x7ffff54d3000     0x7ffff54d7000     0x4000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libINIReader.so.0
+      0x7ffff54d7000     0x7ffff54d8000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libINIReader.so.0
+      0x7ffff54d8000     0x7ffff54d9000     0x1000     0x7000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libINIReader.so.0
+      0x7ffff54d9000     0x7ffff54dd000     0x4000     0x8000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libINIReader.so.0
+      0x7ffff54dd000     0x7ffff54df000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXdmcp.so.6
+      0x7ffff54df000     0x7ffff54e1000     0x2000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXdmcp.so.6
+      0x7ffff54e1000     0x7ffff54e3000     0x2000     0x4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXdmcp.so.6
+      0x7ffff54e3000     0x7ffff54e4000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXdmcp.so.6
+      0x7ffff54e4000     0x7ffff54e8000     0x4000     0x6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXdmcp.so.6
+      0x7ffff54e8000     0x7ffff54e9000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXau.so.6
+      0x7ffff54e9000     0x7ffff54ea000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXau.so.6
+      0x7ffff54ea000     0x7ffff54eb000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXau.so.6
+      0x7ffff54eb000     0x7ffff54ec000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXau.so.6
+      0x7ffff54ec000     0x7ffff54f0000     0x4000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXau.so.6
+      0x7ffff54f0000     0x7ffff54f1000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbrotlidec.so.1
+      0x7ffff54f1000     0x7ffff54f9000     0x8000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbrotlidec.so.1
+      0x7ffff54f9000     0x7ffff54fc000     0x3000     0x9000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbrotlidec.so.1
+      0x7ffff54fc000     0x7ffff54fd000     0x1000     0xb000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbrotlidec.so.1
+      0x7ffff54fd000     0x7ffff5501000     0x4000     0xc000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbrotlidec.so.1
+      0x7ffff5501000     0x7ffff550b000     0xa000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libblkid.so.1
+      0x7ffff550b000     0x7ffff5548000    0x3d000     0xa000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libblkid.so.1
+      0x7ffff5548000     0x7ffff555b000    0x13000    0x47000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libblkid.so.1
+      0x7ffff555b000     0x7ffff5561000     0x6000    0x5a000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libblkid.so.1
+      0x7ffff5561000     0x7ffff5566000     0x5000    0x60000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libblkid.so.1
+      0x7ffff5566000     0x7ffff55c5000    0x5f000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libepoxy.so.0
+      0x7ffff55c5000     0x7ffff562a000    0x65000    0x5f000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libepoxy.so.0
+      0x7ffff562a000     0x7ffff5687000    0x5d000    0xc4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libepoxy.so.0
+      0x7ffff5687000     0x7ffff568f000     0x8000   0x121000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libepoxy.so.0
+      0x7ffff568f000     0x7ffff5696000     0x7000   0x129000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libepoxy.so.0
+      0x7ffff5696000     0x7ffff56b7000    0x21000   0x131000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libepoxy.so.0
+      0x7ffff56b7000     0x7ffff56c4000     0xd000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0
+      0x7ffff56c4000     0x7ffff57b5000    0xf1000     0xd000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0
+      0x7ffff57b5000     0x7ffff57f5000    0x40000    0xfe000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0
+      0x7ffff57f5000     0x7ffff57f7000     0x2000   0x13d000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0
+      0x7ffff57f7000     0x7ffff5800000     0x9000   0x13f000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0
+      0x7ffff5800000     0x7ffff589d000    0x9d000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+      0x7ffff589d000     0x7ffff59c6000   0x129000    0x9d000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+      0x7ffff59c6000     0x7ffff5a54000    0x8e000   0x1c6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+      0x7ffff5a54000     0x7ffff5a5f000     0xb000   0x254000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+      0x7ffff5a5f000     0x7ffff5a62000     0x3000   0x25f000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+      0x7ffff5a62000     0x7ffff5a66000     0x4000        0x0  rw-p   
+      0x7ffff5a66000     0x7ffff5abd000    0x57000   0x262000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+      0x7ffff5abd000     0x7ffff5ac7000     0xa000        0x0  rw-p   
+      0x7ffff5ac7000     0x7ffff5ac9000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbz2.so.1.0
+      0x7ffff5ac9000     0x7ffff5ad6000     0xd000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbz2.so.1.0
+      0x7ffff5ad6000     0x7ffff5ad8000     0x2000     0xf000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbz2.so.1.0
+      0x7ffff5ad8000     0x7ffff5ad9000     0x1000    0x10000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbz2.so.1.0
+      0x7ffff5ad9000     0x7ffff5ada000     0x1000    0x11000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbz2.so.1.0
+      0x7ffff5ada000     0x7ffff5add000     0x3000    0x13000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbz2.so.1.0
+      0x7ffff5add000     0x7ffff5b07000    0x2a000        0x0  rw-p   
+      0x7ffff5b07000     0x7ffff5b08000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXinerama.so.1
+      0x7ffff5b08000     0x7ffff5b09000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXinerama.so.1
+      0x7ffff5b09000     0x7ffff5b0a000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXinerama.so.1
+      0x7ffff5b0a000     0x7ffff5b0b000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXinerama.so.1
+      0x7ffff5b0b000     0x7ffff5b0f000     0x4000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXinerama.so.1
+      0x7ffff5b0f000     0x7ffff5b11000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXrandr.so.2
+      0x7ffff5b11000     0x7ffff5b18000     0x7000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXrandr.so.2
+      0x7ffff5b18000     0x7ffff5b1a000     0x2000     0x9000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXrandr.so.2
+      0x7ffff5b1a000     0x7ffff5b1b000     0x1000     0xa000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXrandr.so.2
+      0x7ffff5b1b000     0x7ffff5b20000     0x5000     0xb000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXrandr.so.2
+      0x7ffff5b20000     0x7ffff5b21000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXcomposite.so.1
+      0x7ffff5b21000     0x7ffff5b22000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXcomposite.so.1
+      0x7ffff5b22000     0x7ffff5b23000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXcomposite.so.1
+      0x7ffff5b23000     0x7ffff5b24000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXcomposite.so.1
+      0x7ffff5b24000     0x7ffff5b28000     0x4000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXcomposite.so.1
+      0x7ffff5b28000     0x7ffff5b29000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXdamage.so.1
+      0x7ffff5b29000     0x7ffff5b2a000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXdamage.so.1
+      0x7ffff5b2a000     0x7ffff5b2b000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXdamage.so.1
+      0x7ffff5b2b000     0x7ffff5b2c000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXdamage.so.1
+      0x7ffff5b2c000     0x7ffff5b30000     0x4000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXdamage.so.1
+      0x7ffff5b30000     0x7ffff5b33000     0x3000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXcursor.so.1
+      0x7ffff5b33000     0x7ffff5b39000     0x6000     0x3000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXcursor.so.1
+      0x7ffff5b39000     0x7ffff5b3b000     0x2000     0x9000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXcursor.so.1
+      0x7ffff5b3b000     0x7ffff5b3c000     0x1000     0xa000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXcursor.so.1
+      0x7ffff5b3c000     0x7ffff5b41000     0x5000     0xb000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXcursor.so.1
+      0x7ffff5b41000     0x7ffff5b42000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-egl.so.1
+      0x7ffff5b42000     0x7ffff5b43000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-egl.so.1
+      0x7ffff5b43000     0x7ffff5b44000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-egl.so.1
+      0x7ffff5b44000     0x7ffff5b45000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-egl.so.1
+      0x7ffff5b45000     0x7ffff5b49000     0x4000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-egl.so.1
+      0x7ffff5b49000     0x7ffff5b4b000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-cursor.so.0
+      0x7ffff5b4b000     0x7ffff5b4d000     0x2000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-cursor.so.0
+      0x7ffff5b4d000     0x7ffff5b4e000     0x1000     0x4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-cursor.so.0
+      0x7ffff5b4e000     0x7ffff5b4f000     0x1000     0x4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-cursor.so.0
+      0x7ffff5b4f000     0x7ffff5b56000     0x7000     0x5000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-cursor.so.0
+      0x7ffff5b56000     0x7ffff5b5c000     0x6000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-client.so.0
+      0x7ffff5b5c000     0x7ffff5b63000     0x7000     0x6000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-client.so.0
+      0x7ffff5b63000     0x7ffff5b66000     0x3000     0xd000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-client.so.0
+      0x7ffff5b66000     0x7ffff5b68000     0x2000    0x10000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-client.so.0
+      0x7ffff5b68000     0x7ffff5b6d000     0x5000    0x12000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libwayland-client.so.0
+      0x7ffff5b6d000     0x7ffff5b72000     0x5000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxkbcommon.so.0
+      0x7ffff5b72000     0x7ffff5b91000    0x1f000     0x5000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxkbcommon.so.0
+      0x7ffff5b91000     0x7ffff5bb5000    0x24000    0x24000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxkbcommon.so.0
+      0x7ffff5bb5000     0x7ffff5bb7000     0x2000    0x47000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxkbcommon.so.0
+      0x7ffff5bb7000     0x7ffff5bbc000     0x5000    0x49000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxkbcommon.so.0
+      0x7ffff5bbc000     0x7ffff5bc8000     0xc000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatk-bridge-2.0.so.0
+      0x7ffff5bc8000     0x7ffff5be1000    0x19000     0xc000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatk-bridge-2.0.so.0
+      0x7ffff5be1000     0x7ffff5bf6000    0x15000    0x25000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatk-bridge-2.0.so.0
+      0x7ffff5bf6000     0x7ffff5bf8000     0x2000    0x39000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatk-bridge-2.0.so.0
+      0x7ffff5bf8000     0x7ffff5c00000     0x8000    0x3b000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatk-bridge-2.0.so.0
+      0x7ffff5c00000     0x7ffff5cdb000    0xdb000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexiv2.so.28
+      0x7ffff5cdb000     0x7ffff5e46000   0x16b000    0xdb000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexiv2.so.28
+      0x7ffff5e46000     0x7ffff5f12000    0xcc000   0x246000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexiv2.so.28
+      0x7ffff5f12000     0x7ffff5f76000    0x64000   0x311000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexiv2.so.28
+      0x7ffff5f76000     0x7ffff5f77000     0x1000   0x375000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexiv2.so.28
+      0x7ffff5f77000     0x7ffff5f7b000     0x4000        0x0  rw-p   
+      0x7ffff5f7b000     0x7ffff5f91000    0x16000   0x376000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexiv2.so.28
+      0x7ffff5f92000     0x7ffff5f9c000     0xa000        0x0  rw-p   
+      0x7ffff5f9c000     0x7ffff5f9e000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXfixes.so.3
+      0x7ffff5f9e000     0x7ffff5fa1000     0x3000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXfixes.so.3
+      0x7ffff5fa1000     0x7ffff5fa2000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXfixes.so.3
+      0x7ffff5fa2000     0x7ffff5fa3000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXfixes.so.3
+      0x7ffff5fa3000     0x7ffff5fa7000     0x4000     0x6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXfixes.so.3
+      0x7ffff5fa7000     0x7ffff5fae000     0x7000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcloudproviders.so.0
+      0x7ffff5fae000     0x7ffff5fb8000     0xa000     0x7000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcloudproviders.so.0
+      0x7ffff5fb8000     0x7ffff5fbd000     0x5000    0x11000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcloudproviders.so.0
+      0x7ffff5fbd000     0x7ffff5fbe000     0x1000    0x16000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcloudproviders.so.0
+      0x7ffff5fbe000     0x7ffff5fc4000     0x6000    0x17000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcloudproviders.so.0
+      0x7ffff5fc4000     0x7ffff5fc7000     0x3000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXi.so.6
+      0x7ffff5fc7000     0x7ffff5fd3000     0xc000     0x3000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXi.so.6
+      0x7ffff5fd3000     0x7ffff5fd6000     0x3000     0xf000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXi.so.6
+      0x7ffff5fd6000     0x7ffff5fd7000     0x1000    0x11000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXi.so.6
+      0x7ffff5fd7000     0x7ffff5fdc000     0x5000    0x12000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXi.so.6
+      0x7ffff5fdc000     0x7ffff5fde000     0x2000        0x0  rw-p   
+      0x7ffff5fde000     0x7ffff5fe9000     0xb000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatk-1.0.so.0
+      0x7ffff5fe9000     0x7ffff5ff8000     0xf000     0xb000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatk-1.0.so.0
+      0x7ffff5ff8000     0x7ffff6004000     0xc000    0x1a000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatk-1.0.so.0
+      0x7ffff6004000     0x7ffff6007000     0x3000    0x25000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatk-1.0.so.0
+      0x7ffff6007000     0x7ffff600e000     0x7000    0x28000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatk-1.0.so.0
+      0x7ffff600e000     0x7ffff6012000     0x4000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo-gobject.so.2
+      0x7ffff6012000     0x7ffff6014000     0x2000     0x4000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo-gobject.so.2
+      0x7ffff6014000     0x7ffff6016000     0x2000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo-gobject.so.2
+      0x7ffff6016000     0x7ffff6018000     0x2000     0x8000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo-gobject.so.2
+      0x7ffff6018000     0x7ffff601c000     0x4000     0xa000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo-gobject.so.2
+      0x7ffff601c000     0x7ffff6024000     0x8000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0
+      0x7ffff6024000     0x7ffff6032000     0xe000     0x8000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0
+      0x7ffff6032000     0x7ffff6037000     0x5000    0x16000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0
+      0x7ffff6037000     0x7ffff6038000     0x1000    0x1b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0
+      0x7ffff6038000     0x7ffff603f000     0x7000    0x1c000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0
+      0x7ffff603f000     0x7ffff6043000     0x4000        0x0  rw-p   
+      0x7ffff6043000     0x7ffff6047000     0x4000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexpat.so.1
+      0x7ffff6047000     0x7ffff6065000    0x1e000     0x4000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexpat.so.1
+      0x7ffff6065000     0x7ffff606e000     0x9000    0x22000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexpat.so.1
+      0x7ffff606e000     0x7ffff6070000     0x2000    0x2b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexpat.so.1
+      0x7ffff6070000     0x7ffff6075000     0x5000    0x2d000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libexpat.so.1
+      0x7ffff6075000     0x7ffff6079000     0x4000        0x0  rw-p   
+      0x7ffff6079000     0x7ffff607b000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libthai.so.0
+      0x7ffff607b000     0x7ffff607f000     0x4000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libthai.so.0
+      0x7ffff607f000     0x7ffff6082000     0x3000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libthai.so.0
+      0x7ffff6082000     0x7ffff6083000     0x1000     0x8000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libthai.so.0
+      0x7ffff6083000     0x7ffff6084000     0x1000     0x9000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libthai.so.0
+      0x7ffff6084000     0x7ffff6088000     0x4000     0xb000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libthai.so.0
+      0x7ffff6088000     0x7ffff608a000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfribidi.so.0
+      0x7ffff608a000     0x7ffff608e000     0x4000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfribidi.so.0
+      0x7ffff608e000     0x7ffff60a5000    0x17000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfribidi.so.0
+      0x7ffff60a5000     0x7ffff60a6000     0x1000    0x1c000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfribidi.so.0
+      0x7ffff60a6000     0x7ffff60aa000     0x4000    0x1d000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfribidi.so.0
+      0x7ffff60aa000     0x7ffff60ae000     0x4000        0x0  rw-p   
+      0x7ffff60ae000     0x7ffff60b2000     0x4000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff60b2000     0x7ffff60d5000    0x23000     0x4000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff60d5000     0x7ffff60d9000     0x4000    0x27000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff60d9000     0x7ffff60da000     0x1000    0x2b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff60da000     0x7ffff60df000     0x5000    0x2c000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff60df000     0x7ffff60e3000     0x4000        0x0  rw-p   
+      0x7ffff60e3000     0x7ffff60e7000     0x4000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libjpeg.so.62
+      0x7ffff60e7000     0x7ffff6136000    0x4f000     0x4000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libjpeg.so.62
+      0x7ffff6136000     0x7ffff6178000    0x42000    0x53000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libjpeg.so.62
+      0x7ffff6178000     0x7ffff6179000     0x1000    0x95000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libjpeg.so.62
+      0x7ffff6179000     0x7ffff617e000     0x5000    0x96000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libjpeg.so.62
+      0x7ffff617e000     0x7ffff6182000     0x4000        0x0  rw-p   
+      0x7ffff6182000     0x7ffff618d000     0xb000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpixman-1.so.0
+      0x7ffff618d000     0x7ffff6214000    0x87000     0xb000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpixman-1.so.0
+      0x7ffff6214000     0x7ffff6226000    0x12000    0x92000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpixman-1.so.0
+      0x7ffff6226000     0x7ffff622e000     0x8000    0xa4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpixman-1.so.0
+      0x7ffff622e000     0x7ffff6233000     0x5000    0xac000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpixman-1.so.0
+      0x7ffff6233000     0x7ffff6234000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb-shm.so.0
+      0x7ffff6234000     0x7ffff6235000     0x1000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb-shm.so.0
+      0x7ffff6235000     0x7ffff6236000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb-shm.so.0
+      0x7ffff6236000     0x7ffff6237000     0x1000     0x2000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb-shm.so.0
+      0x7ffff6237000     0x7ffff623b000     0x4000     0x3000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb-shm.so.0
+      0x7ffff623b000     0x7ffff6240000     0x5000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb-render.so.0
+      0x7ffff6240000     0x7ffff6246000     0x6000     0x5000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb-render.so.0
+      0x7ffff6246000     0x7ffff6248000     0x2000     0xb000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb-render.so.0
+      0x7ffff6248000     0x7ffff6249000     0x1000     0xd000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb-render.so.0
+      0x7ffff6249000     0x7ffff624f000     0x6000     0xe000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb-render.so.0
+      0x7ffff624f000     0x7ffff625b000     0xc000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb.so.1
+      0x7ffff625b000     0x7ffff626f000    0x14000     0xc000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb.so.1
+      0x7ffff626f000     0x7ffff6278000     0x9000    0x20000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb.so.1
+      0x7ffff6278000     0x7ffff6279000     0x1000    0x28000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb.so.1
+      0x7ffff6279000     0x7ffff6283000     0xa000    0x29000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libxcb.so.1
+      0x7ffff6283000     0x7ffff6285000     0x2000        0x0  rw-p   
+      0x7ffff6285000     0x7ffff6287000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXrender.so.1
+      0x7ffff6287000     0x7ffff628e000     0x7000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXrender.so.1
+      0x7ffff628e000     0x7ffff6290000     0x2000     0x9000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXrender.so.1
+      0x7ffff6290000     0x7ffff6291000     0x1000     0xa000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXrender.so.1
+      0x7ffff6291000     0x7ffff6295000     0x4000     0xb000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXrender.so.1
+      0x7ffff6295000     0x7ffff6299000     0x4000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXext.so.6
+      0x7ffff6299000     0x7ffff62a4000     0xb000     0x4000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXext.so.6
+      0x7ffff62a4000     0x7ffff62a8000     0x4000     0xf000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXext.so.6
+      0x7ffff62a8000     0x7ffff62a9000     0x1000    0x12000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXext.so.6
+      0x7ffff62a9000     0x7ffff62ae000     0x5000    0x13000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libXext.so.6
+      0x7ffff62ae000     0x7ffff62ca000    0x1c000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libX11.so.6
+      0x7ffff62ca000     0x7ffff635a000    0x90000    0x1c000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libX11.so.6
+      0x7ffff635a000     0x7ffff63f0000    0x96000    0xac000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libX11.so.6
+      0x7ffff63f0000     0x7ffff63f1000     0x1000   0x142000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libX11.so.6
+      0x7ffff63f1000     0x7ffff6401000    0x10000   0x143000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libX11.so.6
+      0x7ffff6401000     0x7ffff640f000     0xe000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfreetype.so.6
+      0x7ffff640f000     0x7ffff649d000    0x8e000     0xe000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfreetype.so.6
+      0x7ffff649d000     0x7ffff64c8000    0x2b000    0x9c000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfreetype.so.6
+      0x7ffff64c8000     0x7ffff64d0000     0x8000    0xc6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfreetype.so.6
+      0x7ffff64d0000     0x7ffff64d6000     0x6000    0xce000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfreetype.so.6
+      0x7ffff64d6000     0x7ffff64dc000     0x6000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpng16.so.16
+      0x7ffff64dc000     0x7ffff6502000    0x26000     0x6000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpng16.so.16
+      0x7ffff6502000     0x7ffff650d000     0xb000    0x2c000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpng16.so.16
+      0x7ffff650d000     0x7ffff650e000     0x1000    0x37000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpng16.so.16
+      0x7ffff650e000     0x7ffff6514000     0x6000    0x38000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpng16.so.16
+      0x7ffff6514000     0x7ffff6528000    0x14000        0x0  rw-p   
+      0x7ffff6528000     0x7ffff652f000     0x7000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libselinux.so.1
+      0x7ffff652f000     0x7ffff654f000    0x20000     0x7000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libselinux.so.1
+      0x7ffff654f000     0x7ffff6558000     0x9000    0x27000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libselinux.so.1
+      0x7ffff6558000     0x7ffff6559000     0x1000    0x30000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libselinux.so.1
+      0x7ffff6559000     0x7ffff655a000     0x1000    0x31000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libselinux.so.1
+      0x7ffff655a000     0x7ffff655c000     0x2000        0x0  rw-p   
+      0x7ffff655c000     0x7ffff6561000     0x5000    0x32000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libselinux.so.1
+      0x7ffff6561000     0x7ffff656e000     0xd000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libmount.so.1
+      0x7ffff656e000     0x7ffff65bf000    0x51000     0xd000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libmount.so.1
+      0x7ffff65bf000     0x7ffff65d9000    0x1a000    0x5e000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libmount.so.1
+      0x7ffff65d9000     0x7ffff65dc000     0x3000    0x77000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libmount.so.1
+      0x7ffff65dc000     0x7ffff65e3000     0x7000    0x7a000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libmount.so.1
+      0x7ffff65e3000     0x7ffff65e7000     0x4000        0x0  rw-p   
+      0x7ffff65e7000     0x7ffff65ea000     0x3000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpcre2-8.so.0
+      0x7ffff65ea000     0x7ffff6665000    0x7b000     0x3000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpcre2-8.so.0
+      0x7ffff6665000     0x7ffff6694000    0x2f000    0x7e000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpcre2-8.so.0
+      0x7ffff6694000     0x7ffff6695000     0x1000    0xac000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpcre2-8.so.0
+      0x7ffff6695000     0x7ffff669a000     0x5000    0xad000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpcre2-8.so.0
+      0x7ffff669a000     0x7ffff669c000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatomic.so.1
+      0x7ffff669c000     0x7ffff669f000     0x3000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatomic.so.1
+      0x7ffff669f000     0x7ffff66a1000     0x2000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatomic.so.1
+      0x7ffff66a1000     0x7ffff66a2000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatomic.so.1
+      0x7ffff66a2000     0x7ffff66a3000     0x1000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatomic.so.1
+      0x7ffff66a3000     0x7ffff66a4000     0x1000        0x0  rw-p   
+      0x7ffff66a4000     0x7ffff66a8000     0x4000     0x8000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libatomic.so.1
+      0x7ffff66a8000     0x7ffff66ac000     0x4000        0x0  rw-p   
+      0x7ffff66ac000     0x7ffff66ae000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libffi.so.8
+      0x7ffff66ae000     0x7ffff66b5000     0x7000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libffi.so.8
+      0x7ffff66b5000     0x7ffff66b7000     0x2000     0x9000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libffi.so.8
+      0x7ffff66b7000     0x7ffff66b8000     0x1000     0xa000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libffi.so.8
+      0x7ffff66b8000     0x7ffff66bc000     0x4000     0xb000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libffi.so.8
+      0x7ffff66bc000     0x7ffff66cc000    0x10000        0x0  rw-p   
+      0x7ffff66cc000     0x7ffff66d1000     0x5000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpangocairo-1.0.so.0
+      0x7ffff66d1000     0x7ffff66d8000     0x7000     0x5000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpangocairo-1.0.so.0
+      0x7ffff66d8000     0x7ffff66db000     0x3000     0xc000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpangocairo-1.0.so.0
+      0x7ffff66db000     0x7ffff66dc000     0x1000     0xe000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpangocairo-1.0.so.0
+      0x7ffff66dc000     0x7ffff66e1000     0x5000     0xf000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpangocairo-1.0.so.0
+      0x7ffff66e1000     0x7ffff670f000    0x2e000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgdk-3.so.0
+      0x7ffff670f000     0x7ffff6796000    0x87000    0x2e000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgdk-3.so.0
+      0x7ffff6796000     0x7ffff67e5000    0x4f000    0xb5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgdk-3.so.0
+      0x7ffff67e5000     0x7ffff67ef000     0xa000   0x103000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgdk-3.so.0
+      0x7ffff67ef000     0x7ffff6800000    0x11000   0x10d000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgdk-3.so.0
+      0x7ffff6800000     0x7ffff688d000    0x8d000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgtk-3.so.0
+      0x7ffff688d000     0x7ffff6c1f000   0x392000    0x8d000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgtk-3.so.0
+      0x7ffff6c1f000     0x7ffff6fe3000   0x3c4000   0x41f000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgtk-3.so.0
+      0x7ffff6fe3000     0x7ffff6ff6000    0x13000   0x7e3000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgtk-3.so.0
+      0x7ffff6ff6000     0x7ffff6ff9000     0x3000   0x7f6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgtk-3.so.0
+      0x7ffff6ff9000     0x7ffff6ffe000     0x5000        0x0  rw-p   
+      0x7ffff6ffe000     0x7ffff7037000    0x39000   0x7f9000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgtk-3.so.0
+      0x7ffff7037000     0x7ffff7039000     0x2000        0x0  rw-p   
+      0x7ffff7039000     0x7ffff7041000     0x8000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgirepository-1.0.so.1
+      0x7ffff7041000     0x7ffff7063000    0x22000     0x8000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgirepository-1.0.so.1
+      0x7ffff7063000     0x7ffff7071000     0xe000    0x2a000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgirepository-1.0.so.1
+      0x7ffff7071000     0x7ffff7072000     0x1000    0x38000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgirepository-1.0.so.1
+      0x7ffff7072000     0x7ffff7079000     0x7000    0x39000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgirepository-1.0.so.1
+      0x7ffff7079000     0x7ffff7081000     0x8000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfontconfig.so.1
+      0x7ffff7081000     0x7ffff70ab000    0x2a000     0x8000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfontconfig.so.1
+      0x7ffff70ab000     0x7ffff70c4000    0x19000    0x32000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfontconfig.so.1
+      0x7ffff70c4000     0x7ffff70c6000     0x2000    0x4b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfontconfig.so.1
+      0x7ffff70c6000     0x7ffff70cc000     0x6000    0x4d000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libfontconfig.so.1
+      0x7ffff70cc000     0x7ffff70df000    0x13000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpango-1.0.so.0
+      0x7ffff70df000     0x7ffff711c000    0x3d000    0x13000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpango-1.0.so.0
+      0x7ffff711c000     0x7ffff7138000    0x1c000    0x50000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpango-1.0.so.0
+      0x7ffff7138000     0x7ffff713c000     0x4000    0x6b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpango-1.0.so.0
+      0x7ffff713c000     0x7ffff7146000     0xa000    0x6f000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libpango-1.0.so.0
+      0x7ffff7146000     0x7ffff7150000     0xa000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgexiv2.so.2
+      0x7ffff7150000     0x7ffff7173000    0x23000     0xa000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgexiv2.so.2
+      0x7ffff7173000     0x7ffff7180000     0xd000    0x2d000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgexiv2.so.2
+      0x7ffff7180000     0x7ffff7182000     0x2000    0x39000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgexiv2.so.2
+      0x7ffff7182000     0x7ffff718a000     0x8000    0x3b000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgexiv2.so.2
+      0x7ffff718a000     0x7ffff7192000     0x8000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0
+      0x7ffff7192000     0x7ffff71ac000    0x1a000     0x8000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0
+      0x7ffff71ac000     0x7ffff71b6000     0xa000    0x22000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0
+      0x7ffff71b6000     0x7ffff71b7000     0x1000    0x2c000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0
+      0x7ffff71b7000     0x7ffff71bd000     0x6000    0x2d000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0
+      0x7ffff71bd000     0x7ffff71d1000    0x14000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo.so.2
+      0x7ffff71d1000     0x7ffff72bd000    0xec000    0x14000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo.so.2
+      0x7ffff72bd000     0x7ffff7304000    0x47000   0x100000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo.so.2
+      0x7ffff7304000     0x7ffff7308000     0x4000   0x147000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo.so.2
+      0x7ffff7308000     0x7ffff730a000     0x2000   0x14b000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo.so.2
+      0x7ffff730a000     0x7ffff730b000     0x1000        0x0  rw-p   
+      0x7ffff730b000     0x7ffff7314000     0x9000   0x14d000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libcairo.so.2
+      0x7ffff7314000     0x7ffff7325000    0x11000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7325000     0x7ffff73a2000    0x7d000    0x11000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff73a2000     0x7ffff7402000    0x60000    0x8e000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7402000     0x7ffff7403000     0x1000    0xed000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7403000     0x7ffff740c000     0x9000    0xee000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff740c000     0x7ffff7434000    0x28000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7434000     0x7ffff7597000   0x163000    0x28000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7597000     0x7ffff75ed000    0x56000   0x18b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff75ed000     0x7ffff75f1000     0x4000   0x1e0000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff75f1000     0x7ffff75f3000     0x2000   0x1e4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff75f3000     0x7ffff7600000     0xd000        0x0  rw-p   
+      0x7ffff7600000     0x7ffff763e000    0x3e000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgio-2.0.so.0
+      0x7ffff763e000     0x7ffff775c000   0x11e000    0x3e000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgio-2.0.so.0
+      0x7ffff775c000     0x7ffff77eb000    0x8f000   0x15c000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgio-2.0.so.0
+      0x7ffff77eb000     0x7ffff77f5000     0xa000   0x1ea000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgio-2.0.so.0
+      0x7ffff77f5000     0x7ffff77f6000     0x1000   0x1f4000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgio-2.0.so.0
+      0x7ffff77f6000     0x7ffff77f8000     0x2000        0x0  rw-p   
+      0x7ffff77f8000     0x7ffff7812000    0x1a000   0x1f5000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgio-2.0.so.0
+      0x7ffff7812000     0x7ffff7824000    0x12000        0x0  rw-p   
+      0x7ffff7824000     0x7ffff7826000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0
+      0x7ffff7826000     0x7ffff7828000     0x2000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0
+      0x7ffff7828000     0x7ffff7829000     0x1000     0x4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0
+      0x7ffff7829000     0x7ffff782a000     0x1000     0x4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0
+      0x7ffff782a000     0x7ffff782e000     0x4000     0x5000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0
+      0x7ffff782e000     0x7ffff7830000     0x2000        0x0  rw-p   
+      0x7ffff7830000     0x7ffff783b000     0xb000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/liblcms2.so.2
+      0x7ffff783b000     0x7ffff787b000    0x40000     0xb000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/liblcms2.so.2
+      0x7ffff787b000     0x7ffff7891000    0x16000    0x4b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/liblcms2.so.2
+      0x7ffff7891000     0x7ffff7894000     0x3000    0x61000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/liblcms2.so.2
+      0x7ffff7894000     0x7ffff7897000     0x3000    0x64000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/liblcms2.so.2
+      0x7ffff7897000     0x7ffff7898000     0x1000        0x0  rw-p   
+      0x7ffff7898000     0x7ffff789e000     0x6000    0x68000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/liblcms2.so.2
+      0x7ffff789e000     0x7ffff78af000    0x11000        0x0  rw-p   
+      0x7ffff78af000     0x7ffff78ce000    0x1f000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0
+      0x7ffff78ce000     0x7ffff796f000    0xa1000    0x1f000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0
+      0x7ffff796f000     0x7ffff7a05000    0x96000    0xc0000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0
+      0x7ffff7a05000     0x7ffff7a06000     0x1000   0x155000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0
+      0x7ffff7a06000     0x7ffff7a07000     0x1000   0x156000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0
+      0x7ffff7a07000     0x7ffff7a08000     0x1000        0x0  rw-p   
+      0x7ffff7a08000     0x7ffff7a19000    0x11000   0x157000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0
+      0x7ffff7a19000     0x7ffff7a29000    0x10000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0
+      0x7ffff7a29000     0x7ffff7a5e000    0x35000    0x10000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0
+      0x7ffff7a5e000     0x7ffff7a78000    0x1a000    0x45000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0
+      0x7ffff7a78000     0x7ffff7a7b000     0x3000    0x5f000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0
+      0x7ffff7a7b000     0x7ffff7a84000     0x9000    0x62000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0
+      0x7ffff7a84000     0x7ffff7a87000     0x3000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1
+      0x7ffff7a87000     0x7ffff7a9b000    0x14000     0x3000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1
+      0x7ffff7a9b000     0x7ffff7aa2000     0x7000    0x17000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1
+      0x7ffff7aa2000     0x7ffff7aa3000     0x1000    0x1d000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1
+      0x7ffff7aa3000     0x7ffff7aa8000     0x5000    0x1e000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1
+      0x7ffff7aa8000     0x7ffff7aaa000     0x2000        0x0  rw-p   
+      0x7ffff7aaa000     0x7ffff7ac8000    0x1e000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpwidgets-3.0.so.0.206.2
+      0x7ffff7ac8000     0x7ffff7b16000    0x4e000    0x1e000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpwidgets-3.0.so.0.206.2
+      0x7ffff7b16000     0x7ffff7b4f000    0x39000    0x6c000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpwidgets-3.0.so.0.206.2
+      0x7ffff7b4f000     0x7ffff7b51000     0x2000    0xa4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpwidgets-3.0.so.0.206.2
+      0x7ffff7b51000     0x7ffff7b54000     0x3000    0xa6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpwidgets-3.0.so.0.206.2
+      0x7ffff7b54000     0x7ffff7b55000     0x1000        0x0  rw-p   
+      0x7ffff7b55000     0x7ffff7b62000     0xd000   0x31f000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpwidgets-3.0.so.0.206.2
+      0x7ffff7b62000     0x7ffff7b71000     0xf000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpui-3.0.so.0.206.2
+      0x7ffff7b71000     0x7ffff7b89000    0x18000     0xf000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpui-3.0.so.0.206.2
+      0x7ffff7b89000     0x7ffff7b93000     0xa000    0x27000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpui-3.0.so.0.206.2
+      0x7ffff7b93000     0x7ffff7b94000     0x1000    0x30000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpui-3.0.so.0.206.2
+      0x7ffff7b94000     0x7ffff7b96000     0x2000    0x31000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpui-3.0.so.0.206.2
+      0x7ffff7b96000     0x7ffff7b9d000     0x7000   0x109000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpui-3.0.so.0.206.2
+      0x7ffff7b9d000     0x7ffff7ba0000     0x3000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpthumb-3.0.so.0.206.2
+      0x7ffff7ba0000     0x7ffff7ba4000     0x4000     0x3000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpthumb-3.0.so.0.206.2
+      0x7ffff7ba4000     0x7ffff7ba6000     0x2000     0x7000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpthumb-3.0.so.0.206.2
+      0x7ffff7ba6000     0x7ffff7ba7000     0x1000     0x8000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpthumb-3.0.so.0.206.2
+      0x7ffff7ba7000     0x7ffff7ba8000     0x1000     0x9000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpthumb-3.0.so.0.206.2
+      0x7ffff7ba8000     0x7ffff7bab000     0x3000    0x1f000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpthumb-3.0.so.0.206.2
+      0x7ffff7bab000     0x7ffff7bad000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmodule-3.0.so.0.206.2
+      0x7ffff7bad000     0x7ffff7baf000     0x2000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmodule-3.0.so.0.206.2
+      0x7ffff7baf000     0x7ffff7bb0000     0x1000     0x4000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmodule-3.0.so.0.206.2
+      0x7ffff7bb0000     0x7ffff7bb1000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmodule-3.0.so.0.206.2
+      0x7ffff7bb1000     0x7ffff7bb2000     0x1000     0x6000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmodule-3.0.so.0.206.2
+      0x7ffff7bb2000     0x7ffff7bb5000     0x3000    0x16000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmodule-3.0.so.0.206.2
+      0x7ffff7bb5000     0x7ffff7bb7000     0x2000        0x0  rw-p   
+      0x7ffff7bb7000     0x7ffff7bb9000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmath-3.0.so.0.206.2
+      0x7ffff7bb9000     0x7ffff7bbc000     0x3000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmath-3.0.so.0.206.2
+      0x7ffff7bbc000     0x7ffff7bbd000     0x1000     0x5000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmath-3.0.so.0.206.2
+      0x7ffff7bbd000     0x7ffff7bbe000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmath-3.0.so.0.206.2
+      0x7ffff7bbe000     0x7ffff7bbf000     0x1000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmath-3.0.so.0.206.2
+      0x7ffff7bbf000     0x7ffff7bc2000     0x3000    0x13000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmath-3.0.so.0.206.2
+      0x7ffff7bc2000     0x7ffff7bca000     0x8000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpconfig-3.0.so.0.206.2
+      0x7ffff7bca000     0x7ffff7bd8000     0xe000     0x8000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpconfig-3.0.so.0.206.2
+      0x7ffff7bd8000     0x7ffff7bde000     0x6000    0x16000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpconfig-3.0.so.0.206.2
+      0x7ffff7bde000     0x7ffff7bdf000     0x1000    0x1b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpconfig-3.0.so.0.206.2
+      0x7ffff7bdf000     0x7ffff7be0000     0x1000    0x1c000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpconfig-3.0.so.0.206.2
+      0x7ffff7be0000     0x7ffff7be5000     0x5000    0x6d000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpconfig-3.0.so.0.206.2
+      0x7ffff7be5000     0x7ffff7beb000     0x6000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpcolor-3.0.so.0.206.2
+      0x7ffff7beb000     0x7ffff7bf6000     0xb000     0x6000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpcolor-3.0.so.0.206.2
+      0x7ffff7bf6000     0x7ffff7bfa000     0x4000    0x11000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpcolor-3.0.so.0.206.2
+      0x7ffff7bfa000     0x7ffff7bfb000     0x1000    0x15000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpcolor-3.0.so.0.206.2
+      0x7ffff7bfb000     0x7ffff7bfc000     0x1000    0x16000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpcolor-3.0.so.0.206.2
+      0x7ffff7bfc000     0x7ffff7c00000     0x4000    0x4b000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpcolor-3.0.so.0.206.2
+      0x7ffff7c00000     0x7ffff7c10000    0x10000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpbase-3.0.so.0.206.2
+      0x7ffff7c10000     0x7ffff7c26000    0x16000    0x10000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpbase-3.0.so.0.206.2
+      0x7ffff7c26000     0x7ffff7c33000     0xd000    0x26000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpbase-3.0.so.0.206.2
+      0x7ffff7c33000     0x7ffff7c38000     0x5000    0x33000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpbase-3.0.so.0.206.2
+      0x7ffff7c38000     0x7ffff7c39000     0x1000    0x38000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpbase-3.0.so.0.206.2
+      0x7ffff7c39000     0x7ffff7c3a000     0x1000        0x0  rw-p   
+      0x7ffff7c3a000     0x7ffff7c40000     0x6000    0xb5000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpbase-3.0.so.0.206.2
+      0x7ffff7c40000     0x7ffff7c42000     0x2000        0x0  rw-p   
+      0x7ffff7c42000     0x7ffff7c53000    0x11000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-scriptfu-3.0.so.0.206.2
+      0x7ffff7c53000     0x7ffff7c71000    0x1e000    0x11000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-scriptfu-3.0.so.0.206.2
+      0x7ffff7c71000     0x7ffff7c7c000     0xb000    0x2f000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-scriptfu-3.0.so.0.206.2
+      0x7ffff7c7c000     0x7ffff7c7d000     0x1000    0x39000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-scriptfu-3.0.so.0.206.2
+      0x7ffff7c7d000     0x7ffff7c80000     0x3000    0x3a000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-scriptfu-3.0.so.0.206.2
+      0x7ffff7c80000     0x7ffff7c82000     0x2000        0x0  rw-p   
+      0x7ffff7c82000     0x7ffff7c88000     0x6000    0xd7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-scriptfu-3.0.so.0.206.2
+      0x7ffff7c88000     0x7ffff7caa000    0x22000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-3.0.so.0.206.2
+      0x7ffff7caa000     0x7ffff7cef000    0x45000    0x22000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-3.0.so.0.206.2
+      0x7ffff7cef000     0x7ffff7d13000    0x24000    0x67000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-3.0.so.0.206.2
+      0x7ffff7d13000     0x7ffff7d15000     0x2000    0x8b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-3.0.so.0.206.2
+      0x7ffff7d15000     0x7ffff7d17000     0x2000    0x8d000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-3.0.so.0.206.2
+      0x7ffff7d17000     0x7ffff7d18000     0x1000        0x0  rw-p   
+      0x7ffff7d18000     0x7ffff7d28000    0x10000   0x243000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-3.0.so.0.206.2
+      0x7ffff7d28000     0x7ffff7d31000     0x9000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-sc-0.4.so
+      0x7ffff7d31000     0x7ffff7d3e000     0xd000     0x9000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-sc-0.4.so
+      0x7ffff7d3e000     0x7ffff7d44000     0x6000    0x16000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-sc-0.4.so
+      0x7ffff7d44000     0x7ffff7d45000     0x1000    0x1b000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-sc-0.4.so
+      0x7ffff7d45000     0x7ffff7d46000     0x1000    0x1c000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-sc-0.4.so
+      0x7ffff7d46000     0x7ffff7d4b000     0x5000    0x64000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-sc-0.4.so
+      0x7ffff7d4b000     0x7ffff7d4d000     0x2000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-npd-0.4.so
+      0x7ffff7d4d000     0x7ffff7d51000     0x4000     0x2000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-npd-0.4.so
+      0x7ffff7d51000     0x7ffff7d52000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-npd-0.4.so
+      0x7ffff7d52000     0x7ffff7d53000     0x1000     0x6000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-npd-0.4.so
+      0x7ffff7d53000     0x7ffff7d54000     0x1000     0x7000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-npd-0.4.so
+      0x7ffff7d54000     0x7ffff7d57000     0x3000    0x1a000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-npd-0.4.so
+      0x7ffff7d57000     0x7ffff7d72000    0x1b000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-0.4.so.0.471.1
+      0x7ffff7d72000     0x7ffff7e15000    0xa3000    0x1b000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-0.4.so.0.471.1
+      0x7ffff7e15000     0x7ffff7e4f000    0x3a000    0xbe000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-0.4.so.0.471.1
+      0x7ffff7e4f000     0x7ffff7e51000     0x2000    0xf7000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-0.4.so.0.471.1
+      0x7ffff7e51000     0x7ffff7e54000     0x3000    0xf9000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-0.4.so.0.471.1
+      0x7ffff7e54000     0x7ffff7e59000     0x5000        0x0  rw-p   
+      0x7ffff7e59000     0x7ffff7e65000     0xc000   0x39e000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-0.4.so.0.471.1
+      0x7ffff7e65000     0x7ffff7e67000     0x2000        0x0  rw-p   
+      0x7ffff7e67000     0x7ffff7e6b000     0x4000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbabl-0.1.so.0.227.1
+      0x7ffff7e6b000     0x7ffff7ebb000    0x50000     0x4000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbabl-0.1.so.0.227.1
+      0x7ffff7ebb000     0x7ffff7eec000    0x31000    0x54000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbabl-0.1.so.0.227.1
+      0x7ffff7eec000     0x7ffff7eed000     0x1000    0x84000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbabl-0.1.so.0.227.1
+      0x7ffff7eed000     0x7ffff7eee000     0x1000    0x85000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbabl-0.1.so.0.227.1
+      0x7ffff7eee000     0x7ffff7fb0000    0xc2000        0x0  rw-p   
+      0x7ffff7fb0000     0x7ffff7fb3000     0x3000   0x1f2000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbabl-0.1.so.0.227.1
+      0x7ffff7fb3000     0x7ffff7fc1000     0xe000        0x0  rw-p   
+      0x7ffff7fc1000     0x7ffff7fc5000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc5000     0x7ffff7fc7000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc7000     0x7ffff7fc8000     0x1000        0x0  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+      0x7ffff7fc8000     0x7ffff7ff0000    0x28000     0x1000  r-xp   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+      0x7ffff7ff0000     0x7ffff7ffb000     0xb000    0x29000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x34000  r--p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7ffe000     0x1000    0x36000  rw-p   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+      0x7ffff7ffe000     0x7ffff7fff000     0x1000        0x0  rw-p   
+      0x7ffffffdd000     0x7ffffffff000    0x22000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+
+#0  0x00007ffff7a909a0 in inflate () from /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#1  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555617460, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=45771, height=height@entry=46918, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc468, error=0x7fffffffc7d8) at ../plug-ins/common/file-gif-load.c:1613
+#2  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555617460, file=file@entry=0x55555561ad30, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc468, error=0x7fffffffc7d8, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#3  0x000055555555861c in load_image (file=file@entry=0x55555561ad30, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc7d8) at ../plug-ins/common/file-gif-load.c:625
+#4  0x0000555555558dd4 in gif_load (procedure=0x55555561c5f0, run_mode=<optimized out>, file=0x55555561ad30, metadata=<optimized out>, flags=0x7fffffffc834, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#5  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561c5f0, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+
+Thread 1 "file-gif-load" received signal SIGSEGV, Segmentation fault.
+0x00007ffff756f300 in ?? () from /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+GIMP-Error: Plug-in crashed: "file-gif-load"
+(/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load)
+
+The dying plug-in may have messed up GIMP's internal state. You may want to save your images and restart GIMP to be on the safe side.
+
+batch command experienced an execution error:
+Error: Procedure execution of gimp-file-load failed on invalid input arguments: Procedure 'file-jif-load' returned no return values 
+Stopping at failing batch command [0]: (let* ((img (car (gimp-file-load RUN-NONINTERACTIVE "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/evidence/gdb-liveptr-8192.jif" "gdb-liveptr-8192.jif")))) (gimp-message (number->string (car (gimp-image-get-width img)))))
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+
+== INFO ==
+GIMP is now running as a background process. You can quit anytime with Ctrl-C (SIGINT).
+
+If you wanted to quit immediately instead, call GIMP with --quit.
