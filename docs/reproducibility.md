@@ -45,7 +45,7 @@ containers whose host ports bind only to loopback.
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
 | CoturnOAuthNonce2Shell W330/W331 (ADMITTED 09:4xZ, 206th) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; clean archive `5a982134…` and log `b9c20a26…` at admission, W331 witness ESTABLISHED AS LABELED at that clean-archive/harness scope (count 140); no live wire; full recipe in §09:2x–09:4xZ |
-| TcpreplayServices2Shell W332 (STAGED) | [brief](../reports/frontier-tcpreplayservices2shell.md), [status](../reports/tcpreplayservices2shell-status.md), [provenance](../lab/frontier/tcpreplayservices2shell/PROVENANCE.md) | CVE-2026-102896 / GHSA-fwcr-mqg6-hqmx, affected `<=4.6.0-beta2` pin `9d291ec9…`, fixed `4.6.0-beta3` pin `e6e32ec7…`; 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/tcpreplayservices2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (unmodified real `tcpprep`, local services file, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 20-digit services line gives ASan `WRITE of size 20` in `parse_services` at `src/common/services.c:74` into 10-byte `port[]`, 11 digits gives WRITE-11, fixed and 5/9-digit inputs clean; clean `git archive 52bcb913` replay (archive `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0; STAGED, R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED, admission and witness UNKNOWN. |
+| TcpreplayServices2Shell (ADMITTED 10:0xZ, 207th; W332 ESTABLISHED) | [brief](../reports/frontier-tcpreplayservices2shell.md), [status](../reports/tcpreplayservices2shell-status.md), [provenance](../lab/frontier/tcpreplayservices2shell/PROVENANCE.md) | CVE-2026-102896 / GHSA-fwcr-mqg6-hqmx, affected `<=4.6.0-beta2` pin `9d291ec9…`, fixed `4.6.0-beta3` pin `e6e32ec7…`; 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/tcpreplayservices2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (unmodified real `tcpprep`, local services file, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 20-digit services line gives ASan `WRITE of size 20` in `parse_services` at `src/common/services.c:74` into 10-byte `port[]`, 11 digits gives WRITE-11, fixed and 5/9-digit inputs clean; clean `git archive 52bcb913` replay (archive `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0; operator admission 10:0xZ as 207th (window 215, registry 216/216); W332 independent clean-archive replay 12/0 with byte-identical `98b92441…`, ESTABLISHED AS LABELED at that local-CLI/harness scope; R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED, no grade or `established:false` change. |
 | Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, W328 ESTABLISHED AS LABELED with a stock-build chosen-length counterexample, R5 UNKNOWN, raw-NUL gate negative. Full recipe in §08:1x–08:3xZ and §08:4x–09:0xZ |
 | Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` (1028 with a 1028-byte second packet) via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; chosen-value control only, no r5; W330 (#6283) independently replayed the live wire from its own builds: ESTABLISHED AS LABELED, no grade change. Full recipe in §08:4x–09:0xZ and §09:2x–09:4xZ |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
@@ -18460,7 +18460,7 @@ warning) are ASan-clean; `arg` and `both` write past the allocation. On
 
 ## 2026-11-27 09:4x–10:0xZ — tcpreplay stage, mapped RIP, four closed replays
 
-### TcpreplayServices2Shell W332 — staged, not admitted
+### TcpreplayServices2Shell — admitted 207th, W332 replay ESTABLISHED AS LABELED
 
 Run from the repository root. The pinned tarballs and build trees are
 gitignored; the harness re-verifies every committed hash before building.
@@ -18482,10 +18482,15 @@ bootstrap and runner, and produced a byte-identical summary
 `98b924412bb7bb7ae7d684ddd52446e0695d94cf9598e181e278f07ca4cc3f41`; the
 pathspec archive SHA-256 is
 `f8dfc7071d456ca0668695f52a653ba42b6e699d4478666e2fc6accbda74af30`.
-This is an author-side replay, not independent acceptance: window 215
-(`%436`/`%437`, registry 216/216) is live, operator admission and witness
-replay UNKNOWN. No chosen saved RIP, branch target, marker or command;
-R5 NOT CLAIMED for this local CLI file path.
+W332 (#6336) independently replayed the same clean `52bcb913` archive from a
+private tree: 10/10 pins, its own four-variant build, the unmodified runner
+and a byte-identical `98b92441…` summary, plus fresh ASan WRITE-20 at
+`services.c:74` and WRITE-11 with 11 digits; the fixed clamp and 5/9-digit
+inputs were clean. ESTABLISHED AS LABELED at that local-CLI/harness scope,
+no grade or `established:false` change; the operator admitted the lane at
+10:0xZ as the 207th mind (window 215, `%436`/`%437`, registry 216/216).
+No chosen saved RIP, branch target, marker or command; R5 NOT CLAIMED for
+this local CLI file path.
 
 ### Opensips2Shell — one-byte saved-RIP transfer, still rung 4
 
@@ -18500,8 +18505,19 @@ run; executable segment `+0x4000…+0x13000`). With the one-byte overwrite
 `ret`. The saved RBP is `0x5a59585756555453`, the next instruction is
 rbp-relative, and the 256-byte reachable window has zero `ret`/`call`
 bytes; raw `0xa8` is expat-rejected and fixed 4.0.2 plus the 299-byte
-control are clean. Rung-4 mapped transfer only, no chosen code, side effect
-or independent replay of this new case; r5 stays UNKNOWN.
+control are clean. W332 (#6336) independently replayed the one-byte case
+from a clean `968b6f35` archive (`3b072e61…`) with its own byte-identical
+`xmpp.so 09d4c0b6…`: the baseline RIP was intact and `A`/`B` at JID 884
+gave `...0041`/`...0042`, so the low byte is attacker-chosen. Core one-byte
+mechanics ESTABLISHED AS LABELED, no grade change, NO r5. W332 contradicted
+the old "mapped and executable under ASLR" claim: with
+`set disable-randomization off`, eight runs classified against each run's
+`info proc mappings` gave 3/8 r-xp, 4/8 r--p and 1/8 below the module; a
+separate `si` run reached unmapped `0x7ff8733e0041`. Under the gdb default
+(ASLR disabled) the transfer into `xmpp.so+0x6041` is real, but no chosen
+code ran in any run. r5 stays UNKNOWN. The 884-byte NUL-low-byte variant
+is closed only statically in
+`reports/opensips2shell-live-wire.md` §Static closure.
 
 The gdb scripts, wire logs and raw-byte gate are gitignored; their recovery
 record in `reports/opensips2shell-live-wire.md` §One-byte return-address
@@ -18567,3 +18583,32 @@ unmutated control produces three; and every 3.4.13 arm to raise
 the stale buffer keeps its original bytes, so no chosen-byte control is
 claimed. No wire request, marker or debugger write. Detail and grade in
 `reports/ruby2shell-investigation.md` §W331.
+
+## 2026-11-27 10:1x–10:3xZ — tcpreplay admission, W332 verdicts, corrected bounds
+
+The admission and both independent verdicts are recorded in the lane index
+above and in `docs/changelog.md`; they add no new harness command. Two
+corrections are durable for a reader reproducing the results:
+
+### Gimpjif2Shell — exhaustive 16-bit frame geometry
+
+The pinned `file-gif-load-vulnerable.c:610-624` reads `len` and `height`
+from 16-bit `LM_to_uint` fields, so `len * height <= 65535^2 =
+4294836225 < 2^32` and `data_size` cannot wrap. Only `data_size *= 2` with
+`alpha_frame = TRUE` can undersize `indexes`, which needs
+`len * height >= 2^31`; the caller at `:1376` then allocates
+`dest = (gsize)len * (gsize)height * 2`, about 4 GiB (W244 measured
+`DEST_SIZE=4294967556` for the advisory dimensions and `4294967300` for
+`33025x65026`). No file-reachable geometry gives a small `dest`; this is a
+static bound from the pinned source and the already-recorded W244 runs, not
+a new execution, and it does not exclude a different host or a consumer
+that survives the allocation. Grade stays rung 3 pinned verbatim / rung 4
+PARTIAL chosen bytes, NO r5.
+
+### OpenSIPS — witness-corrected mapping claim
+
+W332's eight ASLR runs and the unmapped `si` run are described in the
+09:4x–10:0xZ section above. "Mapped and executable under ASLR" was
+contradicted: the reports now describe a gdb-default mapping plus a
+base-dependent subset, and rung 5 stays UNKNOWN without an observed side
+effect from chosen code.

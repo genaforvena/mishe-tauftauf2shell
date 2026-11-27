@@ -2,6 +2,63 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 10:1x–10:3xZ — tcpreplay admitted, W332 verdicts, corrected bounds
+
+Explanation and recipes only: no rung/grade or `established` flag moved by
+this fold. It covers `2df9f234`, `97e588b4`, `1843fa4c`, `5fdd8c5e` and
+`040ef634` past `51934e2d`. Ruby W331's own docs fold in `1843fa4c` was
+checked against `reports/ruby2shell-investigation.md` §W331 and is not
+repeated; the operator's admission re-rendered the generated register at
+`97e588b4` (207 declared / 204 active / 140 established) and those cells
+stay theirs. Inbox #6313's coturn W331 limb already stands in the
+09:4x–10:0xZ section below.
+
+- **Tcpreplayservices2Shell admitted 207th at 10:0xZ.** The operator adopted
+  window 215 as-is (registry 216/216, panes `%436`/`%437` dead=0) under
+  standing #6. The earlier "STAGED / admission and witness UNKNOWN" wording
+  in `docs/reproducibility.md` and `docs/task.md` is replaced, not
+  duplicated; the clean `f8dfc707…` archive again matched all 10 pins and
+  returned 12 PASS / 0 FAIL. R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED.
+- **W332 closed both replay UNKNOWNs.** For tcpreplay the witness rebuilt
+  all four variants from the clean `52bcb913` archive, used the unmodified
+  runner for 12/0 with a byte-identical `98b92441…` summary, and saw fresh
+  ASan WRITE-20 at `services.c:74` into 10-byte `port[]` plus WRITE-11 at
+  11 digits; fixed clamp and 5/9-digit inputs clean. ESTABLISHED AS LABELED
+  at that local-CLI/harness scope, no grade or `established:false` change,
+  no RIP, marker or command. For OpenSIPS the witness rebuilt
+  `xmpp.so 09d4c0b6…` byte-identically from the clean `968b6f35` archive
+  (`3b072e61…`): baseline RIP intact, `A`/`B` at JID 884 gave
+  `...0041`/`...0042`, so the low byte is attacker-chosen. Core one-byte
+  mechanics ESTABLISHED AS LABELED, no grade change, NO r5.
+- **OpenSIPS's ASLR mapping claim was corrected, not the grade.** The old
+  "always `xmpp.so base + 0x60XX`, mapped and executable under ASLR" sentence
+  was false: with `set disable-randomization off`, W332's eight runs all
+  took the `ret` but classified against each run's own mappings gave 3/8
+  r-xp, 4/8 r--p and 1/8 below the module; a separate `si` run reached an
+  unmapped `0x7ff8733e0041`. The gdb-default one-byte transfer into
+  `xmpp.so+0x6041` is real; no chosen code ran in any run, and r5 stays
+  UNKNOWN. Authors corrected the reports; no generated cell moved.
+- **Gimpjif's alternate-geometry escape is structurally closed.** Both
+  `len` and `height` come from 16-bit frame fields, so
+  `len*height <= 65535^2 < 2^32` and `data_size` cannot wrap; only
+  `data_size *= 2` with `alpha_frame` can undersize `indexes`, requiring
+  `len*height >= 2^31`, and then `dest` is about 4 GiB (W244 measured
+  `DEST_SIZE=4294967556`), whatever the factorization. The old "~2 GiB
+  `dest`" wording is corrected; no file-reachable geometry yields a small
+  `dest`, though a different host or a consumer surviving the allocation
+  is not excluded.
+- **OpenSIPS's NUL-low-byte RIP variant is closed statically.** An 884-byte
+  JID puts the `sprintf` terminator on RIP byte 0 (`+0xc600` under the gdb
+  default) and ASCII in all eight saved-RBP bytes, so the RBP-relative load
+  would fault before a clean return. Static prediction only: no run, no
+  chosen code, no side effect, no rung-5 evidence.
+
+What would change this fold: a chosen target that executes with an observed
+side effect and fresh replay, a tcpreplay pointer-control result, or a
+checker RED on committed HEAD.
+
+
+
 ## 2026-11-27 10:0x–10:1xZ — W331 Ruby W330 wire closed, adjacent `each_line` UAF
 
 - The named W330 wire-reachability experiment is CLOSED: pinned 3.4.12 has
@@ -57,9 +114,10 @@ theirs.
   enters. The 256-byte window `+0x6000…+0x60ff` has no `ret`/`call`; the
   saved RBP is noncanonical `0x5a59585756555453`, the next instruction is
   rbp-relative, raw `0xa8` is rejected by expat, and fixed 4.0.2 plus the
-  299-byte baseline are clean. Rung-4 mapped transfer, no side effect, no
-  witness for this new case, r5 UNKNOWN; no grade moved.
-- **Tcpreplayservices2Shell staged, not admitted.** W332 staged
+  299-byte baseline are clean. Rung-4 mapped transfer under the gdb default,
+  no side effect, r5 UNKNOWN; W332 later replayed this case (see the
+  10:1x–10:3xZ limb above), no grade moved.
+- **Tcpreplayservices2Shell staged, then admitted 207th.** W332 staged
   `lab/frontier/tcpreplayservices2shell` for CVE-2026-102896 /
   GHSA-fwcr-mqg6-hqmx (affected <=4.6.0-beta2 `9d291ec9…`, fixed
   4.6.0-beta3 `e6e32ec7…`): an unbounded `strncpy` count in
@@ -67,9 +125,10 @@ theirs.
   digits into 10-byte `port[]`. Vulnerable ASan gives `WRITE of size 20`
   at `:74` (11 digits → WRITE-11), fixed and 5/9-digit inputs clean,
   12 PASS / 0 FAIL. Clean `git archive 52bcb913` replay (archive
-  `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0; window
-  215 panes `%436`/`%437`, registry 216/216. Operator admission and
-  witness replay remain UNKNOWN; R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED.
+  `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0;
+  window 215 panes `%436`/`%437`, registry 216/216. Operator admission at
+  10:0xZ and W332's independent 12/0 replay are recorded in the
+  10:1x–10:3xZ limb above; R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED.
 - **Two replay UNKNOWNs closed in the register.** Under #6287, the Berry
   row now records W326's independent clean-archive 59/0 replay and
   source-bound ASan WRITE-225 with fresh saved-RIP readback, and the bzfs
@@ -146,8 +205,11 @@ edit. The operator moved the generated counts to 206/203/203 at `ce790520`
   pending=True)` tooling negative, both repaired arms confirmed the
   overwrite, armed two access watchpoints on the target and logged zero
   hits, then faulted before `gimp_drawable_get_buffer`. A 32-bit
-  alpha-doubling wrap needs `len * height >= 2^31` (~2 GiB `dest`), which
-  is why prior runs fault in the allocator. Grade unchanged: rung 3 pinned
+  alpha-doubling wrap needs `len * height >= 2^31`, so `:1376` allocates
+  `dest = (gsize)len * (gsize)height * 2` at about 4 GiB (W244 measured
+  `DEST_SIZE=4294967556`). 16-bit frame fields bound `len*height < 2^32`,
+  so no file-reachable geometry reaches this wrap with a small `dest`.
+  That is why prior runs fault in the allocator. Grade unchanged: rung 3 pinned
   verbatim / rung 4 PARTIAL chosen bytes, NO r5.
 - **Bzfs refreshes its boundary and closes the live witness question.** The
   status separates witness #761's harness scope (20/0, digest `cea3b92e…`)
