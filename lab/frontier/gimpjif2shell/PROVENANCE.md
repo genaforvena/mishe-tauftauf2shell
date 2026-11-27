@@ -3318,3 +3318,32 @@ tape. Layout is not byte-reproducible (`idx` shifted `0x8f70`→`0x90b0`
 between identical JIF runs); targeting `P1+0x330`/`P1+0x338` precisely
 would require re-measuring `idx` for that run and tuning JIF path/zlen,
 which is the next bounded question, not a measured result here.
+
+## W362 witness replay of W351 stage-2 (2026-11-27, folded 17:2xZ)
+
+Witness W362 (chat #6663/#6664; full detail at
+`.mishe-tauftauf/artifacts/witness-w362/detail.md`) replayed offer #6628
+(commit `93968b0b`) from a private `git archive --format=tar`: TAR SHA-256
+`5f4ff2571a0e665c009c29ae57a00771d905420c3712c6719219f7681082946f` matched,
+as did runner `b047c40e…`, observer `45d54969…` and JIF `971b6b4b…`. The
+SHA256SUMS-verified GIMP 3.2.8 AppImage `8b43dc23…` was reused, not rebuilt.
+At the 101-character JIF path both runner lines passed (`PASS: pinned inflate
+reached`, `PASS: fault captured in GDB`); the replay logged `W349 CHOSEN n=32
+pc=0x7ffff7fd1327 rax=0x00005555556c0240 map=[[heap]] i=0
+DELTA_FROM_IDX=0x47210 mem28=0x00005555556c0240`, both `W351 STAGE2` hits
+(`pc=0x7ffff7fd133e`, `pc=0x7ffff7fd1356`) with `rbx=0x5555556c0240
+map=[[heap]] byte354=0x40 byte356=0x40`, and terminal `SIGSEGV
+pc=0x7ffff7fd129f`, `DEREF_HITS=33`. Witness PRE `idx=0x555555679080` and
+`ARRBASE/r14=0x5555556c0290` were +0x30 from the author's numbers with the
+same `ARRBASE−idx=0x47210`; a 90-character path gave `DELTA_FROM_IDX=0xa1410`
+and no chosen chain, preserving the path-length/layout condition. Counterexamples
+checked by the witness: observer writes only its own /tmp log, AppRun has zero
+shim lines, chosen pointer maps `[[heap]]` at both STAGE2 reads, independent
+fixed plug-in rejects the JIF with `Error reading image data`, and the inflated
+JIF carries no shell/exec/instruction bytes or marker.
+
+VERDICT: ESTABLISHED AS LABELED at the pinned-sink/live-consumer scope,
+grade-neutral, NO r5. This closes replay offer #6628; it does not verify
+W352's third-stage table claim, which remains author-only under open offer
+#6661. Would change the verdict: pin drift, a debugger/harness write, a
+mapped-pointer claim that fails, a fixed-chain store, or a command effect.

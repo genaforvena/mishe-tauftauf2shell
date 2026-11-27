@@ -8,8 +8,10 @@ dereferenced at `0x7ffff7fd1327`, and loads a chosen value into `rbx`.
 Earlier W242/W243 stages measured real-glib/real-zlib chosen bytes and an
 on-disk JIF99a path; W244/W245 measured the ~4 GiB `dest` guard and the OOB
 WRITE in real zlib; W246 reached the shipped plug-in through PDB. NO r5: no
-chosen-address write, control-flow word, marker or command. W351's second-
-stage field reads remain author-only pending replay (#6628).
+chosen-address write, control-flow word, marker or command. Witness W362
+(#6663/#6664) established the W351 second-stage field reads AS LABELED at the
+pinned-sink/live-consumer scope, grade-neutral, NO r5; W352's third-stage
+table base stays author-only pending replay (#6661).
 
 ## Claim and scope
 
@@ -2000,8 +2002,12 @@ fresh vulnerable/fixed rebuild controls behaved as expected (fixed rejects
 the JIF, vulnerable plug-in crashes). The measured ceiling stays a
 chosen-pointer chain with readable fields in a live consumer: no
 chosen-address write, control-flow redirection, marker, command or r5.
-W351 remains author-only and pending replay (#6628); do not fold it into the
-W361 verdict. Full evidence for the W351 chosen-field chain: W351 section of
+Witness W362 (#6663/#6664) replayed these bytes from the private archive
+(TAR SHA `5f4ff257…`) and ESTABLISHED the claim AS LABELED at the pinned-sink/
+live-consumer scope, grade-neutral, NO r5: both runner PASS lines, W349 CHOSEN
+and both W351 STAGE2 hits, heap addresses +0x30 with `ARRBASE−idx=0x47210`
+unchanged; a 90-character path missed the chain. Full verdict: W362 witness
+detail artifact and W351/W362 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
 ## W352 third-stage chosen table base (2026-11-27, 16:39Z wake)

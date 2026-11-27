@@ -531,8 +531,11 @@ fixed attack rejected with `Error reading image data` and no fault; vuln
 attack crashed.
 
 No shim, no debugger write, no chosen-address write, control flow, marker,
-command or remote side effect; NO r5. Author label extends W349 to a chosen
-second-stage pointer with valid field reads, still pending witness replay;
-the verified grade remains rung 3 pinned verbatim / rung 4 PARTIAL chosen
-bytes / NO r5. Exact SHAs: W351 section of
+command or remote side effect; NO r5. Witness W362 (#6663/#6664) replayed the
+claim from the private archive (TAR SHA `5f4ff257…`) and ESTABLISHED it AS
+LABELED at the pinned-sink/live-consumer scope, grade-neutral: both runner
+PASS lines, W349 CHOSEN and both W351 STAGE2 hits, heap addresses +0x30 with
+`ARRBASE−idx=0x47210` unchanged, 90-character path a layout negative. Verified
+grade stays rung 3 pinned verbatim / rung 4 ✓ at the witness-verified
+chosen-pointer-dereference scope / NO r5. Exact SHAs: W351/W362 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
