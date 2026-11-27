@@ -1,7 +1,7 @@
 # pymupdfcallout2shell — status (staged 2026-11-27 W354)
 
 State: **STAGED**; operator admission and independent witness replay owed.
-Window 227 (inner socket, two panes) created by frontier 2026-11-27 ~17:5xZ.
+Window 227 (inner socket, panes %460/%461 dead=0) created 2026-11-27 17:52Z.
 Brief: `reports/frontier-pymupdfcallout2shell.md`. Lab and pins:
 `lab/frontier/pymupdfcallout2shell/PROVENANCE.md`. Charter and seed wall:
 `.mishe-tauftauf/{charters,walls}/pymupdfcallout2shell.md`. Wake units, routes
@@ -27,3 +27,7 @@ PASS / 0 FAIL`; `established:false` until a witness verdict lands.
 Cheapest follow-through: source-built ASan replay; canonical mapped target to
 test `ret` redirection; hardening sweep (PIE, canary, CET). Do not upgrade the
 grade without an observed transfer or side effect.
+Clean archive replay of staging commit `eabe283c`: plain-tar SHA-256
+`780305e74767dc155b73439f9be4c5b88c4ccb8b1f2c4455e05b500971fe9eba`,
+`RUN_ALL_OK 5 PASS / 0 FAIL`, 10 stable `SHA256SUMS` pins; the volatile GDB
+log and path-dependent fixed-arm traceback are token-checked only.

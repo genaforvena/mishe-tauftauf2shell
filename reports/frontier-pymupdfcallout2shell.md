@@ -81,6 +81,11 @@ is contacted; the installed wheel is a compiled binary, not a source build.
 Replay: `sh harness/run-all.sh` reported `RUN_ALL_OK 5 PASS / 0 FAIL`. The
 wheel is not ASan-instrumented; corruption is established by GDB inspection of
 the overwritten stack slots and the deterministic crash, not by a sanitizer.
+Clean replay from `git archive --format=tar eabe283c` (plain-tar SHA-256
+`780305e74767dc155b73439f9be4c5b88c4ccb8b1f2c4455e05b500971fe9eba`) also
+reported `RUN_ALL_OK 5 PASS / 0 FAIL`. The GDB log embeds ASLR addresses and
+the fixed-arm traceback embeds the venv path; both are checked by stable
+tokens in `run-all.sh` and excluded from the 10-entry `SHA256SUMS`.
 
 ## Rung-4 feasibility and scope
 

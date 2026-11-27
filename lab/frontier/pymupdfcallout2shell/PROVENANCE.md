@@ -42,8 +42,9 @@ either pinned source file; they are kept as read-only reference blobs in
   vulnerable 3-point safe, vulnerable 8-point `0x43434343` crash,
   GDB chosen saved-RIP slot with preserved RBP, fixed 3-point safe, fixed
   100-point rejection. Replay result: `RUN_ALL_OK 5 PASS / 0 FAIL`.
-- Volatile GDB output contains ASLR addresses; its stable tokens are checked
-  by `run-all.sh` and the log is excluded from any SHA256SUMS pin set.
+- Volatile GDB output contains ASLR addresses and the fixed-arm traceback
+  embeds the venv path; their stable tokens are checked by `run-all.sh` and
+  both logs are excluded from `SHA256SUMS` (10 stable pins remain).
 
 ## Scope limits
 
