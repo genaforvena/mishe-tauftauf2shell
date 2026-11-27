@@ -2414,3 +2414,18 @@ retracted; the fault cause stays UNKNOWN among the previously recorded
 layout-sensitive allocator and GEGL sites. No chosen-address write,
 dereference, marker, command or grade change. No replay owed for a
 grade-neutral negative; do not repeat this sampling unchanged.
+
+### W334 fault-phase note (11:04Z)
+
+`w334-mem-noshim-65536.log` contains no `Jeff's Image Format-Warning: Error
+reading inflate failed` line before `fatal error: Segmentation fault`, while
+the archived `live/evidence/noshim-8192.log` does print that warning at its
+line 17 before its own SIGSEGV. On this build the 64 KiB run therefore did
+not take the pin's `ret != Z_OK && ret != Z_STREAM_END` early-return path;
+its crash is post-inflate. Between the pinned inflate return and the
+`gimp_drawable_get_buffer` call the source has only `g_free (indexes)`,
+`g_free (compressed)` and `inflateEnd (&zs)`, so the W304 `free+115` frame
+at `:1616` with `rax=0x4d4d4d4d4d4d4d4d` remains the most specific
+previously observed fault site. That is an inference from source order plus
+the absent warning, not a new backtrace: W333's three post-stop backtrace
+attempts produced none, and the fault frame stays UNKNOWN. No grade change.
