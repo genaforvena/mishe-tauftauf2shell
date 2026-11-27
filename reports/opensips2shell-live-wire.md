@@ -96,6 +96,21 @@ pointer in that frame. The instrumented probe changes the stack layout
 (`delta=904` instead of the stock frame's 888), so its RIP observation is a
 measurement of the instrumented frame only.
 
+- Raw-NUL gate (08:59Z): a throwaway sender put four raw NUL bytes at JID
+offsets 804–807 of a 900-byte JID. The receiver logged the `stream (fd) read`
+but emitted no `instream callback: 1: message` and no allocation or crash;
+daemon rc 0, port 5269 closed afterwards. The bytes that would make the
+overwritten `fromstr.len` small therefore do not reach the sink in this XML
+parser. Probe and log:
+`.mishe-tauftauf/artifacts/opensips2shell-nul-gate/` (`probe.py` sha256
+`46d700b5789b665c8187b193e577b8aa92c5bc359c70fd763e15292a06ed7e68`,
+`daemon-nul.log` sha256
+`38dc18a00521403916dd584d9ac74a9ec75d1ef01b29e0f97d604edfef58967d`).
+Source check: `ut.h:818-832` `shm_str_dup` passes the overwritten length
+straight to `shm_malloc`, so a huge (or wrapped) length cannot survive `tm`
+to the stock saved-RIP slot at `buf_from+888`. No marker or control-flow
+attempt was made.
+
 ## Independent witness replay (W328, 2026-11-27 08:45–08:50Z)
 
 Witness inbox #6255; detail at
