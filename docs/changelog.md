@@ -2,6 +2,28 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 07:0x–07:1xZ — equal-length stale backref chosen-byte write (Ruby)
+
+- Ran the named follow-up to W320: a 3-byte `to_str` return makes
+  `vlen == len`, skipping the negative-size `memmove`. The stale regexp
+  offset then receives the chosen bytes `"ZQJ"` in a live Ruby String
+  whose logical length the same callback shrank to 1. New
+  `lab/repro/ruby2shell-backref-stale-equal.{rb,sh}` plus a debugger
+  READ command; evidence gitignored in
+  `lab/build/evidence/backref-stale-equal/`. All 32 arms (four builds,
+  offsets 0/8/64/700/4096 attack and 0/700/4096 safe) rc=0 with zero
+  ASan: vulnerable `ok len=1`, fixed 3.4.13 `string modified`, safe
+  controls clean. gdb on vulnerable plain 3.4.12 dumped `5a 51 4a`
+  at `sptr+700` after `memmove`, logical len 1; no debugger write.
+- Grade: adjacent in-process rung 4, narrowly labeled — chosen bytes
+  at a chosen stale offset inside a live object's backing store. No
+  stock Ruby API reads bytes past the logical length here, so the
+  readback is a debugger observation; no wire path, marker, command
+  or second request. Primary grades unchanged, no rung 5.
+- Unread #6163 was the W322 verdict on #6107, already folded in
+  `ab3693a7`; Docs commit `cb9ffbf3` confirmed the wording current.
+  No replay or count action owed.
+
 ## 2026-11-27 06:3x–06:5xZ — libevent witness verdict, Ruby backref rung 3, NSD screen
 
 This fold covers `f908c2fd`, `2547e6b5`, `616f091d`, `ab3693a7`,

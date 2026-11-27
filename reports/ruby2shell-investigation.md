@@ -7381,3 +7381,51 @@ conversion callback is caller-supplied rather than a stock request-path
 consumer — so no primary grade change and no rung 4/5 claim. Falsifier:
 any safe-control or fixed-build fault, or an ASan report at any other
 site, would break this attribution.
+
+## 2026-11-27 07:0x–07:1xZ — W321: equal-length stale backref writes chosen bytes at a stale offset (Ruby)
+
+The named follow-up to W320 replaces the 1-byte `to_str` return with a
+3-byte one (`"ZQJ"`), so `vlen == len == 3` and the negative-size `memmove`
+at `string.c:5770` is skipped. The receiver is 1003 bytes
+(`"a" * OFFSET + "abc" + "d" * 300`), the regexp match begins at
+`OFFSET`, and the callback shrinks the same `String` to `"X"` during
+`StringValue`. 3.4.12 then calls the second `memmove` at
+`string.c:5778` with `beg=OFFSET`, `vlen=3`, against a logical length of
+1; 3.4.13's guard (`string.c:5898`, after `StringValue`) raises
+`RuntimeError: string modified`.
+
+```
+bash lab/repro/ruby2shell-backref-stale-equal.sh
+```
+
+All 32 arms (four builds × five attack offsets 0/8/64/700/4096 × three
+safe offsets) returned rc=0 with zero AddressSanitizer reports. Each
+vulnerable attack prints `ok len=1`; each fixed attack prints
+`raised RuntimeError: string modified`; each safe arm prints the
+unshrunken length (303/1003/4399) with `"ZQJ"` at the match offset on
+both builds. Per-arm stdout/stderr and the debugger transcript are
+gitignored under `lab/build/evidence/backref-stale-equal/`. At `OFFSET=0`
+the chosen first byte is visible to Ruby (`inspect="Z"`); at every other
+offset it sits past the logical length in the retained buffer.
+
+A debugger READ on vulnerable plain 3.4.12 (breakpoint on `memmove`
+conditioned on `size == 3` and source bytes `ZQJ`; no register or memory
+write) showed the destination and the bytes before/after:
+
+```
+CHOSEN memmove(dest=0x7fffdc558b6c src=0x7fffdc558680 size=3)
+before: 05 08 50 20 01 00 00 00   (dest-4 .. dest+3)
+after:  05 08 50 20 5a 51 4a 00   (dest = sptr+700; logical len = 1)
+```
+
+**Grade: adjacent in-process rung 4, narrowly labeled — chosen bytes at a
+chosen stale offset inside a live Ruby object's backing store.** The
+write is fix-sensitive and the no-shrink controls are clean. It is NOT
+the primary CVE, has no wire path, no benign marker or command and no
+second-request behavior. Bytes past the logical length are not readable
+through any stock Ruby API found here (`bytesplice` and `[]=` clamp to
+`RSTRING_LEN`; `inspect`/`unpack`/`Regexp` respect it); the readback above
+is a debugger observation, which keeps this at rung-4 mechanics rather
+than rung 5. No primary grade change. Falsifier: a fixed-build attack
+that does not raise, a safe-control fault, or chosen bytes that are not
+fix-sensitive would break this attribution.
