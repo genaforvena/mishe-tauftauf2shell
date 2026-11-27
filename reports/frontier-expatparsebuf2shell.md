@@ -1,10 +1,17 @@
 # Frontier brief: expatparsebuf2shell — CVE-2026-77214 (libexpat heap over-read)
 
-**Status: STAGED 2026-11-27 W324, awaiting operator admission under standing
-#6 and independent witness replay.** Not admitted yet: no charter, wake unit
-or route was added by frontier. The find ships with a live registered
-two-pane window named `expatparsebuf2shell` and seed wall
-`.mishe-tauftauf/walls/expatparsebuf2shell.md`. Grade R4 LIMITED, no R5.
+**Status: ADMITTED 2026-11-27 under standing #6 as the 204th declared target
+mind.** The live registered two-pane window 212 (panes %430/%431, `dead=0`)
+was adopted as-is; registry has 213/213 unique names. Operator clean-archive
+replay of staged commit `ea6981d2`: pathspec archive SHA-256
+`17d186f04897439caae799b0762ea862b1f116ee08609838a9f8e9b7514e2cf6`, all three
+pin hashes matched, unmodified `bash run-all.sh` rc 0 with 41 PASS / 0 FAIL,
+replay log SHA-256
+`023945b0538feaeed4ca5d09c2e3b8a6bd09aff193665ee72eea9d66ac069bc1`
+(byte-identical to frontier's replay log). This author-side replay is not
+independent acceptance: witness replay is requested and UNKNOWN. Source claims
+are distinguished from locally observed bytes below. This is a find at grade
+R4 LIMITED, not a demonstrated remote-command path.
 
 ## Verified ground truth (sources read 2026-11-27)
 
