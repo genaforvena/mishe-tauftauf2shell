@@ -8,7 +8,8 @@ side effect exists. Written 2026-11-21 ~21:26Z by `wamr2shell`, updated
 #1168 and 2026-11-27 ~07:16Z with the offset-shift depth addendum. Rungs 1-3
 were independently established by witness #1146 and are not re-proved here.
 The 2026-11-27 ~07:35Z addendum names the destination as the live i64 const
-table.
+table; the 2026-11-27 ~08:00Z addendum records the confinement sweeps and a
+synthetic forced-survival copy observation.
 
 ## Result in one paragraph
 
@@ -386,7 +387,8 @@ Measured at the first OOB (`dup_before`; absolute addresses ASLR-vary):
   process ends `malloc(): corrupted top size` (rc −6) after further
   pointer/`i16` writes.
 
-Source consequence, **unmeasured here**: `wasm_loader.c:16856-16868` copies
+Source consequence, unmeasured here at the time (a synthetic forced-survival
+probe of it is in the next addendum): `wasm_loader.c:16856-16868` copies
 `loader_ctx->i64_consts` into `func->consts` at the end of function
 preparation, so a load that survived the corruption would carry these bytes
 into the module's per-function constant pool. In these builds the load
@@ -395,3 +397,67 @@ attacker-chosen pointer value (the logged pointers are loader-generated),
 no wire traffic and no benign-command side effect. Rung 5 stays UNKNOWN and
 this addendum does not re-audit witness verdict #1168. The replay offer for
 the shift ladder (tape #6192) is separate from this measurement.
+
+## Addendum: table-confinement sweeps and the `func->consts` copy (2026-11-27 ~08:00Z)
+
+This answers the operator's bounded follow-up on the W5 destination: can a
+module shape keep chosen stores inside the live `i64_consts` table and let
+the load survive far enough to copy them into `func->consts`? All evidence
+below is rung-4 depth at the labeled scope; it changes no grade and does not
+re-audit witness verdict #1168.
+
+Method: the committed caller-store binary
+`build-plain-2.4.4-callerstore/iwasm-2.4.4` (sha `de75c5e6…`, clean pinned
+2.4.4 plus `caller-store.patch` `9c0e7907…`) was run on byte-level variants
+of the pinned PoC. Two throwaway generators (gitignored `/tmp/w6gen.py`,
+`/tmp/w6trim.py`, `/tmp/w6block.py`) (a) varied the number of appended chosen
+`i64.const` pairs after the copied 21-result block, (b) trimmed the
+`i64.const 0` duplicates from 16373 down while keeping the copied block and
+eight chosen pairs, and (c) varied the block arity with balanced trailing
+drops. Raw logs are in the gitignored site under
+`.mishe-tauftauf/artifacts/wamr2shell/w6-*.out`.
+
+Result — no valid shape confines the chosen stores. With the copied block
+and N chosen pairs, the chosen store starts move in 18-byte steps and always
+end at `past=172`: N=1 → 172; N=2 → 154/172; N=3 → 136/154/172; N=4 →
+118/136/154/172; N=5 → 100/118/136/154/172; N=8 (`dup_before`, sha
+`756cabf8…`) → 46/64/82/100/118/136/154/172. Only N=8 has its first four
+stores wholly inside the table (`end+38/56/74/92`); the other four reach the
+following chunks. Every such run ends `malloc(): corrupted top size` (rc
+−6). Trimming duplicates to K ≤ 16368 removes the overflow entirely (rc 0,
+`0x1:i32`); K = 16369/16370/16371 gives exactly one chosen 8-byte store at
+`past=4/6/8`, then `bh_assert_internal` at `wasm_loader.c:9422` `_ret == 0`
+(the `bh_memcpy_s` destination capacity underflows once the cursor is past
+the end), rc −6; K = 16372/16373 restores the multi-store overflow and
+heap abort. Reducing the block arity below 21 fails validation with
+`type mismatch: stack`; M=21 regenerates `dup_before` byte-for-byte
+(`756cabf8…`), so the PoC's 21-result block is required. The natural load
+therefore aborts before the `:16856-16868` copy in every valid variant
+observed. This negative is preserved: no surviving real load was produced.
+
+To measure the previously unmeasured source consequence, a **synthetic
+forced-survival probe** (not a valid module load) was built in the gitignored
+tree `src/wamr-2.4.4-survive`: clean pinned 2.4.4 plus `caller-store.patch`,
+with `wamr_oob_log()` modified to suppress every OOB store except chosen
+8-byte const immediates, and a dump of `func->consts` immediately after the
+i64 copy. Binary sha `6438b537…`; patched loader sha `49eb9811…`. On
+`dup_before` it skipped 95 OOB writes, really stored all eight chosen
+immediates, reached the copy and printed (`W6_FUNC_CONSTS n=12`):
+
+```
+0000000000000000 0000000000000001 0000000000000002 4142434445464700
+0000000000000004 4344454647010005 0000000000004142 4546470200000007
+0000000041424344 4703000000000009 0000414243444546 000000000000000b
+```
+
+Chosen bytes are copied into seven of twelve `func->consts` entries (3, 5,
+6, 7, 8, 9, 10); entries 0/1/2/4/11 remain loader values. The subsequent
+guest call still faults in `copy_stack_values()` (`wasm_interp_fast.c:938`)
+because the suppressed OOB writes leave gaps in the compiled stream, so a
+guest `i64.const` readback of those entries remains **unmeasured even in this
+synthetic build**. The copy observation is a forced-survival mechanic only:
+no valid load survives, no guest instruction reads chosen bytes, no
+attacker-chosen pointer, no wire traffic and no benign-command side effect.
+Rung 5 stays UNKNOWN. Fixed 2.4.5 ASan control on `dup_before`, the four-pair
+variant and the single-store trim: no ASan report, only the known post-load
+CLI `Exception: native stack overflow` (rc 1).
