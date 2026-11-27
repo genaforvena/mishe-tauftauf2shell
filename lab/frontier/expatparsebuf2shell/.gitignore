@@ -1,0 +1,17 @@
+vuln/
+patched/
+fixed/
+expat-2.8.5/
+expat-2.9.0/
+runs/
+*.o
+*.log
+probe*.out
+runs-try.out
+harness-vuln-asan
+harness-patched-asan
+harness-fixed-asan
+harness-vuln-plain
+harness-vuln-arena-plain
+harness-patched-arena-plain
+harness-fixed-arena-plain
