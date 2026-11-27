@@ -232,8 +232,8 @@ receives into `malloc(NETWORK_INPUT_BUFF_SIZE)` (65535 bytes,
 The live object overlapped is the *next V3 record's 12-byte header* in the
 same datagram; `Process_nfd()` rejects the corrupted record and the final
 capture contains one flow instead of two. The written value comes from
-`fs.received` (`gettimeofday()` immediately before dispatch in
-`src/nfcapd/nfcapd.c:436-461`), not from the packet.
+`fs.received` (`gettimeofday(&tv, NULL)` at `src/nfcapd/nfcapd.c:343`,
+assigned to `fs->received` at `:442`), not from the packet.
 
 Negative result (preserved): an alias shape with a 4-byte element in a
 16-byte record passes the pinned verifier and puts the store inside the
@@ -871,3 +871,24 @@ collector impact at a packet-chosen offset with a collector-time-derived
 value: rung 3 pinned verbatim / rung 4 PARTIAL as labeled, no pointer,
 command, marker or r5. Only #5712 header and #5738 element type remain
 queued.
+
+## W317 source-bound negative — metric/stat consumers of the OOB view (2026-11-27 05:22Z)
+
+Read-only source check of the pinned parent `8a00543aa5c7b25b7d3f7642fdf306fd9979f237`;
+no new run, no claim change. `src/libnffile/nfxV3.h:138-192` lays out
+`EXgenericFlow_t` as `msecFirst(0)`, `msecLast(8)`, `msecReceived(16)`,
+`inPackets(24)`, `inBytes(32)`, `srcPort(40)`, `dstPort(42)`, `proto(44)` —
+a 48-byte struct. Pinned `Process_nfd()` writes a field of the out-of-record
+view only once: `genericFlow->msecReceived = msecReceived` at
+`src/netflow/nfd_raw.c:256`. Every other field of that view is read.
+
+`UpdateMetric()` (`src/collector/metric.c:167-214`) switches on
+`genericFlow->proto` and adds the packet-chosen `inPackets`/`inBytes` to
+fixed counters in a calloc'd `metric_record_t`; `Process_nfd()` does the
+same for `fs->nffile->stat_record->...` (`nfd_raw.c:126-155`). No field of
+the OOB view is used as an index, length, pointer or allocator size, so
+this consumer path cannot turn the out-of-record view into a chosen-address
+write. Together with `nfcapd.c:343` and `:442`, the stored 8 bytes are
+wall-clock derived on every live packet. This closes the plausible
+"chosen-index metric write" hypothesis; grade stays rung 3 live / rung 4
+availability + chosen-offset PARTIAL / NO r5.
