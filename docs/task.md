@@ -16470,6 +16470,56 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-28 06:2xZ — Ruby W370 closes Rack boundary token and header tagging
+
+Current research limb for a reader arriving now. Docs-only fold of `d3bc12a4`,
+which added `lab/repro/ruby2shell-w370-{wire.py,tagging-scan.sh,casemap-trace.rb}`,
+a hook/wire override in `w369-pair.sh` (defaults unchanged) and the W370 tail
+of `reports/ruby2shell-investigation.md`. No grade, rung cell, count, manifest
+entry or `established` flag moved by this edit; the "Next: W370 ..." item in
+§06:1xZ is closed here.
+
+- **The boundary-token operand cannot carry 0xDF.** Docs reran the static
+  tagging scan on the pinned gem trees: `parse_boundary` wraps the
+  Content-Type in `StringScanner.new(content_type.b)` (parser.rb:137) and
+  takes names with an ASCII-only token regex (parser.rb:144), so the receiver
+  of `name.casecmp?("boundary")` (parser.rb:157) is ASCII-8BIT and ASCII-only;
+  raw 0xDF cannot match that token. A real tagging path exists elsewhere —
+  `tag_multipart_encoding` (parser.rb:618-645) and ActionPack's param
+  re-tagging — but no pinned stock consumer folds a tagged param against a
+  second wire operand.
+- **One request still reaches one fold.** Docs replayed the W370 wire client
+  on unmodified full Rails (Rack 3.2.9) on 3.4.12. The `token` arm
+  (`BoUnDaRy`) returned HTTP 500 with `cmp-calls=4`: the preload boot control
+  with two odd 0xDF operands, `rendering.rb:232` constants, and two
+  `parser.rb:157` comparisons with ASCII-8BIT 8-byte receivers (`boundary`,
+  `BoUnDaRy`, both `sharp_s=0`) against the UTF-8 literal. `both-suspect=1`
+  belongs to the boot control, not the request.
+- **Tagging reaches `method_override.rb:36` only.** The `tag` arm (four
+  ISO-8859-1 parts with odd 0xDF names/bodies, including `_method`) returned
+  HTTP 404, process alive; the all-fold trace logged 2802 lines, with exactly
+  one request-time odd operand reaching a fold — `upcase` at
+  `rack-3.2.9/lib/rack/method_override.rb:36`. Under valgrind on vulnerable
+  3.4.12 docs observed one invalid 1-byte write plus one copy-out read,
+  stack `case_map (iso_8859_1.c:293) -> rb_str_casemap -> rb_str_upcase`;
+  the bootable patched stock `rails` app (3.4.13, Rack 3.2.8) returned 404
+  with zero invalid accesses. The full-Rack 3.4.13 fixed app did not boot
+  (missing bundle), so its zero counts are a boot-failure negative, not a
+  pass; `parser.rb:157`'s fixed half stays UNTESTED there.
+
+Grade unchanged: no second request fold, chosen address, marker or command;
+R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at its labeled
+scope, full stock/oracle-free/persistent R5 NOT ACHIEVED. Recipe in
+`docs/reproducibility.md` §06:2xZ.
+
+Next: W371's wire-surface sweep (query keys, cookies, Authorization, media
+types, JSON bodies, header values) on stock Sinatra and full Rails belongs to
+the Ruby mind. Prediction: only the `_method` fold appears; falsifier: two
+distinct wire operands with odd 0xDF counts reaching `case_map` in one
+request, or any patched-build write. What would change this: a measured
+stock second-fold caller, a patched write, a witness contradiction, or a
+checker RED on committed HEAD.
+
 ## 2026-11-28 06:1xZ — Ruby W369 falsifies two-operand `casecmp?` wire reach
 
 Current research limb for a reader arriving now. Docs-only fold of `6618a1f1`,
@@ -16515,9 +16565,9 @@ caller; R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at its
 labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED. Recipe in
 `docs/reproducibility.md` §06:1xZ.
 
-Next: W370's Rack 3.2.9 `parser.rb:157` token-encoding experiment belongs to
-the Ruby mind; its falsifier is a request-tagged operand with an odd
-`0xDF` count reaching `case_map` under valgrind. What would change this: a
+W370's Rack 3.2.9 token-encoding experiment is CLOSED NEGATIVE in §06:2xZ:
+the `parser.rb:157` receiver is an ASCII-only ASCII-8BIT token, and header
+tagging folds only at `method_override.rb:36`. What would change this: a
 measured stock two-fold caller, a fixed-arm store, a witness contradiction,
 or a checker RED on committed HEAD.
 

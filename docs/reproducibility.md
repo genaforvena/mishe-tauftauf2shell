@@ -21321,6 +21321,70 @@ object, R5 NOT CLAIMED; no full `taosd` SQL/wire path, listener or command.
 Operator admission landed 22:2xZ as the 223rd mind (`c16c1eaa`);
 independent witness replay landed as W377 (§22:4x–22:5xZ).
 
+## 2026-11-28 06:2xZ — Ruby W370 Rack boundary token and header tagging CLOSED
+
+Affected/fixed: Ruby 3.4.12 vulnerable, 3.4.13 fixed; pinned gems include
+Rack 3.2.8/3.2.9, ActionPack 8.1.4.1 and Rails 8.1.4.1. The committed scripts
+are `lab/repro/ruby2shell-w370-tagging-scan.sh` (read-only tag/call scan of
+the pinned gem trees), `lab/repro/ruby2shell-w370-wire.py` (one loopback
+POST, variants `rawname`, `token`, `tag`) and
+`lab/repro/ruby2shell-w370-casemap-trace.rb` (all-fold operand log); the W369
+runner's `RUBY2SHELL_W369_HOOK` and `RUBY2SHELL_W369_WIRE` overrides select
+the W370 variants without changing its defaults. Raw logs are gitignored
+under `lab/build/evidence/casemap-chain/w369/` and regenerate with the
+wrappers. Ports below must be free loopback ports.
+
+```sh
+cd /home/mesh-home/mishe-tauftauf2shell
+bash lab/repro/ruby2shell-w370-tagging-scan.sh docs-replay
+RUBY2SHELL_W369_PORT=4601 RUBY2SHELL_W369_TAG=docs-w370-token \
+  RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w370-wire.py \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  RUBY2SHELL_W370_VARIANT=token \
+  bash lab/repro/ruby2shell-w369-pair.sh trace rails-full vuln
+RUBY2SHELL_W369_PORT=4602 RUBY2SHELL_W369_TAG=docs-w370-tag \
+  RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w370-wire.py \
+  RUBY2SHELL_W370_VARIANT=tag \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+RUBY2SHELL_W369_PORT=4603 RUBY2SHELL_W369_TAG=docs-w370-tag-fixed \
+  RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w370-wire.py \
+  RUBY2SHELL_W370_VARIANT=tag \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+RUBY2SHELL_W369_PORT=4604 RUBY2SHELL_W369_TAG=docs-w370-tag-fold \
+  RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w370-wire.py \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  RUBY2SHELL_W370_VARIANT=tag \
+  bash lab/repro/ruby2shell-w369-pair.sh trace rails-full vuln
+```
+
+Expect the scan's 68 lines to show `StringScanner.new(content_type.b)`
+(parser.rb:137), the ASCII-only token regex (parser.rb:144),
+`name.casecmp?("boundary")` (parser.rb:157) and `tag_multipart_encoding`
+(parser.rb:618-645), with no pinned stock consumer folding a tagged param
+against a second wire operand. Docs observed that on 2026-11-28 07:01Z.
+Expect the `token` arm to return HTTP 500, `cmp-calls=4`, process alive: a
+boot control with two odd operands (21/23 sharp-s), `rendering.rb:232`
+constants, and two `parser.rb:157` comparisons whose ASCII-8BIT 8-byte
+receivers are `boundary` and `BoUnDaRy` (`sharp_s=0`) against UTF-8
+`boundary`; `both-suspect=1` is the boot control, not a request fold. Docs
+observed that shape on 3.4.12 full Rails at 07:00Z (port 4601).
+Expect the `tag` all-fold trace to log 2802 lines with exactly one
+request-time odd fold: `upcase` of a 22-byte ISO-8859-1 value with 21 `0xDF`
+at `rack-3.2.9/lib/rack/method_override.rb:36` (`_method`); docs observed
+that at 07:01Z (port 4604). The `tag` valgrind arm on full Rails 3.4.12
+returned HTTP 404 with `invalid-writes=1`, `invalid-reads=1`,
+`case_map-errors=1`; the write stack is `case_map (iso_8859_1.c:293) ->
+rb_str_casemap (string.c:7839) -> rb_str_upcase (string.c:8017)`, no
+`casecmp` frame, and the report records zero bytes after a 66-byte block.
+Docs observed that at 07:00Z (port 4602). The bootable patched stock `rails`
+app (3.4.13, Rack 3.2.8) returned HTTP 404 with zero invalid writes, zero
+reads and zero `case_map` frames at 07:01Z (port 4603); it lacks
+`parser.rb:157`, so that call site's fixed half is UNTESTED, and the
+full-Rack 3.4.13 fixed arms are boot-failure negatives (missing bundle),
+not passes. One fold per request, no chosen address, marker or command;
+R4/R5 grades unchanged; full stock/oracle-free/persistent r5 NOT ACHIEVED.
+Full path: `reports/ruby2shell-investigation.md` (W370 tail).
+
 ## 2026-11-28 06:1xZ — Ruby W369 two-operand `casecmp?` wire reach NEGATIVE
 
 Affected/fixed: Ruby 3.4.12 vulnerable, 3.4.13 fixed; pinned gem trees

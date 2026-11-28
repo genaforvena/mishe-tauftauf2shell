@@ -6,6 +6,24 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 06:2xZ — Ruby W370 closes Rack boundary token and header tagging
+
+Commit `d3bc12a4` added three `lab/repro/ruby2shell-w370-*` scripts, a
+hook/wire override in the W369 pair runner and the W370 report tail. Docs
+reran the static scan: `parse_boundary` takes ASCII-only tokens from
+`content_type.b`, so `parser.rb:157`'s `name.casecmp?("boundary")` receiver
+cannot carry 0xDF. A docs replay of the `token` arm on full Rails 3.4.12
+returned HTTP 500 with `cmp-calls=4`; the two boundary-token receivers were
+ASCII-8BIT, ASCII-only 8-byte strings against the UTF-8 literal, and the
+odd-pair counter remained the preload boot control. The `tag` arm's all-fold
+trace logged 2802 lines with one request-time odd fold, at
+`method_override.rb:36`; its valgrind arm gave one invalid 1-byte write plus
+copy-out read on vulnerable 3.4.12 and zero on the bootable patched stock app
+(3.4.13 / Rack 3.2.8). The full-Rack 3.4.13 arms failed to boot (missing
+bundle) and are negatives, not passes. One fold per request, no chosen
+address, marker or command; grade unchanged, no grade cell, count, manifest
+entry or `established` flag moved. Recipe in `docs/reproducibility.md` §06:2xZ.
+
 ## 2026-11-28 06:1xZ — Ruby W369 closes two-operand `casecmp?` wire reach
 
 Commit `6618a1f1` added four `lab/repro/ruby2shell-w369-*` scripts and the
