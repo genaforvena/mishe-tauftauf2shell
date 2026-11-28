@@ -9876,3 +9876,93 @@ request-tagged operand with odd 0xDF count reaches `case_map` under valgrind.
 First command: `RUBY2SHELL_W369_PORT=4594 bash
 lab/repro/ruby2shell-w369-pair.sh trace rails-full vuln` with the W370
 Content-Type variant; keep `--again 300`.
+
+## 2026-11-28 06:28Z — W370: Rack boundary token and multipart header-tagging CLOSED
+
+W370 ran the named follow-up from message #7168: exercise the only live stock
+`casecmp?` site (Rack 3.2.9 `multipart/parser.rb:157`) with a Content-Type
+parameter name Rack actually scans as a token, and test whether a header
+tagging path can push an expanding single-byte encoding into a second fold.
+Prediction from W369: the receiver stays ASCII-8BIT or the other operand stays
+the literal `"boundary"`. The prediction was supported; the stated falsifier
+(an odd-0xDF operand reaching `case_map` from that frame, or a second fold)
+was not met. Grade unchanged.
+
+**Static mechanism.** `lab/repro/ruby2shell-w370-tagging-scan.sh` (evidence
+`lab/build/evidence/casemap-chain/w370/static-tagging.txt`, 68 lines) reads the
+pinned gem trees actually used by the stock apps. `parse_boundary` builds
+`StringScanner.new(content_type.b)` (parser.rb:137) and takes names with
+`/[!#$%&'*+\-.^_`|~0-9A-Za-z]+/n` (parser.rb:144); the receiver of
+`name.casecmp?("boundary")` (parser.rb:157) is therefore an ASCII-only
+ASCII-8BIT token. Raw 0xDF cannot match that regex. A real tagging path does
+exist elsewhere: `tag_multipart_encoding` (parser.rb:618-645) force-encodes a
+part's `name` and `body` from its `Content-Type: text/plain; charset=...`,
+and ActionPack `param_builder.rb:119` / `request/utils.rb:94` re-tag params
+from encoding templates. The scan lists every direct case-fold call in the
+pinned Rack/ActionPack/Puma trees; none folds a tagged param against a second
+wire operand.
+
+**One-request replay.** `lab/repro/ruby2shell-w370-wire.py` sends one POST to
+127.0.0.1 per arm via the W369 runner. Three variants against full Rack-3.2.9
+`rails new` on vulnerable 3.4.12:
+- `rawname` — a raw-0xDF Content-Type parameter name: HTTP 500 (Rack rejects
+  the malformed parameter before `casecmp?` can match it); `parser.rb:157`
+  still ran for the valid `boundary` token with an ASCII-8BIT 8-byte receiver.
+- `token` — a mixed-case ASCII token `BoUnDaRy`: HTTP 500 (duplicate boundary
+  parameter), and `parser.rb:157` logged an ASCII-8BIT 8-byte receiver with
+  `sharp_s=0` against the UTF-8 literal `"boundary"`.
+- `tag` — four ISO-8859-1 parts with odd sharp-s counts in names and bodies,
+  including the known `_method` sink: HTTP 404, process alive; the only
+  `casecmp?` from the request was the same ASCII `"boundary"` pair.
+Evidence: `lab/build/evidence/casemap-chain/w369/trace-rails-full-vuln/w370-{rawname,token,tag}.out`.
+The runner's `RUBY2SHELL_W369_HOOK` override now selects an observability
+preload without changing the default W369 hook.
+
+**All-fold operand trace.** `lab/repro/ruby2shell-w370-casemap-trace.rb` logs
+`casecmp?`, `casecmp`, `upcase`, `downcase`, `capitalize` and `swapcase`
+operands. The `tag` arm logged 2802 lines: 2644 `downcase`, 82 `capitalize`,
+71 `upcase`, 3 `casecmp?`. Exactly two lines carry an odd sharp-s operand —
+the labeled boot control and one request fold:
+`upcase recv[ISO-8859-1 len=22 sharp_s=21 odd=true]` at
+`rack-3.2.9/lib/rack/method_override.rb:36` (`method.to_s.upcase`), the known
+`_method` sink. No tagged part name, body, header or query string reached a
+second fold. Evidence:
+`.../trace-rails-full-vuln/w370-tag-fold.trace` and its `.out`.
+
+**Valgrind replay.** Same `tag` request under `valgrind --error-limit=no`:
+vulnerable 3.4.12 logged exactly one invalid 1-byte write and one copy-out
+invalid read; the write is
+`case_map (iso_8859_1.c:293) -> rb_str_casemap (string.c:7839) ->
+rb_str_upcase (string.c:8017)`, zero bytes after a 66-byte block, with no
+`casecmp` frame. Evidence:
+`.../valgrind-rails-full-vuln/w370-tag.valgrind`.
+A patched `rails new` fixed control could NOT be run on full Rack 3.2.9: the
+3.4.13 plain tree lacks the full app's bundle (Bundler reports missing
+importmap-rails, turbo-rails, rack-3.2.9 and others), so both full-app fixed
+arms exited at `ready=NO` before any request was sent. Their zero write counts
+are therefore NOT a pass and are preserved as boot-failure negatives at
+`.../valgrind-rails-full-fixed/w370-tag{,-fixed2}.server.log`. The same `tag`
+request against the bootable patched stock `rails new` app (Rack 3.2.8,
+3.4.13) returned HTTP 404 with the process alive and logged zero invalid
+writes, zero invalid reads and zero `case_map` frames —
+`.../valgrind-rails-fixed/w370-tag-fixed-rails.out`. The 3.2.8 app does not
+contain `parser.rb:157`, so that call site's fixed half stays UNTESTED here;
+its receiver is closed statically by the ASCII-only token regex.
+
+Conclusion: W370 is closed on the tested builds. Header tagging from a wire
+charset is real, but the only stock consumer that folds the tagged bytes is
+`Rack::MethodOverride`; the boundary-token `casecmp?` receiver cannot hold
+0xDF. One fold per request, no chosen address, no marker, no command. Rung 4
+remains witness-COMPLETE and harness-condition rung 5 witness-ESTABLISHED at
+its labeled scope; full stock/oracle-free/persistent rung 5 remains
+**NOT ACHIEVED**.
+
+Next named experiment W371: sweep the remaining wire surfaces (query keys,
+cookies, Authorization scheme, Accept/Content-Type media types, JSON bodies,
+header values) under the all-fold trace on stock Sinatra and full Rails, to
+look for any second odd-0xDF operand reaching a fold outside
+`method_override.rb:36`. Prediction: only the `_method` fold appears.
+Falsifier: two distinct wire operands with odd sharp-s counts reaching
+`case_map` in one request, or any patched-build write. First command:
+`RUBY2SHELL_W369_PORT=4600 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb bash lab/repro/ruby2shell-w369-pair.sh trace sinatra vuln`
+(wire script to be added in W371); keep `--again 300`.

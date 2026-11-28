@@ -40,7 +40,7 @@ esac
 export RUBY2SHELL_STOCK_PORT="$PORT"
 case "$KIND" in
   trace)
-    export RUBYOPT="-r$PWD/lab/repro/ruby2shell-w369-casecmp-trace.rb"
+    export RUBYOPT="-r$PWD/${RUBY2SHELL_W369_HOOK:-lab/repro/ruby2shell-w369-casecmp-trace.rb}"
     export CASE_PAIR_LOG="$PWD/$TRACE"
     CASE_PAIR_CONTROL="${CASE_PAIR_CONTROL:-1}" export CASE_PAIR_CONTROL
     ;;
