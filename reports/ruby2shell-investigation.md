@@ -10318,6 +10318,70 @@ across vulnerable, fixed and safe-input arms. Prediction: no response-byte
 difference, one write per odd request; falsifier: any response change or crash
 attributable to the write.
 
+## 2026-11-28 12:1xZ — W386: ninth-request length sweep; no new victim, no cross-request abort
+
+Operator #7306's bounded follow-up to W385, which left open whether a different
+ninth request length could select a new fold chunk. The committed runner
+`lab/repro/ruby2shell-w386-ninth-length.sh` drives nine ordinary
+`ruby2shell-w371-wire.py` invocations against ONE fresh plain 3.4.12 Sinatra
+process under `ruby2shell-w379-wire-watch.gdb`: request 1 at post-field length
+64, requests 2-8 at 1024, request 9 at the swept length, N=27 sharp-s on every
+request. Reproduction:
+
+```
+bash lab/repro/ruby2shell-w386-ninth-length.sh arms 5310 lab/build/evidence/casemap-chain/w386/ninth-1 1 4
+bash lab/repro/ruby2shell-w386-ninth-length.sh arms 5318 lab/build/evidence/casemap-chain/w386/ninth-64 64 4
+bash lab/repro/ruby2shell-w386-ninth-length.sh arms 5330 lab/build/evidence/casemap-chain/w386/ninth-4096 4096 4
+bash lab/repro/ruby2shell-w386-ninth-length.sh controls 5340 lab/build/evidence/casemap-chain/w386/controls
+```
+
+The first smoke attempt failed to create its log because an edit removed
+`mkdir -p "$OUT"`; the job was cancelled, the line restored, the commit
+amended to `5f4c9a27`, and `bash -n` passed. The repeated smoke on port 5300
+(ninth length 64) served nine 404s and is preserved in `.../w386/smoke/`.
+The authoritative 24 arms used verified-free ports 5310-5333, four arms per
+swept length; all booted. Every fold reports `capa=48 oob_off=72 slack=0` and
+the watched byte is `0x53` in `case_map` line 294 (186 fold calls); the marker
+is never at the write. `W379TRAP` lines count distinct watched destinations,
+not writes.
+
+**Falsifier met.** Eleven valid arms — one at ninth length 1, two each at
+8/64/256/1024/4096 — served all nine requests with the exact 650-byte 404
+digest `1e07f7bb…c961f`, nine folds each, no `malloc_printerr`, no
+`unlink_chunk` frame, and stayed alive. Every survivor reused the fold chunk
+already selected by request 3 at request 9: the `a2` family used
+`0x7fffc803f220` on folds 3-9 in all six lengths, the `a0` family used
+`0x7fffc8073610` on folds 3-9 in five lengths. No arm reached request 9 and
+aborted. The ninth length therefore does not create a new victim, closing the
+sub-condition W385 left open; it does not upgrade any ladder cell. The written
+byte remains `0x53`, never wire-shaped.
+
+Seven arms aborted at fold 2 or 4 (after one or three responses, well before
+request 9): all seven via `_int_realloc(oldp=current fold chunk, oldsize=80,
+nb=144) → ruby_xrealloc2 → rb_gc_impl_realloc`, always
+`malloc_printerr("corrupted size vs. prev_size") →
+unlink_chunk(p=current fold chunk+0x50)`. Their fold-chunk families repeat
+across all six lengths (`a1`: `0x7fffc802c520`, `0x7fffc8088390`,
+`0x7fffc8088340`, `0x7fffc8024eb0` on folds 1-4), so the ninth length does
+not change the early heap layout. No later request unlinked a chunk corrupted
+by an earlier one.
+
+Preserved anomalies: six fault-free 9/9 arms entered fold 1 with a
+pre-existing `0x54` sizeword (provenance UNKNOWN before the first request) and
+are excluded from the valid count; the length-4096 `a3` among them switched
+fold chunk at request 8 from `0x7fffc80841e0` to `0x7fffc806d680` and
+survived. Controls `w386-vg-safe20` and `w386-vg-fixed27` logged 0 invalid
+writes / 0 invalid reads / 0 `case_map` errors and stayed alive.
+
+Grade unchanged: wire-only, layout-dependent DoS on unmodified Sinatra; no
+chosen address, no marker and no second distinct command. R4 witness-COMPLETE,
+harness-condition R5 witness-ESTABLISHED at its labeled scope, full
+stock/oracle-free/persistent R5 NOT ACHIEVED. Next named experiment W387:
+change an earlier request's length (requests 4/6/8 from 1024 to 256) to force
+a late new fold chunk after earlier sizeword corruption; prediction: a
+cross-request unlink; falsifier: all valid arms reuse the early chunk with
+nine 404s and no fault.
+
 ## 2026-11-28 11:5xZ — W385: ninth-request layout switch; no cross-request abort
 
 Operator #7301's bounded follow-up to W384. The committed runner

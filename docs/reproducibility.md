@@ -21554,6 +21554,50 @@ the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
 run concurrently with another valgrind server lost connections from the sixth
 request onward, so run these arms sequentially. No grade or rung cell moved.
 
+## 2026-11-28 12:1xZ — Ruby W386 ninth-length sweep CLOSED
+
+Committed runner: `lab/repro/ruby2shell-w386-ninth-length.sh`. It uses the
+committed client `ruby2shell-w371-wire.py`, the committed watch script
+`ruby2shell-w379-wire-watch.gdb` (`R2S_W379_ABORT_BT=1` adds a native backtrace
+at SIGABRT) and the gitignored plain 3.4.12 Sinatra build at
+`lab/build/plain/ruby-3.4.12-plain`. Pick unused 127.0.0.1 ports; occupied
+ports are refused. One fresh process per arm, nine wire requests: request 1
+`RUBY2SHELL_W377_POSTLEN=64`, requests 2-8 `1024`, request 9 set by the fourth
+argument, all with `RUBY2SHELL_W380_COUNT=27`.
+
+```
+bash lab/repro/ruby2shell-w386-ninth-length.sh arms 5300 lab/build/evidence/casemap-chain/w386/smoke 64 1
+bash lab/repro/ruby2shell-w386-ninth-length.sh arms 5310 lab/build/evidence/casemap-chain/w386/ninth-1 1 4
+bash lab/repro/ruby2shell-w386-ninth-length.sh arms 5314 lab/build/evidence/casemap-chain/w386/ninth-8 8 4
+bash lab/repro/ruby2shell-w386-ninth-length.sh arms 5318 lab/build/evidence/casemap-chain/w386/ninth-64 64 4
+bash lab/repro/ruby2shell-w386-ninth-length.sh arms 5322 lab/build/evidence/casemap-chain/w386/ninth-256 256 4
+bash lab/repro/ruby2shell-w386-ninth-length.sh arms 5326 lab/build/evidence/casemap-chain/w386/ninth-1024 1024 4
+bash lab/repro/ruby2shell-w386-ninth-length.sh arms 5330 lab/build/evidence/casemap-chain/w386/ninth-4096 4096 4
+bash lab/repro/ruby2shell-w386-ninth-length.sh controls 5340 lab/build/evidence/casemap-chain/w386/controls
+```
+
+The first smoke attempt failed to create its log because an edit accidentally
+removed `mkdir -p "$OUT"`; that job was cancelled, the line restored, the
+commit amended to `5f4c9a27` and `bash -n` run cleanly. The repeated smoke on
+port 5300 and all 24 arms on verified-free ports 5310-5333 booted. Eleven
+valid arms served all nine requests with the exact 650-byte 404 digest
+`1e07f7bb…c961f`, nine folds each, no allocator fault and no unlink frame —
+the cross-request-abort falsifier is MET. Request 9 reused the earlier fold
+chunk in every valid arm (`0x7fffc803f220` on folds 3-9 in the `a2` family,
+`0x7fffc8073610` on folds 3-9 in the `a0` family); no arm reached request 9
+and aborted. Seven arms aborted at fold 2/4, always
+`malloc_printerr("corrupted size vs. prev_size") →
+unlink_chunk(p=current fold chunk+0x50) → _int_realloc → rb_gc_impl_realloc`.
+Six 9/9 arms with a pre-existing `0x54` sizeword are excluded and preserved;
+the 4096 `a3` switched fold chunk at request 8. All 186 folds report
+`capa=48 oob_off=72 slack=0`; the trapped byte is `0x53` in `case_map` line
+294, marker never at the write. Controls `w386-vg-safe20` and
+`w386-vg-fixed27` each reported 0 invalid writes / 0 invalid reads /
+0 `case_map` errors and stayed alive. No grade or rung cell moved.
+
+Next W387: vary an earlier request length to force a late new fold chunk;
+first command: `read lab/repro/ruby2shell-w386-ninth-length.sh:60-100`.
+
 ## 2026-11-28 11:5xZ — Ruby W385 ninth-request switch CLOSED
 
 Committed runner: `lab/repro/ruby2shell-w385-layout-switch.sh`. It uses the

@@ -6,6 +6,28 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 12:1xZ — Ruby W386 ninth-length sweep CLOSED
+
+Operator #7306's bounded experiment closed with the committed runner
+`lab/repro/ruby2shell-w386-ninth-length.sh`. Request 1 used post length 64,
+requests 2-8 used 1024, and the ninth request swept 1/8/64/256/1024/4096,
+N=27, one fresh plain 3.4.12 Sinatra process per arm under the W379 hardware
+write watch. Smoke on port 5300 at length 64 survived 9/9; the authoritative
+24 arms used verified-free ports 5310-5333, four arms per length. Eleven valid
+arms served all nine 650-byte 404s with nine folds, no allocator fault and no
+unlink frame, alive. Every valid arm's request-9 fold chunk was already
+selected by request 3: the ninth length never created a new victim and no
+cross-request abort occurred, so the falsifier is MET. Seven arms aborted at
+fold 2 or 4 (before request 9), always `corrupted size vs. prev_size` with
+`unlink_chunk(p=current fold chunk+0x50)` from `_int_realloc →
+rb_gc_impl_realloc`. Six fault-free 9/9 arms entered fold 1 with a
+pre-existing `0x54` sizeword and are preserved as UNKNOWN, excluded from the
+count; one of them switched fold chunk at request 8. Controls: safe-20 and
+fixed Rails 3.4.13 valgrind 0/0/0, alive. Grade unchanged: R4
+witness-COMPLETE / harness R5 witness-ESTABLISHED / full stock R5 NOT
+ACHIEVED. Next W387: vary an earlier request's length to force a late new fold
+chunk.
+
 ## 2026-11-28 11:5xZ — Ruby W385 ninth-request switch CLOSED
 
 Operator #7301's named experiment ran with the new committed runner

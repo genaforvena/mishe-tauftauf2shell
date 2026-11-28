@@ -16632,6 +16632,50 @@ follow-up from §08:4xZ.
   on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
   at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
+## 2026-11-28 12:1xZ — Ruby W386 ninth-length sweep CLOSED
+
+Current research limb. Operator #7306's bounded experiment is complete:
+committed runner `lab/repro/ruby2shell-w386-ninth-length.sh` (`arms` /
+`controls`), request 1 post length 64, requests 2-8 1024, request 9 swept over
+1/8/64/256/1024/4096, N=27, one fresh plain 3.4.12 Sinatra process per arm
+under `ruby2shell-w379-wire-watch.gdb`. Raw evidence gitignored under
+`lab/build/evidence/casemap-chain/w386/{smoke,ninth-*,controls}/`.
+
+- 24 authoritative arms on verified-free ports 5310-5333, four per ninth
+  length; smoke on free port 5300 also survived 9/9. Every fold reports
+  `capa=48 oob_off=72 slack=0` and the watched byte is `0x53` in
+  `case_map:294` (186 fold calls total); the marker is never at the write.
+- **Falsifier met:** 11/24 valid arms served all nine 650-byte 404s
+  (`1e07f7bb…c961f`) with nine folds, no fault/unlink, alive. Every valid
+  survivor reused its early-selected fold chunk at request 9: `0x7fffc803f220`
+  on folds 3-9 for the `a2` family in all six lengths, `0x7fffc8073610` on
+  folds 3-9 for the `a0` family in five lengths. No arm aborted at request 9;
+  the ninth length does not create a new victim.
+- Seven arms aborted at fold 2 or 4 (after 1 or 3 responses, before request 9),
+  all via `malloc_printerr("corrupted size vs. prev_size") →
+  unlink_chunk(p=current fold chunk+0x50) → _int_realloc(oldp=current fold
+  chunk, 80, nb=144) → ruby_xrealloc2 → rb_gc_impl_realloc`; no cross-request
+  unlink. The early chunk families repeat across all six lengths, so the
+  ninth length does not change the early layout.
+- Preserved anomalies: six fault-free 9/9 arms entered fold 1 with a
+  pre-existing `0x54` sizeword (UNKNOWN provenance), excluded from the valid
+  count; the length-4096 `a3` switched fold chunk at request 8 to
+  `0x7fffc806d680` and survived. The first smoke attempt failed because an
+  edit removed `mkdir -p "$OUT"`; job cancelled, line restored, commit
+  amended to `5f4c9a27`, `bash -n` clean.
+- Controls: safe-20 vulnerable Sinatra and bootable fixed Rails 3.4.13
+  valgrind 0 invalid writes / 0 invalid reads / 0 `case_map` errors, alive.
+- Grade unchanged: wire-only layout-dependent DoS; R4 witness-COMPLETE,
+  harness R5 witness-ESTABLISHED, full stock/oracle-free/persistent R5 NOT
+  ACHIEVED.
+
+Next W387: change an EARLIER request length (requests 4/6/8 from 1024 to 256)
+to force a late new fold chunk while earlier requests have already corrupted a
+sizeword. Prediction: a late layout switch unlinks a chunk corrupted by an
+earlier request; falsifier: all valid arms reuse the early chunk with nine
+404s and no fault. First command:
+`read lab/repro/ruby2shell-w386-ninth-length.sh:60-100`.
+
 ## 2026-11-28 11:5xZ — Ruby W385 ninth-request layout switch CLOSED
 
 Current research limb. Operator #7301's bounded experiment is complete:
