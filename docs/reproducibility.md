@@ -21554,6 +21554,42 @@ the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
 run concurrently with another valgrind server lost connections from the sixth
 request onward, so run these arms sequentially. No grade or rung cell moved.
 
+## 2026-11-28 11:2xZ — Ruby W383 third-request replay CLOSED
+
+Committed runner: `lab/repro/ruby2shell-w383-third-request.sh`. It uses the
+committed client `ruby2shell-w371-wire.py`, the committed watch script
+`ruby2shell-w379-wire-watch.gdb` (`R2S_W379_ABORT_BT=1` adds a native
+backtrace at SIGABRT; default off) and the gitignored plain 3.4.12 Sinatra
+build at `lab/build/plain/ruby-3.4.12-plain`. Pick unused 127.0.0.1 ports;
+the runner refuses occupied ones. One fresh process per arm, three wire
+requests: request 1 `RUBY2SHELL_W377_POSTLEN=64`, request 2 `1024`, request 3
+1/64/256/1024/4096, all with `RUBY2SHELL_W380_COUNT=27` and
+`RUBY2SHELL_W378_COUNT=1`.
+
+```
+bash lab/repro/ruby2shell-w383-third-request.sh arms 4915 lab/build/evidence/casemap-chain/w383/arms 4
+bash lab/repro/ruby2shell-w383-third-request.sh controls 4960 lab/build/evidence/casemap-chain/w383/controls
+```
+
+The command above was rehearsed first on ports 4890-4894 and 4915-4934, then
+run authoritatively on verified-free ports 4940-4959; the two earlier output
+directories have invalid summary flags from a draft script and are preserved
+only as raw logs. In the final 20 arms, 12 aborted and 8 survived; only 10
+arms reached `case_map` on all three requests. Of those 10, 7 returned the
+650-byte 404 digest `1e07f7bb…c961f` on all three requests with no allocator
+fault (falsifier MET), and 3 aborted with
+`malloc_printerr("corrupted size vs. prev_size") → unlink_chunk(p=third fold
+chunk+0x50) → _int_realloc(oldp=third fold chunk, oldsize=80, nb=144) →
+ruby_xrealloc2 → rb_gc_impl_realloc` through `str_buf_cat4`. Every folded
+call reports `capa=48 oob_off=72 slack=0` and every watch trap sees `0x53`.
+Controls `w383-vg-safe20` (vulnerable Sinatra, N=20) and `w383-vg-fixed27`
+(bootable patched Rails 3.4.13, N=27) each reported 0 invalid writes /
+0 invalid reads / 0 `case_map` errors and stayed alive. No grade or rung
+cell moved.
+
+Next: W384, eight repeated post-1024 requests on a survivor; first command:
+`read lab/repro/ruby2shell-w383-third-request.sh:61-91`.
+
 ## 2026-11-28 11:1xZ — Ruby W382 second-post-length replay CLOSED
 
 Committed runner: `lab/repro/ruby2shell-w382-postlen-abort.sh`. It uses the
@@ -21582,8 +21618,8 @@ abort, so the operator's falsifier was not met. Controls on ports 4860/4861:
 `w382-vg-safe20` and `w382-vg-fixed27` each 0 invalid writes / 0 invalid
 reads / 0 `case_map` errors, alive. No grade or rung cell moved.
 
-Next: W383, opt-in third request on the 1024 survivor family. First command:
-read `lab/repro/ruby2shell-w382-postlen-abort.sh:52-95`.
+W383 closed this replay with seven fault-free three-request survivors; see
+§11:2xZ. No grade or rung cell moved.
 
 ## 2026-11-28 10:5xZ — Ruby W381 count sweep and sizeword replay CLOSED
 

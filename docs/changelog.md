@@ -6,6 +6,24 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 11:2xZ — Ruby W383 third-request falsifier MET
+
+Operator #7282's named experiment closed with the new committed runner
+`lab/repro/ruby2shell-w383-third-request.sh`. Requests 1/2 were held at
+post-field lengths 64/1024 and a third wire request at 1/64/256/1024/4096
+was added in the same fresh plain 3.4.12 Sinatra process, N=27, under the
+committed hardware write watch. Four rounds (ports 4940-4959): 12/20 arms
+aborted and 8 survived; only 10 arms reached all three folds. Of those, 7
+served three 650-byte 404s with no allocator fault — the operator's
+falsifier is MET — while 3 aborted through `unlink_chunk` on their OWN
+third-request fold chunk, not on a chunk corrupted by an earlier request.
+Five arms entered fold 1 with a pre-existing `0x54` sizeword; provenance
+UNKNOWN. Controls: safe-20 and patched Rails 3.4.13 valgrind 0/0/0, alive.
+A draft script's invalid summary flags in `arms-smoke/`/`arms/` were
+superseded by rerun `arms-final/`; raw logs preserved. Grade unchanged:
+R4 witness-COMPLETE / harness R5 witness-ESTABLISHED / full stock R5 NOT
+ACHIEVED. Next W384: eight repeated post-1024 requests on a survivor.
+
 ## 2026-11-28 11:1xZ — Ruby W382 second-request post length CLOSED
 
 Operator #7273's named experiment: new committed runner

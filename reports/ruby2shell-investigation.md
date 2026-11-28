@@ -10318,6 +10318,76 @@ across vulnerable, fixed and safe-input arms. Prediction: no response-byte
 difference, one write per odd request; falsifier: any response change or crash
 attributable to the write.
 
+## 2026-11-28 11:2xZ — W383: a third wire request survives on the 1024 family; falsifier MET
+
+Operator #7282's named follow-up to W382's all-survivor post-length family.
+W382 left two possibilities: a later allocation might unlink the chunk whose
+size LSB the second request rewrote, or the process might keep serving with
+that corrupted chunk still live. The committed runner
+`lab/repro/ruby2shell-w383-third-request.sh` drives three separate
+`ruby2shell-w371-wire.py` invocations against ONE fresh plain 3.4.12 Sinatra
+process under the committed hardware-write watch
+`ruby2shell-w379-wire-watch.gdb`: request 1 at post-field length 64,
+request 2 at 1024 (W382's survivor family), request 3 at 1, 64, 256, 1024
+or 4096. Every request uses N=27 sharp-s. Reproduction:
+
+```
+bash lab/repro/ruby2shell-w383-third-request.sh arms 4890 lab/build/evidence/casemap-chain/w383/arms 4
+bash lab/repro/ruby2shell-w383-third-request.sh controls 4910 lab/build/evidence/casemap-chain/w383/controls
+```
+
+Four rounds on verified-free loopback ports 4940-4959; the authoritative
+raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w383/arms-final/`. Every fold reports
+`capa=48 oob_off=72 slack=0` with pre-write sizeword `0x55`, and each
+trapped write is the usual `0x53` in `case_map` line 294. Of 20 arms, 12
+aborted and 8 stayed alive. Only 10 arms reached `case_map` on all three
+requests; 5 stopped after one fold and 5 after two, so the other 10 say
+nothing about a third request and are preserved, not counted as third-request
+survivals.
+
+**Falsifier MET.** Of the 10 three-fold arms, 7 served all three requests
+with the same 650-byte 404 digest `1e07f7bb…c961f` and no allocator fault:
+third lengths 64 (rounds 1-3), 1 and 1024 (round 3), 256 (round 3), and
+1024 (round 4). The round-4 1024 survivor logged fold chunks
+`0x7fffc80262a0`, `0x7fffc8075040`, `0x7fffc8074f80` and three `0x53`
+traps — three distinct fold buffers, no reuse of the chunk corrupted by
+request 2. The corrupted sizeword can therefore persist into a later
+request without the process aborting; the operator's prediction that a
+later allocation always unlinks it is false on this family.
+
+**The three third-request aborts are intra-request.** Arms `r1-third-1`,
+`r2-third-1` and `r4-third-256` reached three folds and then aborted with
+`#6 malloc_printerr("corrupted size vs. prev_size") → #7
+unlink_chunk(p=third fold chunk+0x50) → #8 _int_realloc(oldp=third fold
+chunk, oldsize=80, nb=144) → ruby_xrealloc2 → rb_gc_impl_realloc` via
+`str_buf_cat4`. For `r4-third-256` the reallocated chunk was
+`0x7fffc8027c80` and the unlinked next chunk `0x7fffc8027cd0`: the byte
+that broke `unlink_chunk` was written by that same request. No arm showed a
+later request unlinking a chunk corrupted by an earlier request, and no
+wire-shaped byte was written at the corrupted sizeword.
+
+Preserved anomalies: five arms entered fold 1 with sizeword already `0x54`
+(rounds 1 and 3 at third 256, round 1 at 4096, round 4 at 1 and 64); their
+provenance before the first wire request is UNKNOWN. A first draft of the
+runner lost its abort/unlink detection to an edit and used a lenient
+empty-response check; its two early directories `arms-smoke/` and `arms/`
+have invalid summary flags, while their raw gdb logs remain readable. The
+final run above uses the corrected, committed script. Safe-20 vulnerable
+Sinatra and bootable patched Rails 3.4.13 valgrind controls each logged 0
+invalid writes / 0 invalid reads / 0 `case_map` errors and stayed alive.
+
+Grade unchanged: wire-only, layout-dependent DoS on unmodified Sinatra;
+no chosen address, no marker and no second distinct command. R4
+witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at its labeled
+scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next W384: on a survivor, repeat post-1024 requests beyond the third and
+test whether persistence is bounded by request count. Prediction: a later
+request eventually reuses and unlinks the corrupted chunk; falsifier: a
+process serving eight post-1024 requests with all 404s and no allocator
+fault. First command: `read lab/repro/ruby2shell-w383-third-request.sh:61-91`.
+
 ## 2026-11-28 11:1xZ — W382: the second post-field length selects a repeatable layout family CLOSED
 
 Operator #7273's bounded follow-up to W381's met falsifier. W381 established
@@ -10375,12 +10445,10 @@ chosen address, no marker, no second command. R4 witness-COMPLETE,
 harness-condition R5 witness-ESTABLISHED at its labeled scope, full
 stock/oracle-free/persistent R5 NOT ACHIEVED.
 
-Next W383: on the 1024 survivor family, add an opt-in third wire request and
-test whether the corrupted chunk persists into a later request or whether
-the process keeps serving 404s. Prediction: the later allocation unlinks the
-corrupted chunk and aborts; falsifier: a survivor serving a third request
-with no further allocator fault. First command: read
-`lab/repro/ruby2shell-w382-postlen-abort.sh:52-95`.
+W383 closed this question: seven of ten three-request arms served all three
+requests with no allocator fault, so the corrupted sizeword persisted into a
+later request; the three third-request aborts unlinked the third request's
+own corrupted chunk. See §11:2xZ; no ladder cell moved.
 
 ## 2026-11-28 10:5xZ — W381: the sizeword window is one odd count, and the abort is layout-dependent CLOSED
 

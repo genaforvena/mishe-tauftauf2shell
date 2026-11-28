@@ -16632,6 +16632,28 @@ follow-up from §08:4xZ.
   on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
   at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
+## 2026-11-28 11:2xZ — Ruby W383 third-request survivor falsifier MET
+
+Current research limb. Operator #7282's bounded experiment is complete:
+committed runner `lab/repro/ruby2shell-w383-third-request.sh` (`arms` /
+`controls`), first request at post-field length 64, second at 1024, third at
+1/64/256/1024/4096, N=27 sharp-s, one fresh plain 3.4.12 Sinatra process per
+arm under `ruby2shell-w379-wire-watch.gdb`. Raw evidence gitignored under
+`lab/build/evidence/casemap-chain/w383/arms-final/`.
+
+- 20 arms, four rounds on ports 4940-4959: 12 aborted, 8 survived; only 10 reached `case_map` on all three requests (5 stopped at one fold, 5 at two), so only those 10 bear on the third request.
+- **Operator's falsifier MET:** 7/10 three-fold arms served all three 650-byte 404s with no allocator fault, including two round-3/4 arms at third length 1024. Fold chunks in the round-4 survivor were three distinct addresses; no reuse of the request-2 chunk was observed. The corrupted sizeword persisted until the process was killed.
+- The 3/10 three-fold aborts were intra-request: `malloc_printerr("corrupted size vs. prev_size") → unlink_chunk(p=third fold chunk+0x50) → _int_realloc(oldp=third fold chunk, oldsize=80, nb=144) → ruby_xrealloc2 → rb_gc_impl_realloc` via `str_buf_cat4`. No arm showed a later request unlinking a chunk corrupted by an earlier request; byte always `0x53`, never wire-shaped.
+- Five arms entered fold 1 with sizeword already `0x54`; provenance before the first wire request UNKNOWN, preserved. A draft script's invalid summary flags in `arms-smoke/` and `arms/` are superseded by `arms-final/`.
+- Controls: safe-20 vulnerable Sinatra and bootable fixed Rails 3.4.13 valgrind 0/0/0, both alive.
+- Grade unchanged: wire-only layout-dependent DoS; R4 witness-COMPLETE, harness R5 witness-ESTABLISHED, full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next: W384, repeat post-1024 requests beyond the third on a survivor.
+Prediction: a later request eventually reuses and unlinks the corrupted
+chunk; falsifier: a process serving eight post-1024 requests with all 404s
+and no allocator fault. First command:
+`read lab/repro/ruby2shell-w383-third-request.sh:61-91`.
+
 ## 2026-11-28 11:1xZ — Ruby W382 second-post-length layout pick CLOSED
 
 Current research limb. Operator #7273's bounded experiment is complete:
@@ -16647,11 +16669,9 @@ gitignored under `lab/build/evidence/casemap-chain/w382/`.
 - Controls: safe-20 vulnerable and bootable fixed Rails 3.4.13 valgrind 0/0/0, both alive.
 - Grade unchanged: wire-only layout-dependent DoS; R4 witness-COMPLETE, harness R5 witness-ESTABLISHED, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
-Next: W383, add an opt-in third wire request on the 1024 survivor family and
-test whether the corrupted chunk persists into a later request. Prediction:
-later allocation unlinks it and aborts; falsifier: a survivor serving a third
-request with no further allocator fault. First command: read
-`lab/repro/ruby2shell-w382-postlen-abort.sh:52-95`.
+W383 closed this limb: seven of ten three-fold arms served a third request
+with no allocator fault, while the three aborts unlinked their own request's
+corrupted chunk. See §11:2xZ; no ladder cell moved.
 
 ## 2026-11-28 10:5xZ — Ruby W381 sizeword window and falsifier CLOSED
 
