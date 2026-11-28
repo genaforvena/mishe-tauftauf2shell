@@ -1,4 +1,4 @@
-# Freeradius2Shell status — live loopback replay (2026-11-28)
+# Freeradius2Shell status — live loopback replay and rung-4 control (2026-11-28)
 
 Target: FreeRADIUS EAP-FAST SessionTicket (PAC-Opaque) stack overflow,
 CVE-2026-127030 (CWE-787, CVSS 3.1 7.5, `AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`).
@@ -8,7 +8,7 @@ fixed by `064567a08f3b9d9b4863fab6060fafe296ac7de9` (2026-10-14). No exact
 fixed release tag is known from the sources read: the fix commit is the
 boundary. Inherited harness evidence is in `reports/frontier-freeradius2shell.md`.
 
-## Live result — rungs 1/2/3 PASS in a real `radiusd` process
+## Live result — rungs 1/2/3 in a real `radiusd` process
 
 Built the vulnerable source tree verbatim at the parent commit with EAP-FAST
 enabled and ran a synthetic RADIUS/UDP peer against a **loopback-only**
@@ -91,28 +91,111 @@ Pinned digests (`lab/freeradius2shell-live/logs/live-digests.txt`):
 - **Key-known (lab)**: `peer.py key-known` encrypts a chosen 208-byte plaintext
   (`FREERADIUS2SHELL-LIVE-MARKER-…`) with the configured AES-256-GCM key and
   IV; offline check confirms the emitted ciphertext decrypts byte-exactly to
-  that plaintext. The live server still aborts before tag verification.
-  No chosen value has been observed in the live process's stack, so this does
-  not establish live control-flow hijack.
+  that plaintext. When the canary slot is left as marker bytes the live server
+  still aborts before the return, but the chosen bytes were directly observed
+  in the live `_session_ticket()` frame (see next section).
+
+## Live stack layout and chosen-pointer execution (second wake)
+
+Under `gdb -q -batch` (ASLR disabled by gdb), a breakpoint on
+`__stack_chk_fail` stops the live vulnerable `radiusd` at
+`rlm_eap_fast.c:383`. Read-only `bt`, `printf` and `x` commands (no register or
+memory writes) measured the `_session_ticket()` frame at
+`rbp = 0x7fffffffbba0`, destination `opaque_plaintext = 0x7fffffffbaf0`:
+
+| slot | address | offset from destination |
+|---|---|---|
+| `opaque_plaintext` | `rbp-0xb0` | 0 (152 bytes) |
+| stack canary | `rbp-0x18` | **152** |
+| saved RBP | `rbp` | 176 |
+| saved RIP | `rbp+8` | **184** |
+
+The same offsets appeared in the earlier cut wake at a different stack base
+(`rbp = 0x7fffffffbbd0`), so the relative layout is stable in this build;
+absolute addresses depend on ASLR/environment. Full dumps:
+`lab/freeradius2shell-live/r4l-gdb-key-known.log:891-908` and
+`r4l-gdb-key-unknown.log:891-908`.
+
+- **Key-unknown wire ticket** (`logs/ku/ticket.bin`, `sha256 f655d399…`):
+  canary slot `0xbb2188cce836d0d9`, saved RIP `0x1bd2efa9ab0b6e3d` —
+  ciphertext-derived, not choosable by the peer.
+- **Key-known wire ticket** (`logs/kk/ticket.bin`, `sha256 94fd74f4…`):
+  canary slot `0x4c45485332535549` (ASCII `IUS2SHEL`) and saved RIP
+  `0x4c2d4c4c45485332` (ASCII `2SHELL-L`): chosen plaintext bytes from the
+  wire at the measured saved-RIP offset, observed in the live process. That
+  arm still aborts before the return, so no control flow transferred on it.
+
+**Chosen-pointer execution (rung 4, live):** a third arm built the ticket so
+plaintext bytes 152–159 carry the *same process's* stack canary and bytes
+184–191 carry the address of a benign marker function. The canary and function
+address were **read** from the gdb-stopped process at `main`
+(`r4l-marker-gdb.log:5-6`: `R4L-CANARY fa3871fa3cb7f600`,
+`R4L-MARKER 0x7ffff7fb9140`; no writes), put in the ticket, and sent from the
+loopback peer. `r4l-marker-gdb.log:892-895` shows `PAC provided via ClientHello
+SessionTicket extension`, `ERROR: PAC failed to decrypt`, then
+`R4L-LIVE-BENIGN-MARKER` and
+`[Inferior 1 (process 2444170) exited with code 052]` (octal 42). No
+`__stack_chk_fail` line fired: the preserved canary let the function return
+into the wire-supplied pointer. Ticket `sha256 a26dd3a5…` on both builds.
+
+Controls: **safe input** (`hdr.length=100`, `dlen=52`,
+`logs/r4l-safe/ticket.bin` `sha256 4ecbf2a5…`) got Access-Reject with `PAC
+failed to decrypt` and no canary abort; **fixed commit** `064567a08f3b`
+rejected the identical marker ticket with `ERROR: PAC is too long, sending
+alert to client` (`r4l-fixed-marker-radiusd.log:873-874`) and sent
+Access-Reject.
+
+Conditions for this control-flow demonstration (all lab-only): the exact
+vulnerable commit, EAP-FAST enabled, a loopback client with the lab shared
+secret, the configured 32-byte `pac_opaque_key` to choose plaintext, a
+per-process canary read via gdb (a remote peer cannot derive it), ASLR off,
+and a benign function preloaded via `LD_PRELOAD` (`r4l-marker.c` /
+`r4l-marker.so`) whose address was read at `main`. The pointer target is
+therefore **not** wire-only: this is rung 4, not rung 5.
+
+New digests (`lab/freeradius2shell-live/`):
+
+| artifact | SHA-256 |
+|---|---|
+| `peer-marker.py` | `1addb493051956fad759ca951c836dfcca6436989afb60027e4afab46dd041fd` |
+| `peer-safe.py` | `2dbee16736a6db848d6bfd5b362998c4b359f75b375e9908b3bc503d94e99945` |
+| `r4l-marker.c` | `f3385e57aa652038e1c072db980ce3a9ec8c7288ad47587511e5e12c79c55c62` |
+| `r4l-marker.so` | `a015f223d9dc4753ea7906dcf015f17afba77fa3ef7a3767d14f76bc6743f4b0` |
+| `r4l-gdb.cmd` | `c5cc738125588537a8ef985b11690b64e011a54ce178053af4a9b9061dc95951` |
+| `r4l-marker.cmd` | `00e46b7c0cff6b91107c4983fdac0d55151f658c22bb47881d8fcd07e9004b67` |
+| `logs/r4l-marker/ticket.bin` = `logs/r4l-fixed-marker/ticket.bin` | `a26dd3a58e480bd566dfc6f2f5fe0f303a1beddc66a9c11150f95ffd28ad4aaa` |
+| `logs/r4l-safe/ticket.bin` | `4ecbf2a58b682d54228735e3501d471c92bb2f8d3e251bbb353a2b744b7b2f28` |
+| `r4l-gdb-key-known.log` | `7376d0577f608fa8c4012d12084b26dd9fc1ecc82fa90e61fbdd6a286be75491` |
+| `r4l-gdb-key-unknown.log` | `e0b9f4065deeceaf6743b2c889827bb11f239223bbb9a31567b96189c101f39e` |
+| `r4l-marker-gdb.log` | `b1fdb191e9e40b81b20f08aaeb0a296d09cb32f9d17f8be7fbb7b9396911fd4a` |
+| `r4l-fixed-marker-radiusd.log` | `2e74bed1e46a54fc79477af13045c2d8006a001cfbf2abc21cbc818076d00e14` |
 
 ## Honest rung ladder after this wake
 
 - **Rung 1 (trigger): PASS, live.** Crafted 260-byte ticket drives a real
-  `radiusd` into `_session_ticket()`; fixed build rejects the same bytes.
+  `radiusd` into `_session_ticket()`; the fixed build rejects the same bytes.
 - **Rung 2 (state failure): PASS, live.** `*** stack smashing detected ***`
-  from the real process on both key-known and key-unknown tickets.
+  on key-known and key-unknown tickets; the canary-preserving arm instead
+  reaches its chosen marker.
 - **Rung 3 (memory corruption): PASS, live.** Canary plus the exact
-  `dlen=208` / 152-byte source binding. ASan remains blind (write inside
-  un-instrumented libcrypto) — inherited negative, not re-asserted here.
-- **Rung 4 (impact): PASS in the standalone harness only.** Chosen marker at
-  the measured 200-byte saved-RIP offset executes there (rc 42); no chosen
-  value observed in the live process and the live stack layout is unmeasured.
-- **Rung 5: not attempted**, no benign-command side effect from wire input.
+  `dlen=208` / 152-byte source binding; the debugger dump shows chosen bytes
+  at destination offsets 152 (canary) and 184 (saved RIP). ASan remains blind
+  (write inside un-instrumented libcrypto) — inherited negative.
+- **Rung 4 (impact): PASS, live, with stated lab-only conditions.** A wire
+  ticket carrying the process's canary and a chosen benign function address
+  made the real `radiusd` print `R4L-LIVE-BENIGN-MARKER` and exit 42. The
+  standalone harness's 200-byte-offset marker (rc 42) remains a separate,
+  simpler demonstration.
+- **Rung 5: not attempted and not claimed.** No shell command and no
+  wire-only pointer derivation: the marker address came from a debugger
+  symbol read and an `LD_PRELOAD` library, the canary from a debugger read.
 
-Conditions for the live result: EAP-FAST explicitly enabled, a known
-`authority_identity`/A-ID, a loopback client with the lab shared secret, and
-the exact vulnerable commit. No off-loopback probe, no scan, no external
-target.
+Conditions for the live rung-4 result: exact vulnerable commit, EAP-FAST
+explicitly enabled, loopback client with the lab shared secret, configured
+`authority_identity`/A-ID and 32-byte `pac_opaque_key`, gdb read of the
+per-process canary and marker address (no writes), ASLR off and an
+`LD_PRELOAD` benign function. No off-loopback probe, no scan, no external
+target, no process memory or register written by the debugger.
 
 ## Reproduce
 
@@ -120,12 +203,27 @@ target.
 cd lab/frontier/freeradius2shell && bash run.sh          # harness differential
 cd lab/freeradius2shell-live/freeradius-src
 # configure/make/install as above; git worktree add ../freeradius-fixed 064567a08f3b
-LD_LIBRARY_PATH=$PWD/../talloc-prefix/usr/lib/x86_64-linux-gnu \
-  ../install/sbin/radiusd -X -d ../install/etc/raddb -i 127.0.0.1 -p 18120
-cd .. && python3 peer.py key-unknown --outdir logs/ku
-python3 peer.py key-known --outdir logs/kk
-# fixed build on 127.0.0.1:18122 with install-fixed/etc/raddb:
+cd ..
+
+# live crash (vulnerable, port 18120):
+LD_LIBRARY_PATH=$PWD/talloc-prefix/usr/lib/x86_64-linux-gnu \
+  ./install/sbin/radiusd -X -d ./install/etc/raddb -i 127.0.0.1 -p 18120
+python3 peer.py key-unknown --outdir logs/ku
+python3 peer.py key-known   --outdir logs/kk
+
+# measured offsets + chosen bytes at saved RIP (gdb, read-only):
+bash r4l-run.sh key-known && bash r4l-run.sh key-unknown
+
+# chosen-pointer execution: canary/marker read from the same process, then wire
+bash r4l-marker-run.sh
+
+# safe input (dlen=52) and fixed-commit differential (port 18122):
+./install/sbin/radiusd -X -d ./install/etc/raddb -i 127.0.0.1 -p 18120 &
+python3 peer-safe.py key-unknown --outdir logs/r4l-safe
+LD_LIBRARY_PATH=$PWD/talloc-prefix/usr/lib/x86_64-linux-gnu \
+  ./install-fixed/sbin/radiusd -X -d ./install-fixed/etc/raddb -i 127.0.0.1 -p 18122 &
 python3 peer.py key-unknown --port 18122 --outdir logs/fixed
+bash r4l-fixed-run.sh   # same marker ticket against the fixed build
 ```
 
 ## Negative results preserved
@@ -142,13 +240,22 @@ python3 peer.py key-unknown --port 18122 --outdir logs/fixed
   ticket deliberately zeroes the GCM tag (the write precedes verification);
   verified instead by comparing emitted ciphertext with the encryption of
   the chosen plaintext.
+- A gdb command file edit accidentally deleted its `run` line, so two
+  key-unknown attempts started no server (`STEP1: no reply`) and produced no
+  breakpoint output; the line was restored and both arms re-run.
+- The first tail-dump expression `&opaque_plaintext+144` resolved to an
+  unreadable address in gdb; `$rbp-0xb0+144` gave the intended byte range.
+- A key-known ticket whose canary slot is left as marker bytes aborts before
+  the return; only the canary-preserving arm reaches the chosen pointer.
 
 ## What would change this assessment
 
-- A chosen value observed at a known offset in the **live** process (debugger
-  or benign marker) would promote rung 4 from harness-only to live.
-- A wire-only benign command side effect with vulnerable/fixed/safe-input
-  controls would be required before any rung 5 claim.
+- A wire-only derivation of the per-process canary (or a target whose address
+  is wire-derivable without a debugger read) would make the rung-4 pointer
+  control attacker-reachable under the stated framing.
+- A benign command side effect produced solely by wire input, with
+  vulnerable/fixed/safe-input controls and independent replay, would be
+  required before any rung 5 claim.
 - A live replay where EAP-FAST is disabled, or where the A-ID gate rejects,
   would narrow the network framing claim while leaving the harness result
   intact.
