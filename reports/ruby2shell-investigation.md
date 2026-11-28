@@ -10318,6 +10318,76 @@ across vulnerable, fixed and safe-input arms. Prediction: no response-byte
 difference, one write per odd request; falsifier: any response change or crash
 attributable to the write.
 
+## 2026-11-28 09:4xZ — W377: wire-chosen post-field length does not move the write CLOSED
+
+W377 ran operator #7232's bounded follow-up to W376.
+`lab/repro/ruby2shell-w371-wire.py` gained two opt-in multipart shapes:
+`method-postfield-size` (`_method` = `a` + 21 raw 0xDF bytes tagged
+ISO-8859-1, followed by an `after` part of `RUBY2SHELL_W377_POSTLEN` ASCII
+bytes) and `method-postfield-size-safe` (identical except N=20, no fold).
+The default length 30 reproduces the W376 body byte-for-byte. `py_compile`
+and a `build()` smoke over 7 lengths x 4 shapes passed before any server
+started. Ten valgrind arms ran on loopback ports 4650–4659; raw output is
+`lab/build/evidence/casemap-chain/w377/run-all.out`, with valgrind logs in
+`lab/build/evidence/casemap-chain/w369/valgrind-*/w377-*`.
+
+- **Write target.** For lengths 1, 8, 30, 64, 256, 1024 and 4096, vulnerable
+  3.4.12 Sinatra reported 1 invalid write / 1 invalid read / 1 `case_map`
+  frame each (`iso_8859_1.c:293` ← `rb_str_casemap` string.c:7839 ←
+  `rb_str_upcase` string.c:8017). Every write was 0 bytes after a 66-byte
+  block allocated by `rb_str_casemap` (string.c:7834). Addresses vary per
+  process (0x225…–0x230…) with no monotone relation to length; comparison is
+  on block size and offset. Vulnerable rails-full at 4096 gave 1/1/1 on the
+  same 66-byte block. Summary:
+  `lab/build/evidence/casemap-chain/w377/write-targets.txt`.
+- **Response bytes.** Vulnerable Sinatra returned the same 650-byte 404 with
+  sha256 `1e07f7bb201b15f974654de84612acc1c572177a8fb07fbacfa5b6e4ab9c961f`
+  for all seven lengths and for the even-N safe control. The rails-full and
+  patched arms each ran one length (4096 and 1024) and reflect the longer
+  parameter plus per-request headers; they are write-verdict controls, not a
+  cross-length response series. Digests:
+  `lab/build/evidence/casemap-chain/w377/response-digests.txt`.
+- **Controls.** Even-N safe input at 1024 on vulnerable Sinatra and odd-N
+  input at 1024 on bootable patched `rails new` 3.4.13 each gave 0/0/0. All
+  ten requests returned HTTP 404 and every process stayed alive.
+- **Verdict.** Prediction supported, falsifier not met: no wire-chosen
+  block or byte became the write target and no response change or crash was
+  attributable to the fold. Grade unchanged: R4 witness-COMPLETE,
+  harness-condition R5 witness-ESTABLISHED at its labeled scope, full
+  stock/oracle-free/persistent R5 **NOT ACHIEVED**. Still no chosen address,
+  marker or command. The W376 single-arm negative on port 4640 (0/0/0 on the
+  same vulnerable build, cause UNKNOWN) remains preserved; W377 used fresh
+  ports.
+
+Reproduce with free loopback ports (raw logs are gitignored; the throwaway
+runner is `lab/build/evidence/casemap-chain/w377/run-all.sh`):
+
+```sh
+RUBY2SHELL_W369_PORT=4650 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=1 \
+  RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_TAG=w377-vg-sinatra-l1 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4656 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=4096 \
+  RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_TAG=w377-vg-sinatra-l4096 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4657 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size-safe RUBY2SHELL_W377_POSTLEN=1024 \
+  RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_TAG=w377-vg-sinatra-safe-l1024 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4658 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=1024 \
+  RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_TAG=w377-vg-rails-fixed-l1024 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+```
+
+Next named experiment W378: send two requests in one vulnerable Sinatra
+valgrind process with a wire-chosen post-field length, and compare the second
+write target and survival with safe and patched controls. Prediction: the
+second odd request either faults or writes again 0 bytes after a 66-byte
+block; falsifier: a survivor whose second request writes into a wire-shaped
+block or executes a marker.
+
 ## 2026-11-28 09:2xZ — W376: post-field does not steer the one-byte fold CLOSED
 
 W376 ran operator #7223's named steerability probe.

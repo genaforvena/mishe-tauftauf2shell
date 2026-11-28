@@ -16632,6 +16632,37 @@ follow-up from §08:4xZ.
   on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
   at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
+## 2026-11-28 09:4xZ — Ruby W377 post-field length sweep CLOSED
+
+Current research limb for a reader arriving now. Operator #7232's named
+experiment is complete; the client change is committed in
+`lab/repro/ruby2shell-w371-wire.py`, raw logs are gitignored under
+`lab/build/evidence/casemap-chain/{w369,w377}/`. No grade, rung cell, manifest
+entry or `established` flag moved.
+
+- **Prediction supported, falsifier not met.** Sweeping the `after` part from
+  1 to 4096 ASCII bytes never moved the fold's write target: vulnerable
+  Sinatra reported 1 invalid write / 1 read / 1 `case_map` frame at every
+  length (1, 8, 30, 64, 256, 1024, 4096), each 0 bytes after the 66-byte
+  `rb_str_casemap` block. Per-process addresses vary without a monotone
+  relation to length. No wire-chosen block or byte received the write.
+- **Controls.** Even-N safe input at 1024 and bootable patched `rails new`
+  3.4.13 at 1024 each gave 0/0/0; vulnerable rails-full at 4096 gave 1/1/1
+  with the same 66-byte block. All requests returned HTTP 404 and every
+  process stayed alive. Sinatra's raw response was the same 650-byte digest
+  across all seven lengths and the safe control.
+- **Limit.** The rails-full and fixed arms each ran one length and reflect the
+  longer parameter plus per-request headers, so they control the write verdict
+  but are not a cross-length response series. Still one stock caller, no
+  chosen address, marker or command: R4 witness-COMPLETE, harness-condition
+  R5 witness-ESTABLISHED at its labeled scope, full stock/oracle-free/
+  persistent R5 NOT ACHIEVED.
+
+Next: W378, two requests in one vulnerable Sinatra valgrind process with a
+wire-chosen post-field length. Prediction: the second odd request either
+faults or writes again 0 bytes after a 66-byte block; falsifier: a survivor
+whose second request writes into a wire-shaped block or executes a marker.
+
 ## 2026-11-28 09:2xZ — Ruby W376 post-field steerability probe CLOSED
 
 Current research limb for a reader arriving now. Operator #7223's named

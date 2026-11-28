@@ -6,6 +6,19 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 09:4xZ — Ruby W377 post-field length sweep does not steer the fold
+
+Added opt-in `method-postfield-size` / `...-safe` shapes with a wire-chosen
+`after` length to `lab/repro/ruby2shell-w371-wire.py` and replayed 10 loopback
+valgrind arms on ports 4650–4659. All seven odd lengths (1, 8, 30, 64, 256,
+1024, 4096) give 1 invalid write / 1 read / 1 `case_map` frame on vulnerable
+Sinatra, each 0 bytes after the 66-byte `rb_str_casemap` block; Sinatra's raw
+404 bytes are identical across those lengths and the even-N control. Even-N
+safe and bootable patched Rails 3.4.13 give 0/0/0, vulnerable rails-full at
+4096 gives 1/1/1 with the same block, and all processes survive. Prediction
+supported, falsifier not met; grade unchanged (R4 COMPLETE, harness R5
+ESTABLISHED, full stock R5 NOT ACHIEVED). Next: W378 two-request survivor probe.
+
 ## 2026-11-28 09:2xZ — Ruby W376 post-field does not steer the fold
 
 Added opt-in `method-postfield` / `method-postfield-safe` shapes and opt-in
