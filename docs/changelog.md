@@ -6,6 +6,19 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 09:0xZ — Ruby W375 wire-confirms all 14 writable charsets
+
+Replaced the three literal multipart `_method` charset shapes in
+`lab/repro/ruby2shell-w371-wire.py` with one table of all 14 SHARP_s
+single-byte encodings patched in ruby/ruby@d582f8f, then replayed the trace
+and valgrind arms on loopback. All 14 tags reach `rack/method_override.rb:36`
+as odd `upcase` operands on unmodified 3.4.12 Sinatra and full Rails; the 11
+new tags each write one byte past a 66-byte block (11 writes / 1 read / 11
+`case_map` frames per vulnerable app), while bootable patched Rails 3.4.13
+stays 0/0/0. Prediction supported, falsifier not met. Still one stock caller,
+no chosen address, marker or command: R4 COMPLETE, harness R5 ESTABLISHED,
+full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
 ## 2026-11-28 08:4xZ — Ruby W374 falsifies the single-encoding prediction
 
 Commit added two opt-in multipart `_method` shapes (`charset=ISO-8859-15`,

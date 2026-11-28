@@ -16605,6 +16605,37 @@ NOT ACHIEVED. Next: W375, wire-verify the other eleven tags from the same fix
 commit; prediction all write on 3.4.12 with fixed zero, falsifier any
 vulnerable tag clean or any fixed tag writes.
 
+## 2026-11-28 09:0xZ — Ruby W375 all 14 charsets wire-confirmed CLOSED
+
+Current research limb for a reader arriving now. The client change is
+committed in `lab/repro/ruby2shell-w371-wire.py`; raw logs stay gitignored
+under `lab/build/evidence/casemap-chain/w369/` and `.../w375/`. No grade, rung
+cell, manifest entry or `established` flag moved; the "Next: W375" item above
+is closed here.
+
+- **Prediction supported, falsifier not met.** All 11 charsets added after
+  W374 (ISO-8859-2/3/4/9/10/13/14/16, Windows-1250/1254/1257) reach
+  `rack/method_override.rb:36` as odd `upcase` operands on unmodified 3.4.12
+  Sinatra and full Rails and each writes one byte past a 66-byte heap block.
+  The all-fold trace shows 14 odd operands on each vulnerable app; valgrind
+  shows 11 writes / 1 read / 11 `case_map` frames per app, each write 0 bytes
+  after the block. The 11 frame locations are in the report tail.
+- **Fixed control clean.** Bootable patched `rails new` 3.4.13 (Rack 3.2.8)
+  with all 14 tags: HTTP 404 on every request, 0 invalid writes, 0 reads,
+  0 `case_map`, ready and alive. Fixed Sinatra 3.4.13 and full-Rack 3.4.13
+  cannot boot; their zeros remain UNTESTED.
+- **Scope settled, primitive unchanged.** The writable wire set is now all
+  14 SHARP_s single-byte encodings from ruby/ruby@d582f8f through one stock
+  caller. No chosen address, marker or command was obtained, so nothing moves
+  on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
+  at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next: W376, a bounded steerability probe. Add a post-`_method` multipart field
+and compare response bytes plus the valgrind write target across vulnerable,
+fixed and safe-input arms. Prediction: no response-byte difference, one write
+per odd request; falsifier: any response change or crash attributable to the
+write.
+
 ## 2026-11-28 06:2xZ — Ruby W370 closes Rack boundary token and header tagging
 
 Current research limb for a reader arriving now. Docs-only fold of `d3bc12a4`,

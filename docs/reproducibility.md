@@ -21486,6 +21486,42 @@ shapes (`case_map iso_8859_15.c:267` and `windows_1252.c:224`), 1 write / 1
 read for the `method-odd` control, and 0/0/0 on the bootable patched Rails
 3.4.13. Full path: `reports/ruby2shell-investigation.md` (W374 tail).
 
+
+## 2026-11-28 09:0xZ — Ruby W375 all 14 charset wire folds CLOSED
+
+`lab/repro/ruby2shell-w371-wire.py` now has one `METHOD_CHARSETS` table for
+all 14 single-byte encodings patched in ruby/ruby@d582f8f; W374's three shape
+names are unchanged. `py_compile` and a `build()` smoke over all 14 shapes
+passed. It reuses the W369 runner's wire/hook overrides; raw logs stay
+gitignored under `lab/build/evidence/casemap-chain/w369/` and the throwaway
+runner lives at `lab/build/evidence/casemap-chain/w375/run-all.sh`. Ports must
+be free.
+
+```sh
+NEW11=method-iso8859-2,method-iso8859-3,method-iso8859-4,method-iso8859-9,method-iso8859-10,method-iso8859-13,method-iso8859-14,method-iso8859-16,method-windows-1250,method-windows-1254,method-windows-1257
+ALL14=method-odd,$NEW11,method-iso8859-15,method-windows-1252
+RUBY2SHELL_W369_PORT=4630 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$ALL14" \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W369_TAG=w375-trace-sinatra \
+  bash lab/repro/ruby2shell-w369-pair.sh trace sinatra vuln
+RUBY2SHELL_W369_PORT=4632 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$NEW11" RUBY2SHELL_W369_TAG=w375-vg-sinatra-new11 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4633 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$NEW11" RUBY2SHELL_W369_TAG=w375-vg-railsfull-new11 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+RUBY2SHELL_W369_PORT=4634 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$ALL14" RUBY2SHELL_W369_TAG=w375-vg-rails-fixed-all14 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+```
+
+Expect 14 odd `upcase` operands at `rack/method_override.rb:36` on each
+vulnerable app, HTTP 404 and alive processes; 11 invalid writes / 1 read /
+11 `case_map` frames per vulnerable app with the new tags, each write 0 bytes
+after a 66-byte block; and 0/0/0 on the bootable patched Rails 3.4.13. Full
+path: `reports/ruby2shell-investigation.md` (W375 tail).
+
 ## 2026-11-28 06:2xZ — Ruby W370 Rack boundary token and header tagging CLOSED
 
 Affected/fixed: Ruby 3.4.12 vulnerable, 3.4.13 fixed; pinned gems include

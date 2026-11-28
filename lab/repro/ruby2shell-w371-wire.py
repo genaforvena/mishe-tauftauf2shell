@@ -14,7 +14,7 @@ Odd sharp-s count = 21 in every variant, with no raw 0xDF in the request
 target (percent-encoded there) so the server parses the request at all.
 W372 adds charset-tagged (ISO-8859-1) JSON and urlencoded bodies with raw 0xDF
 keys/values; the opt-in form-charset-method is the known `_method` sink.
-W374 adds opt-in multipart `_method` shapes tagged ISO-8859-15 / windows-1252.
+W375 adds the other 11 single-byte encodings fixed in the same Ruby commit.
 """
 
 import os
@@ -35,6 +35,23 @@ ALL = [
     "form-body", "multipart-part", "json-charset-val", "json-charset-key",
     "form-charset-val", "form-charset-key",
 ]
+
+METHOD_CHARSETS = {
+    "method-odd": b"ISO-8859-1",
+    "method-iso8859-2": b"ISO-8859-2",
+    "method-iso8859-3": b"ISO-8859-3",
+    "method-iso8859-4": b"ISO-8859-4",
+    "method-iso8859-9": b"ISO-8859-9",
+    "method-iso8859-10": b"ISO-8859-10",
+    "method-iso8859-13": b"ISO-8859-13",
+    "method-iso8859-14": b"ISO-8859-14",
+    "method-iso8859-15": b"ISO-8859-15",
+    "method-iso8859-16": b"ISO-8859-16",
+    "method-windows-1250": b"windows-1250",
+    "method-windows-1252": b"windows-1252",
+    "method-windows-1254": b"windows-1254",
+    "method-windows-1257": b"windows-1257",
+}
 
 
 def build(surface):
@@ -97,12 +114,8 @@ def build(surface):
                 headers + [(b"Content-Type",
                             b"multipart/form-data; boundary=" + BOUNDARY)],
                 body)
-    if surface in ("method-odd", "method-iso8859-15", "method-windows-1252"):
-        charset = {
-            "method-odd": b"ISO-8859-1",
-            "method-iso8859-15": b"ISO-8859-15",
-            "method-windows-1252": b"windows-1252",
-        }[surface]
+    if surface in METHOD_CHARSETS:
+        charset = METHOD_CHARSETS[surface]
         body = (b"--" + BOUNDARY + b"\r\n"
                 b'Content-Disposition: form-data; name="_method"\r\n'
                 b"Content-Type: text/plain; charset=" + charset + b"\r\n\r\n"

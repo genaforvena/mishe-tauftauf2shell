@@ -10252,3 +10252,68 @@ commit single-byte tags (ISO-8859-2/3/4/9/10/13/14/16, Windows-1250/1254/1257)
 through multipart `_method` on both stock apps under valgrind; prediction — all
 write on 3.4.12 and none on 3.4.13; falsifier — any vulnerable tag clean or any
 fixed tag writes.
+
+## 2026-11-28 09:0xZ — W375: all 14 SHARP_s charsets wire-confirmed CLOSED
+
+W375 ran operator #7212's bounded follow-up to W374. `lab/repro/ruby2shell-w371-wire.py`
+now maps all 14 single-byte SHARP_s encodings changed by ruby/ruby@d582f8f
+through one `METHOD_CHARSETS` table; each opt-in shape sends a multipart
+`_method` part of `a` + 21 raw 0xDF bytes labelled with that charset. The
+three W374 names are preserved. `python3 -m py_compile` and a `build()` smoke
+over all 14 shapes passed before any server was started.
+
+- Reachability, vulnerable 3.4.12 with the all-fold hook and
+  `CASE_PAIR_CONTROL=0`: Sinatra logged 14 odd `upcase` operands (encoding
+  names ISO-8859-1/2/3/4/9/10/13/14/15/16 and Windows-1250/1252/1254/1257,
+  each 22 bytes with 21 sharp-s) at `rack/method_override.rb:36`; full Rails
+  logged the same 14 operands. All 28 requests returned HTTP 404 and both
+  processes survived. Raw traces: `w375-trace-sinatra.trace` (563 lines) and
+  `w375-trace-railsfull.trace` (2954 lines) under
+  `lab/build/evidence/casemap-chain/w369/trace-{sinatra,rails-full}-vuln/`.
+- Valgrind, vulnerable 3.4.12, the 11 new tags alone: Sinatra and rails-full
+  each produced 11 `Invalid write of size 1` / 1 `Invalid read of size 1` /
+  11 `case_map` frames, every write 0 bytes after a 66-byte block. The frames
+  name `case_map (iso_8859_2.c:262)`, `_3.c:272`, `_4.c:268`, `_9.c:261`,
+  `_10.c:265`, `_13.c:260`, `_14.c:276`, `_16.c:271`,
+  `(windows_1250.c:235)`, `_1254.c:273` and `_1257.c:275`. Logs:
+  `w375-vg-{sinatra,railsfull}-new11.{out,valgrind}` in the matching
+  `.../w369/valgrind-*-vuln/` directories.
+- Fixed control: bootable patched `rails new` 3.4.13 (Rack 3.2.8) with all 14
+  tags returned HTTP 404 on every request and produced 0 invalid writes,
+  0 invalid reads and 0 `case_map` frames (`w375-vg-rails-fixed-all14.out`);
+  `ready=YES`, alive after the requests. Fixed Sinatra 3.4.13 and full-Rack
+  3.4.13 still cannot boot here, so their zeros remain UNTESTED, not passes.
+- Prediction supported, falsifier not met: no vulnerable tag was clean and no
+  fixed arm wrote. The writable wire set is now all 14 encodings, still
+  through one stock caller with no chosen address, marker or command.
+
+Reproduce with free loopback ports (raw logs are gitignored; the throwaway
+runner is `lab/build/evidence/casemap-chain/w375/run-all.sh`):
+
+```sh
+NEW11=method-iso8859-2,method-iso8859-3,method-iso8859-4,method-iso8859-9,method-iso8859-10,method-iso8859-13,method-iso8859-14,method-iso8859-16,method-windows-1250,method-windows-1254,method-windows-1257
+ALL14=method-odd,$NEW11,method-iso8859-15,method-windows-1252
+RUBY2SHELL_W369_PORT=4630 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$ALL14" \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W369_TAG=w375-trace-sinatra \
+  bash lab/repro/ruby2shell-w369-pair.sh trace sinatra vuln
+RUBY2SHELL_W369_PORT=4632 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$NEW11" RUBY2SHELL_W369_TAG=w375-vg-sinatra-new11 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4633 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$NEW11" RUBY2SHELL_W369_TAG=w375-vg-railsfull-new11 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+RUBY2SHELL_W369_PORT=4634 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$ALL14" RUBY2SHELL_W369_TAG=w375-vg-rails-fixed-all14 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+```
+
+Rung 4 remains witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED
+at its labeled scope, and full stock/oracle-free/persistent rung 5
+**NOT ACHIEVED**. Next named experiment W376: probe whether the one-byte fold
+can steer into an attacker-observable live object by adding a post-`_method`
+multipart field and comparing response bytes plus the valgrind write target
+across vulnerable, fixed and safe-input arms. Prediction: no response-byte
+difference, one write per odd request; falsifier: any response change or crash
+attributable to the write.
