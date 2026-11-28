@@ -24,6 +24,8 @@ run() {
 stable() {
     sed -E -e 's/==[0-9]+==//g' \
         -e '/ERROR: AddressSanitizer|SUMMARY/ s/0x[0-9a-f]+/ADDR/g' \
+        -e '/^WRITE of size/ s/0x[0-9a-f]+/ADDR/g' \
+        -e '/^0x.*is located/ s/0x[0-9a-f]+/ADDR/g' \
         -e 's#[^ ]*/harness/main.cpp#harness/main.cpp#g' \
         "evidence/$1.raw" | grep -E \
         'QTINDEX|RETURN|ERROR: AddressSanitizer|WRITE of size|located .*bytes|SUMMARY' \

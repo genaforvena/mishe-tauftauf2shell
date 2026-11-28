@@ -1,5 +1,5 @@
 QTINDEX arm=vuln layout=heap type=ushort count=5 last=0x4141
 ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
-WRITE of size 10 at 0x504000000038 thread T0
-0x504000000038 is located 0 bytes after 40-byte region [0x504000000010,0x504000000038)
+WRITE of size 10 at ADDR thread T0
+ADDR is located 0 bytes after 40-byte region [ADDR,ADDR)
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
