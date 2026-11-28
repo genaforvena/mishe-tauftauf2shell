@@ -16705,11 +16705,9 @@ entry or `established` flag moved.
   witness-ESTABLISHED at its labeled scope, full stock/oracle-free/persistent
   R5 **NOT ACHIEVED**.
 
-Next: W380, add an opt-in wire-chosen odd sharp-s count (e.g. 27) so
-`capa=48` puts the overflow byte exactly on the next chunk's size LSB.
-Prediction: metadata LSB becomes `0x53` and glibc diagnostics or a changed
-chunk size follow; falsifier: the write stays in slack with unchanged
-neighbouring chunk metadata. Keep even-N and patched controls.
+W380 closed this follow-up: `RUBY2SHELL_W380_COUNT=27` put the fold byte on
+the next chunk's size LSB and two wire requests in one process aborted with
+`corrupted size vs. prev_size`; see the 10:3xZ section above. Grade unchanged.
 
 ## 2026-11-28 10:0xZ — Ruby W378 two requests in one process CLOSED
 

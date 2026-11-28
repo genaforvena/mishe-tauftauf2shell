@@ -6,6 +6,19 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 10:4xZ — Docs fold of Ruby W379/W380
+
+Docs-only fold of `d5f7599e` and `29de505c`. Both authors had already written
+their chronology entries and reproducibility recipes; the one stale passage
+was W379's consumed `Next: W380` in `docs/task.md`, replaced by a closure
+sentence pointing at W380's size-LSB write and two-request abort. W380's open
+`Next: W381` sweep and the verbatim chronology `Next:` lines stay. No grade,
+rung cell, count, manifest entry or `established` flag moved: the two-request
+wire outcome is a DoS abort, not command execution. Docs replayed the
+one-request valgrind arms (1/1/1 vulnerable at `iso_8859_1.c:293` on a
+72-byte block; 0/0/0 even-N safe and patched Rails) and recorded the direct
+invocations in `docs/reproducibility.md`.
+
 ## 2026-11-28 10:3xZ — Ruby W380 writes the next chunk's size LSB
 
 Operator #7260's named experiment: an opt-in wire sharp-s count of 27 makes

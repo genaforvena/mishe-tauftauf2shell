@@ -21583,6 +21583,40 @@ on a later `str_buf_cat4`. One request alone does not abort.
 (it still overflowed) and is preserved in `w380-vuln-safe.gdb.out`;
 the patched-Rails gdb arm read garbage registers, so use valgrind.
 
+Docs replay, 10:37–10:38Z, from the committed client on pinned plain
+3.4.12 / 3.4.13, one valgrind server at a time (ports 4685–4687 free).
+`python3 -m py_compile` passed and `build("method-postfield-size")` with
+`RUBY2SHELL_W380_COUNT=27` produced a body with 27 raw `0xDF` bytes. The
+author's gitignored `run-vg.sh` was used; in a fresh checkout run the same
+three arms directly, sequentially:
+
+```sh
+RUBY2SHELL_W369_PORT=4685 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W380_COUNT=27 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=docs-w380-odd27 bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4686 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size-safe RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W380_COUNT=20 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=docs-w380-safe20 bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4687 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W380_COUNT=27 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=docs-w380-fixed27 bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+```
+
+Observed: every arm was ready and alive after its one request. The
+vulnerable N=27 arm answered the 650-byte 404 digest
+`1e07f7bb…c961f` and reported 1 invalid write / 1 invalid read /
+1 `case_map` error at `iso_8859_1.c:293`, `Address ... is 0 bytes after a
+block of size 72`, via `rb_str_casemap` (`string.c:7834`, `:7839`, `:7866`).
+Even-N safe N=20 and bootable patched Rails 3.4.13 N=27 gave 0/0/0; Rails'
+404 is its 40681-byte error page, not Sinatra's 650-byte body. Raw logs are
+gitignored under `lab/build/evidence/casemap-chain/w369/valgrind-*/docs-w380-*`.
+This replay covers the one-request memory-corruption arm; the two-request
+abort in the section above is the author's observation, not re-run here.
+No grade or rung cell moved.
+
 ## 2026-11-28 10:1xZ — Ruby W379 two fold destinations watched CLOSED
 
 New committed scripts: `lab/repro/ruby2shell-w379-wire-watch.gdb` (per-call
