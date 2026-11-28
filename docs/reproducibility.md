@@ -21404,6 +21404,43 @@ and full-Rack 3.4.13 cannot boot on this host; their zeros are UNTESTED.
 Full path: `reports/ruby2shell-investigation.md` (W372 tail).
 
 
+## 2026-11-28 08:2xZ — Ruby W373 upcase tag matrix CLOSED
+
+`lab/repro/ruby2shell-rung3-utf8-tag.rb` now has five `upcase_*` modes in
+addition to W365's `casecmp?` modes; the runner adds a 20-arm matrix with
+N=21 (odd, overflow) and N=20 (clean). Requires the pinned plain builds
+`lab/build/plain/ruby-3.4.12-plain` and `ruby-3.4.13-plain` from the Ruby
+setup above plus `valgrind`. Logs are gitignored under
+`lab/build/evidence/casemap-chain/w373/`.
+
+```sh
+cd /home/mesh-home/mishe-tauftauf2shell
+bash -n lab/repro/ruby2shell-utf8-tag-matrix.sh
+lab/build/plain/ruby-3.4.12-plain/bin/ruby -c lab/repro/ruby2shell-rung3-utf8-tag.rb
+bash lab/repro/ruby2shell-utf8-tag-matrix.sh
+```
+
+Single arms (omit `--error-limit=no` only if the default error limit is
+acceptable):
+
+```sh
+valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  lab/repro/ruby2shell-rung3-utf8-tag.rb 21 upcase_latin
+valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  lab/repro/ruby2shell-rung3-utf8-tag.rb 21 upcase_utf8_invalid
+```
+
+Expected: `vg373` lines report `writes=1 reads=1` only for
+`build=ruby-3.4.12-plain mode=upcase_latin N=21`, with `case_map
+iso_8859_1.c:293` → `rb_str_casemap string.c:7839` → `rb_str_upcase
+string.c:8017`, 0 bytes after a 66-byte block, and `result="A" + 42*S`.
+`N=20` reports 0/0 with 42 output bytes; all other tags on both builds and
+all ten 3.4.13 arms report 0/0. The invalid-UTF-8 arm prints
+`result=error:ArgumentError:input string invalid` with no `case_map` frame.
+The ten original `vg` lines must match W365 (`latin_arg` N=27/43 on 3.4.12
+write once; everything else clean). No grade or rung cell moved. Full path:
+`reports/ruby2shell-investigation.md` (W373 tail).
+
 ## 2026-11-28 06:2xZ — Ruby W370 Rack boundary token and header tagging CLOSED
 
 Affected/fixed: Ruby 3.4.12 vulnerable, 3.4.13 fixed; pinned gems include

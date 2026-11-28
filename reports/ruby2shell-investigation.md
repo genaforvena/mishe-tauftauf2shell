@@ -10116,3 +10116,55 @@ grade-neutral mechanism check of the UTF-8-tagged invalid-0xDF `upcase`
 anomaly (W365 tag-matrix driver extended with an `upcase` mode, N=21/20, both
 builds, valgrind). Prediction: only ISO-8859-1 on 3.4.12 writes; falsifier: any
 non-ISO-8859-1 tag or any 3.4.13 arm writes.
+
+## 2026-11-28 08:2xZ — W373: `upcase` tag check CLOSED, no second writable fold
+
+W373 ran the named follow-up from W372: the W365 encoding-tag driver gained
+five `upcase_*` modes, so the same raw-0xDF string can be folded by
+`String#upcase` — the operation Rack::MethodOverride uses — under each tag.
+`lab/repro/ruby2shell-rung3-utf8-tag.rb` and
+`lab/repro/ruby2shell-utf8-tag-matrix.sh` are committed; the 40 valgrind logs
+(20 W365 `casecmp?` arms plus 20 new `upcase` arms) stay gitignored under
+`lab/build/evidence/casemap-chain/w373/`.
+
+Prediction: only the ISO-8859-1-tagged operand on vulnerable 3.4.12 writes,
+at odd N=21 but not N=20. Falsifier: any non-ISO-8859-1 tag arm, or any
+3.4.13 arm, writes. **Prediction supported; falsifier not met.**
+
+- Vulnerable 3.4.12, `upcase_latin`, N=21: one `Invalid write of size 1` at
+  `case_map (iso_8859_1.c:293)` via `rb_str_casemap (string.c:7839)` and
+  `rb_str_upcase (string.c:8017)`, address 0 bytes after a 66-byte block
+  allocated at `string.c:7834`; one `Invalid read of size 1` in `memmove` via
+  `rb_str_casemap (string.c:7857)` at the same address. Result is `A` plus 42
+  `S` bytes (22 input bytes, capa 42). N=20 gives 42 output bytes with zero
+  invalid accesses: the odd-count boundary holds for direct `upcase`.
+- Vulnerable 3.4.12 with UTF-8-tagged raw 0xDF (`upcase_utf8_invalid`) raises
+  `ArgumentError: input string invalid` at both N values; its log has no
+  `case_map` frame. Valid UTF-8 U+0130 (`upcase_utf8_valid`), US-ASCII and
+  ASCII-8BIT tags all return a string with zero invalid accesses. This
+  **refines W372's mechanism claim**: the UTF-8-tagged `_method` anomaly was
+  not a case fold that wrote zero — encoding validation rejects the operand
+  before the fold.
+- Fixed 3.4.13: all ten `upcase` arms report zero invalid writes and zero
+  reads, including the N=21 ISO-8859-1 arm that returns the same 43-byte
+  result (safe-input/version parity, not a dead harness).
+- The twenty replayed W365 `casecmp?` arms agree with the recorded result:
+  3.4.12 `latin_arg` N=27/43 each write once and read once; every other tag
+  arm and all fixed arms are clean.
+
+Reproduce:
+
+```sh
+bash -n lab/repro/ruby2shell-utf8-tag-matrix.sh
+lab/build/plain/ruby-3.4.12-plain/bin/ruby -c lab/repro/ruby2shell-rung3-utf8-tag.rb
+bash lab/repro/ruby2shell-utf8-tag-matrix.sh
+```
+
+Conclusion: W373 is closed on the tested builds. It adds no wire caller, no
+chosen address, marker or command, so rung 4 remains witness-COMPLETE,
+harness-condition rung 5 witness-ESTABLISHED at its labeled scope, and full
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Next named experiment
+W374: send the multipart `_method` under `charset=ISO-8859-15` and
+`charset=windows-1252` to the stock apps under valgrind; prediction — no
+writable fold; falsifier — any non-ISO-8859-1 tag writes on 3.4.12 while the
+fixed control stays zero.

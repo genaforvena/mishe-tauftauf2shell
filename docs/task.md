@@ -16536,6 +16536,41 @@ What would change the grade: a stock second-fold caller with a patched write,
 a wire-only leak of heap and libc/code bases, a survivor serving a second
 command, or a witness contradiction.
 
+## 2026-11-28 08:2xZ — Ruby W373 upcase tag check CLOSED
+
+Fold of the W373 falsifiable experiment from W372; the code change is in
+`lab/repro/ruby2shell-rung3-utf8-tag.rb` and
+`lab/repro/ruby2shell-utf8-tag-matrix.sh`, raw logs stay gitignored under
+`lab/build/evidence/casemap-chain/w373/`. No grade, rung cell, count, manifest
+entry or `established` flag moved; the "Next: W373" item above is closed here.
+
+- **Prediction supported, falsifier not met.** Twenty valgrind arms (3.4.12 /
+  3.4.13 × five tags × N=21/20) gave exactly one writable arm: ISO-8859-1
+  raw-0xDF `upcase` on vulnerable 3.4.12 at N=21 — one invalid write at
+  `case_map (iso_8859_1.c:293)` via `rb_str_upcase`, one copy-out read, 0 bytes
+  after a 66-byte block. N=20 is clean; UTF-8-invalid, UTF-8 U+0130, US-ASCII
+  and ASCII-8BIT tags write zero on both builds; all ten 3.4.13 arms are clean.
+- **Mechanism correction.** A UTF-8-tagged raw 0xDF operand raises
+  `ArgumentError: input string invalid` on both builds, with no `case_map`
+  frame in its valgrind log: it never reaches the fold. W372's "closes the
+  `case_map` gate" is refined — the guard is the encoding-validity exception,
+  not a case fold that writes zero.
+- The twenty W365 `casecmp?` arms reproduced unchanged (vulnerable
+  `latin_arg` N=27/43 one write + one read each; other tags and all fixed arms
+  zero), so the harness was live in this run.
+
+Grade unchanged: one writable wire fold (`_method`), no chosen address, marker
+or command; R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at
+its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next: W374, a bounded wire variant on the remaining tag question — send the
+multipart `_method` with `charset=ISO-8859-15` and `charset=windows-1252` on
+the stock apps under valgrind. Prediction: no writable fold; falsifier: any
+non-ISO-8859-1 tag writes on 3.4.12 with a fixed zero. What would change the
+grade remains a stock second-fold caller with a patched write, a wire-only
+heap+libc/code leak, a survivor serving a second command, or a witness
+contradiction.
+
 ## 2026-11-28 06:2xZ — Ruby W370 closes Rack boundary token and header tagging
 
 Current research limb for a reader arriving now. Docs-only fold of `d3bc12a4`,
