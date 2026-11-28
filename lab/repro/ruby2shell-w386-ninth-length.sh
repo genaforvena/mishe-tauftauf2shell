@@ -39,6 +39,7 @@ case "$NARMS" in ''|*[!0-9]*) echo "NARMS must be a number" >&2; exit 2 ;; esac
 [ "$NINTH_LEN" -ge 1 ] || { echo "NINTH_LEN must be >= 1" >&2; exit 2; }
 [ "$NARMS" -ge 1 ] || { echo "NARMS must be >= 1" >&2; exit 2; }
 [ -n "$OUT" ] || { echo "OUTDIR required" >&2; exit 2; }
+mkdir -p "$OUT" || exit 1
 SUMMARY="$OUT/summary.txt"
 : > "$SUMMARY"
 
