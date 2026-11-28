@@ -16632,6 +16632,41 @@ follow-up from §08:4xZ.
   on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
   at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
+## 2026-11-28 10:0xZ — Ruby W378 two requests in one process CLOSED
+
+Current research limb for a reader arriving now. Operator #7243's named
+experiment is complete; the client change is committed in
+`lab/repro/ruby2shell-w371-wire.py`, raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w378/` and `.../w369/`. No grade, rung cell,
+manifest entry or `established` flag moved.
+
+- **Prediction supported, falsifier not met.** Two odd `_method` requests in
+  one vulnerable 3.4.12 Sinatra process, with post-field length 64 or 1024,
+  both returned the same 650-byte 404 and the process stayed alive. The trace
+  arm logged exactly two folds at `method_override.rb:36`. No crash, no
+  chosen address, no marker or command.
+- **Write count caveat.** Each same-charset valgrind arm printed one invalid
+  write, one read and one `case_map` frame, 0 bytes after a 66-byte
+  `rb_str_casemap` block. A two-charset arm (ISO-8859-1 then ISO-8859-15,
+  same post length) printed two writes at two distinct 66-byte blocks,
+  frames `iso_8859_1.c:293` and `iso_8859_15.c:267`; GDB on a plain process
+  logged two distinct `rb_str_casemap` destinations. Both requests therefore
+  overflow. Why memcheck collapses the identical same-charset reports is
+  UNKNOWN (a C dedup check showed different addresses with one stack are
+  both printed); preserved as a negative, not claimed as a single fold.
+- **Controls.** Even-N safe input twice on vulnerable Sinatra and odd input
+  twice on bootable patched `rails new` 3.4.13 gave 0/0/0 each; vulnerable
+  rails-full gave one write / one read / one frame. Every request returned
+  404 and every process stayed alive.
+- **Grade unchanged.** R4 witness-COMPLETE, harness-condition R5
+  witness-ESTABLISHED at its labeled scope, full stock/oracle-free/persistent
+  R5 **NOT ACHIEVED**.
+
+Next: W379, watch both `rb_str_casemap` destinations in one plain process to
+identify what the second overflow byte lands in. Prediction: an unrelated
+live Ruby object or free gap, not wire-shaped bytes; falsifier: a second
+write into an attacker-shaped allocation or a control-flow target.
+
 ## 2026-11-28 09:4xZ — Ruby W377 post-field length sweep CLOSED
 
 Current research limb for a reader arriving now. Operator #7232's named

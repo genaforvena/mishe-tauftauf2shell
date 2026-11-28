@@ -21554,6 +21554,54 @@ the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
 run concurrently with another valgrind server lost connections from the sixth
 request onward, so run these arms sequentially. No grade or rung cell moved.
 
+## 2026-11-28 10:0xZ — Ruby W378 two requests in one server process CLOSED
+
+`lab/repro/ruby2shell-w371-wire.py` gained opt-in `RUBY2SHELL_W378_COUNT`
+(default 1, so W377 bytes are unchanged) and `method-postfield-size-alt`
+(identical wire-chosen post-field, ISO-8859-15 tag instead of ISO-8859-1).
+`python3 -m py_compile` and a `build()` smoke for both shapes pass. The
+throwaway runners are `lab/build/evidence/casemap-chain/w378/run-all.sh`
+(ports 4660–4665), `.../w378/disambiguate.sh` (4666–4668),
+`.../w378/gdb-two.sh` (4669). Run sequentially with those ports free.
+
+```sh
+RUBY2SHELL_W369_PORT=4660 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W378_COUNT=2 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=w378-vg-sinatra-odd-l64 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4662 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size-safe RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W378_COUNT=2 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=w378-vg-sinatra-safe-l64 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4663 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W378_COUNT=2 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=w378-vg-rails-fixed-l64 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+RUBY2SHELL_W369_PORT=4666 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size,method-postfield-size-alt \
+  RUBY2SHELL_W377_POSTLEN=64 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=w378-vg-mixed-charset-vuln \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+bash lab/build/evidence/casemap-chain/w378/gdb-two.sh
+```
+
+Expect both requests HTTP 404 and a live process. Same-charset valgrind
+arms report 1 write / 1 read / 1 `case_map` frame at 0 bytes after a
+66-byte block; the mixed-charset arm reports 2 writes at two such blocks
+(`iso_8859_1.c:293`, `iso_8859_15.c:267`), and the safe and patched arms
+report 0/0/0. Sinatra's two raw 404s are both 650 bytes with sha256
+`1e07f7bb201b15f974654de84612acc1c572177a8fb07fbacfa5b6e4ab9c961f`.
+The trace arm logged two odd `upcase` operands; GDB logged two distinct
+`rb_str_casemap` destinations (capa 42). Summaries:
+`lab/build/evidence/casemap-chain/w378/{write-targets.txt,disambiguation.txt,gdb-two-calls.txt}`;
+raw logs under `lab/build/evidence/casemap-chain/w369/`. Full path:
+`reports/ruby2shell-investigation.md` (W378 tail). Why memcheck prints one
+report for two identical folds is UNKNOWN; the dedup check in
+`.../w378/dedup-check/` shows distinct addresses with one stack are printed.
+
 ## 2026-11-28 09:4xZ — Ruby W377 post-field length sweep CLOSED
 
 `lab/repro/ruby2shell-w371-wire.py` gained opt-in `method-postfield-size`

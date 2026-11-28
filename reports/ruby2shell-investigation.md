@@ -10318,6 +10318,78 @@ across vulnerable, fixed and safe-input arms. Prediction: no response-byte
 difference, one write per odd request; falsifier: any response change or crash
 attributable to the write.
 
+## 2026-11-28 10:0xZ — W378: two requests in one process CLOSED
+
+W378 ran operator #7243's bounded follow-up to W377: does a second odd
+`_method` request in the SAME vulnerable 3.4.12 Sinatra process fault,
+write into a wire-shaped allocation, or execute a marker? Prediction: the
+second request faults or writes again 0 bytes after the 66-byte block;
+falsifier: a survivor whose second write reaches a wire-shaped block or a
+marker.
+
+`lab/repro/ruby2shell-w371-wire.py` gained opt-in `RUBY2SHELL_W378_COUNT`:
+each built surface is sent over that many fresh loopback connections to one
+server process, with `request=n` labels only when count>1 (default 1 keeps
+W377 output byte-identical). It also gained `method-postfield-size-alt`, the
+same wire-chosen post-field tagged ISO-8859-15 so the two folds have
+distinct `case_map` frames. `py_compile` and `build()` smoke passed before
+any server started. Six arms ran on ports 4660–4665, one shape per process:
+
+- **Primary.** Vulnerable Sinatra with two odd requests at post-field length
+  64 and 1024: both requests returned the same 650-byte 404 (sha256
+  `1e07f7bb201b15f974654de84612acc1c572177a8fb07fbacfa5b6e4ab9c961f`),
+  each process stayed alive. Valgrind printed 1 invalid write / 1 read /
+  1 `case_map` frame (`iso_8859_1.c:293` ← `rb_str_casemap` string.c:7839),
+  write 0 bytes after a 66-byte block (0x2304eda2 at length 64, 0x20f368f2
+  at 1024). Vulnerable rails-full at 64: same verdict, both 404, alive,
+  per-request headers differing. The all-fold trace arm logged exactly two
+  odd `upcase` operands at `rack/method_override.rb:36`.
+- **Controls.** Two even-N safe requests on vulnerable Sinatra and two odd
+  requests on bootable patched `rails new` 3.4.13 each gave 0/0/0 with both
+  processes alive and both responses 404.
+- **Both requests do overflow.** A same-charset arm reports only one invalid
+  write, which could be read as a single fold. Disambiguation on port 4666
+  (ISO-8859-1 then ISO-8859-15, same post length) produced two writes at two
+  distinct 66-byte blocks, frames `iso_8859_1.c:293` and
+  `iso_8859_15.c:267`; port 4668 (same frame, different post lengths) again
+  printed one. A C dedup check (`.../w378/dedup-check/`) showed memcheck
+  prints two same-stack writes when their addresses differ. GDB on a plain
+  3.4.12 Sinatra process (`.../w378/gdb-two.sh`) logged 75 `rb_str_casemap`
+  calls, including two capa-42 destinations at distinct pointers
+  (`0x7fffc809cd48`, `0x7fffc8028668`) for the two identical requests. Both
+  folds therefore execute. Why memcheck prints one identical-stack report
+  is **UNKNOWN** and preserved; no claim is made about where the second
+  overflow byte lands under valgrind.
+- **Verdict.** Prediction supported, falsifier not met: no fault, no
+  wire-shaped write target, no marker or command; both requests returned
+  identical bytes on Sinatra and the process survived the second request.
+  Grade unchanged: R4 witness-COMPLETE, harness-condition R5
+  witness-ESTABLISHED at its labeled scope, full stock/oracle-free/persistent
+  R5 **NOT ACHIEVED**. The W376 port-4640 single-arm negative remains
+  preserved; W378 used fresh ports.
+
+Reproduce with free loopback ports (raw logs are gitignored; throwaway
+runners are in `lab/build/evidence/casemap-chain/w378/`):
+
+```sh
+RUBY2SHELL_W369_PORT=4660 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W378_COUNT=2 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=w378-vg-sinatra-odd-l64 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4666 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size,method-postfield-size-alt \
+  RUBY2SHELL_W377_POSTLEN=64 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=w378-vg-mixed-charset-vuln \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+bash lab/build/evidence/casemap-chain/w378/gdb-two.sh
+```
+
+Next named experiment W379: watch both `rb_str_casemap` `to_end` addresses
+in one plain process to identify what receives the second byte. Prediction:
+an unrelated live Ruby object or free gap, not wire-shaped bytes; falsifier:
+a second write into an attacker-shaped allocation or a control-flow target.
+
 ## 2026-11-28 09:4xZ — W377: wire-chosen post-field length does not move the write CLOSED
 
 W377 ran operator #7232's bounded follow-up to W376.

