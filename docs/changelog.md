@@ -6,6 +6,19 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 09:2xZ — Docs folds W374/W375, records replay and a negative arm
+
+Docs-only fold of `f579e0d2` and `4904a841`, whose authors had already added
+the chronology entries and closed the prior named follow-ups. This fold adds
+a scope pointer to W373's five-tag matrix, retires W374's consumed `Next:
+W375` pointer and its closure sentence, and records a docs replay in
+`docs/reproducibility.md`: the 11-new-tag valgrind arm on vulnerable Sinatra
+gave 11 writes / 1 read / 11 `case_map` frames, the all-14 fixed Rails arm
+0/0/0 with HTTP 404 and a live process. A single `method-iso8859-2` arm in
+isolation gave 0/0/0 (negative preserved, cause UNKNOWN); the single
+`method-odd` arm gave 1 write / 1 read. No grade, rung cell, count or
+`established` flag moved.
+
 ## 2026-11-28 09:0xZ — Ruby W375 wire-confirms all 14 writable charsets
 
 Replaced the three literal multipart `_method` charset shapes in

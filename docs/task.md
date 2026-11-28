@@ -16551,6 +16551,10 @@ entry or `established` flag moved; the "Next: W373" item above is closed here.
 - The twenty W365 `casecmp?` arms reproduced unchanged (vulnerable
   `latin_arg` N=27/43 one write + one read each; other tags and all fixed arms
   zero), so the harness was live in this run.
+- **Scope later widened.** This matrix covered only five tags. W374
+  falsified the prediction that non-ISO-8859-1 tags stay clean, and W375
+  wire-confirmed all 14 SHARP_s single-byte encodings changed by
+  ruby/ruby@d582f8f through the same one stock caller; the grade did not move.
 
 Grade unchanged: one writable wire fold (`_method`), no chosen address, marker
 or command; R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at
@@ -16601,17 +16605,15 @@ closed here.
 Grade unchanged: three wire-confirmed writable folds through one caller, no
 chosen address, marker or command; R4 witness-COMPLETE, harness-condition R5
 witness-ESTABLISHED at its labeled scope, full stock/oracle-free/persistent R5
-NOT ACHIEVED. Next: W375, wire-verify the other eleven tags from the same fix
-commit; prediction all write on 3.4.12 with fixed zero, falsifier any
-vulnerable tag clean or any fixed tag writes.
+NOT ACHIEVED.
 
 ## 2026-11-28 09:0xZ — Ruby W375 all 14 charsets wire-confirmed CLOSED
 
 Current research limb for a reader arriving now. The client change is
 committed in `lab/repro/ruby2shell-w371-wire.py`; raw logs stay gitignored
 under `lab/build/evidence/casemap-chain/w369/` and `.../w375/`. No grade, rung
-cell, manifest entry or `established` flag moved; the "Next: W375" item above
-is closed here.
+cell, manifest entry or `established` flag moved; this closes W374's named
+follow-up from §08:4xZ.
 
 - **Prediction supported, falsifier not met.** All 11 charsets added after
   W374 (ISO-8859-2/3/4/9/10/13/14/16, Windows-1250/1254/1257) reach

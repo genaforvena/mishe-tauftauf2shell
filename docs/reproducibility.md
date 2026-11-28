@@ -21522,6 +21522,38 @@ vulnerable app, HTTP 404 and alive processes; 11 invalid writes / 1 read /
 after a 66-byte block; and 0/0/0 on the bootable patched Rails 3.4.13. Full
 path: `reports/ruby2shell-investigation.md` (W375 tail).
 
+Docs replay, 09:17–09:20Z: the recipe above was re-run on pinned plain 3.4.12
+and 3.4.13 with fresh tags and free loopback ports, one valgrind server at a
+time. The checked-out wire client had an uncommitted W376-only addition
+(post-`_method` shapes and response digests) that leaves `METHOD_CHARSETS`
+unchanged; a clean checkout uses the committed client. Raw logs are gitignored
+under `lab/build/evidence/casemap-chain/w369/valgrind-*` with the `docs-w375-*`
+tags.
+
+```sh
+NEW11=method-iso8859-2,method-iso8859-3,method-iso8859-4,method-iso8859-9,method-iso8859-10,method-iso8859-13,method-iso8859-14,method-iso8859-16,method-windows-1250,method-windows-1254,method-windows-1257
+ALL14=method-odd,$NEW11,method-iso8859-15,method-windows-1252
+RUBY2SHELL_W369_PORT=4642 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$NEW11" RUBY2SHELL_W369_TAG=docs-w375-vg-sinatra-new11 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4643 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$ALL14" RUBY2SHELL_W369_TAG=docs-w375-vg-rails-fixed-all14-seq \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+RUBY2SHELL_W369_PORT=4644 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-odd RUBY2SHELL_W369_TAG=docs-w375-vg-sinatra-odd \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+```
+
+Observed: the 11-new-tag vulnerable Sinatra arm answered HTTP 404 on all 11
+requests, stayed alive, and logged 11 invalid writes / 1 invalid read / 11
+`case_map` frames; the all-14 fixed Rails arm answered 404 on all 14, stayed
+alive, and logged 0/0/0; the single `method-odd` vulnerable arm logged 1 write
+/ 1 read / 1 `case_map`. One bounded negative: a single `method-iso8859-2`
+arm in isolation (port 4640, tag `docs-w375-vg-sinatra-new`) logged 0/0/0 on
+the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
+run concurrently with another valgrind server lost connections from the sixth
+request onward, so run these arms sequentially. No grade or rung cell moved.
+
 ## 2026-11-28 06:2xZ — Ruby W370 Rack boundary token and header tagging CLOSED
 
 Affected/fixed: Ruby 3.4.12 vulnerable, 3.4.13 fixed; pinned gems include
