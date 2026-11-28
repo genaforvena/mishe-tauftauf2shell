@@ -21321,6 +21321,66 @@ object, R5 NOT CLAIMED; no full `taosd` SQL/wire path, listener or command.
 Operator admission landed 22:2xZ as the 223rd mind (`c16c1eaa`);
 independent witness replay landed as W377 (§22:4x–22:5xZ).
 
+## 2026-11-28 06:1xZ — Ruby W369 two-operand `casecmp?` wire reach NEGATIVE
+
+Affected/fixed: Ruby 3.4.12 vulnerable, 3.4.13 fixed; pinned gem trees
+include Rack 3.2.8/3.2.9, Puma 8.1.2, Sinatra 4.2.2 and Rails 8.1.4.1.
+The committed scripts are `lab/repro/ruby2shell-w369-callers.sh` (read-only
+grep of the pinned gem trees), `lab/repro/ruby2shell-w369-pair-wire.py`
+(one POST carrying two ISO-8859-1 sharp-s values of 21 and 23 bytes plus
+`_method` and binary header/parameter surfaces), `lab/repro/ruby2shell-w369-pair.sh`
+(unmodified stock Sinatra/rails/rails-full app, trace/valgrind/plain arms)
+and `lab/repro/ruby2shell-w369-casecmp-trace.rb` (`RUBYOPT` preload logging
+both operands of every `casecmp?`/`casecmp`). Builds and apps come from
+`lab/ruby2shell/provision.sh` and the stock app setup; raw per-arm logs are
+gitignored under `lab/build/evidence/casemap-chain/w369/` and regenerate
+with the wrappers. Ports below must be free loopback ports.
+
+```sh
+cd /home/mesh-home/mishe-tauftauf2shell
+bash lab/repro/ruby2shell-w369-callers.sh
+RUBY2SHELL_W369_PORT=4593 RUBY2SHELL_W369_TAG=docs-replay \
+  bash lab/repro/ruby2shell-w369-pair.sh trace rails-full vuln
+RUBY2SHELL_W369_PORT=4597 RUBY2SHELL_W369_TAG=docs-replay2 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails vuln
+```
+
+Expect the static arm to list only Rack 3.2.9 `multipart/parser.rb:157`
+(`name.casecmp?("boundary")`), Rails `rendering.rb:232` and the `urlmap.rb`
+helpers whose bodies call `v1.casecmp(v2)`; no Sinatra, rack-protection,
+WEBrick or stock-app two-operand fold. Docs observed that output on
+2026-11-28 06:24Z. Expect the trace arm with the default client to print
+`ready=YES process-alive-after-one-request=YES`, a request head of HTTP 404
+on stock Sinatra/rails or HTTP 500 on full Rack 3.2.9 Rails (malformed
+Content-Type parameter), `cmp-calls=3` on full Rails — one boot control with
+21/23 `0xDF` operands whose stack points into the preload file, one
+`rendering.rb:232` comparison of `"Accept"` with `"X-Requested-With"`, and
+one `parser.rb:157` comparison of ASCII-8BIT `"boundary"` with UTF-8
+`"boundary"`; `both-suspect=1` and `both-odd=1` are the boot control, not a
+request observation. Docs observed exactly that shape on the vulnerable
+3.4.12 full-Rails replay at 06:24Z, with head HTTP 500; fixed 3.4.13 trace
+evidence is preserved by the author in `trace-rails-fixed/final.out`.
+Expect the committed valgrind wrapper to count per-class `Invalid
+write`/`Invalid read` lines, not the noisy Ruby `ERROR SUMMARY`. Docs'
+default-client replays on vulnerable stock Rails at 06:25Z returned HTTP
+500 with `invalid-writes=0` and `invalid-reads=0` on two free ports; the
+author's gitignored final arms recorded HTTP 404 with one invalid write and
+one copy-out read 0 bytes past the `_method` block on 3.4.12
+(`valgrind-rails-vuln/vuln2.out`, stack `case_map (iso_8859_1.c:293) ->
+rb_str_casemap -> rb_str_upcase`) and zero on 3.4.13
+(`valgrind-rails-fixed/fixed.out`). No second write from the two operands
+appeared. Because docs did not reproduce that positive arm in the same
+shape, it is a report observation, not an independently replayed pass; the
+one-fold `_method` sink has a separate tracked recipe above (§ "wire-only
+multipart `_method` corruption (stock apps)"). Two author arms failed and
+are preserved: a shell syntax error from editing while a runner was being
+read, and a stale `server.pid` that blocked one vulnerable valgrind boot;
+both were rerun successfully with the final request shape. Absolute
+addresses vary under ASLR and are not pins. Grade unchanged: the two-fold
+write remains in-process (W367/W368), stock HTTP reaches one fold at most,
+no chosen address, marker or command; full stock/oracle-free/persistent r5
+NOT ACHIEVED. Full path: `reports/ruby2shell-investigation.md` (W369 tail).
+
 ## 2026-11-28 06:0xZ — Ruby W368 odd-count threshold and watchpoint artifact
 
 The two committed scripts are `lab/repro/ruby2shell-twofold-watch-all.gdb`

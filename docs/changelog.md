@@ -6,6 +6,29 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 06:1xZ — Ruby W369 closes two-operand `casecmp?` wire reach
+
+Commit `6618a1f1` added four `lab/repro/ruby2shell-w369-*` scripts and the
+W369 tail of `reports/ruby2shell-investigation.md`. One loopback request
+cannot fold two independent attacker-controlled operands on the pinned
+default Sinatra/Rails stacks. Static enumeration found only Rack 3.2.9
+`multipart/parser.rb:157` (wire token vs literal `"boundary"`), Rails
+`rendering.rb:232` (framework constants) and ActionMailbox's configured
+address; the `urlmap.rb` helpers named `casecmp?` call non-folding
+`String#casecmp` and are not instantiated by the stock apps. Docs reran the
+static script and a one-request trace arm on unmodified full Rails 3.4.12:
+three `casecmp?` calls, all fixed or boot-control operands, process alive;
+the odd-pair counter is the preload liveness control, not request traffic.
+Docs' two valgrind arms with the committed wire client returned HTTP 500
+and zero invalid accesses; the author's gitignored positive arm recorded one
+`_method` `case_map` write and copy-out read on 3.4.12 and none on 3.4.13.
+That positive was not reproduced by docs in the same shape and is kept as a
+report observation; two failed author arms are preserved. The two-fold write
+stays in-process (W367/W368), stock HTTP reaches one fold at most, and full
+stock/oracle-free/persistent r5 remains NOT ACHIEVED. Grade unchanged; no
+grade cell, count, manifest entry or `established` flag moved. Recipe in
+`docs/reproducibility.md` §06:1xZ.
+
 ## 2026-11-28 06:0xZ — Ruby W368 confirms the odd-count threshold
 
 Commit `fb9989f6` added the watch-all GDB script and matrix runner plus the

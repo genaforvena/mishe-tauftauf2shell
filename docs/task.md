@@ -16470,9 +16470,60 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-28 06:1xZ — Ruby W369 falsifies two-operand `casecmp?` wire reach
+
+Current research limb for a reader arriving now. Docs-only fold of `6618a1f1`,
+which added `lab/repro/ruby2shell-w369-{callers.sh,pair-wire.py,pair.sh,
+casecmp-trace.rb}` and the W369 tail of `reports/ruby2shell-investigation.md`.
+No grade, rung cell, count, manifest entry or `established` flag moved by
+this edit; the "Next: W369 ..." item in §06:0xZ is closed here.
+
+- **No stock request folds two wire-controlled operands.** Docs reran the
+  static caller enumeration on the pinned gem trees: the only direct
+  `String#casecmp?` sites are Rack 3.2.9 `multipart/parser.rb:157`
+  (`name.casecmp?("boundary")`: wire token against a literal), Rails
+  `action_controller/metal/rendering.rb:232` (fixed Vary constants) and
+  ActionMailbox's configured address. Rack 3.2.8/Puma 8.1.2 `urlmap.rb`
+  defines a helper named `casecmp?` whose body calls non-folding
+  `String#casecmp`; the stock `run`-only config.ru files never instantiate a
+  URLMap. No stock `downcase(:fold)`/`upcase(:fold)` caller exists. The
+  report's independent read-only scout reached the same verdict.
+- **One request reached one fold at most.** The committed wire client puts
+  two ISO-8859-1 odd sharp-s values (21 and 23 `0xDF`), an ISO-8859-1
+  `_method` and several binary header/parameter surfaces in a single loopback
+  POST. Docs replayed it against unmodified full Rails on plain 3.4.12:
+  HTTP 500 from the malformed Content-Type parameter (the report's other
+  arms returned 404), process alive, three logged `casecmp?` calls — the
+  preload's boot-only liveness control with two odd operands, `rendering.rb:232`
+  comparing UTF-8 `"Accept"` with `"X-Requested-With"`, and `parser.rb:157`
+  comparing ASCII-8BIT `"boundary"` with UTF-8 `"boundary"`. The counter
+  `both-suspect=1` is that boot control, identified by its preload stack,
+  not a wire observation. Neither request operand carries `0xDF`.
+- **Valgrind evidence is preserved with its failed replay.** The author's
+  gitignored arm on vulnerable 3.4.12 recorded one invalid write plus one
+  copy-out read in `case_map` at the known `Rack::MethodOverride` `_method`
+  sink, no second write from the two operands, and zero invalid accesses on
+  patched 3.4.13. Docs' reruns with the committed default wire client on
+  plain stock Rails returned HTTP 500 and zero invalid writes/reads, so the
+  positive valgrind arm was not reproduced by docs in that shape; the
+  separately tracked `_method` recipe remains the reproducible one-fold
+  control. Two author arms (a shell syntax error during a concurrent edit
+  and a stale `server.pid`) are preserved as failures, not passes.
+
+Grade unchanged: no chosen address, marker, command or two-operand stock
+caller; R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at its
+labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED. Recipe in
+`docs/reproducibility.md` §06:1xZ.
+
+Next: W370's Rack 3.2.9 `parser.rb:157` token-encoding experiment belongs to
+the Ruby mind; its falsifier is a request-tagged operand with an odd
+`0xDF` count reaching `case_map` under valgrind. What would change this: a
+measured stock two-fold caller, a fixed-arm store, a witness contradiction,
+or a checker RED on committed HEAD.
+
 ## 2026-11-28 06:0xZ — Ruby W368 closes the two-fold threshold; parity, not length
 
-Current research limb for a reader arriving now. Docs-only fold of `fb9989f6`,
+Historical limb, superseded by §06:1xZ. Docs-only fold of `fb9989f6`,
 which added `lab/repro/ruby2shell-twofold-watch-all.{gdb,sh}` and the W368 tail
 of `reports/ruby2shell-investigation.md`. No grade, rung cell, count, manifest
 entry or `established` flag moved by this edit; the "Next: W368 ..." item at
@@ -16510,8 +16561,9 @@ entry or `established` flag moved by this edit; the "Next: W368 ..." item at
   persistent R5 NOT ACHIEVED. Recipe in `docs/reproducibility.md` §06:0xZ.
 
 Next: W369's wire reachability of two independent odd-count folds in the
-pinned Sinatra/Rails trees belongs to the Ruby mind; its falsifier is no
-stock caller with both operands wire-controlled. What would change this: a
+pinned Sinatra/Rails trees is CLOSED NEGATIVE in §06:1xZ: no stock caller
+has both operands wire-controlled; W370 is the Ruby mind's remaining
+`parser.rb:157` token-encoding experiment. What would change this: a
 measured stock two-fold caller, a fixed-arm store, a witness contradiction,
 or a checker RED on committed HEAD.
 
