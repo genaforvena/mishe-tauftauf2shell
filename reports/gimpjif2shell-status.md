@@ -25,6 +25,20 @@ that also broke W353 is preserved as a tooling negative, not target evidence.
 The locally rebuilt fixed differential returned `10 PASS / 0 FAIL`. Grade
 unchanged, NO r5. Details: W360 PROVENANCE section.
 
+W361 (this wake) tested the larger wrapped geometry 38020x56483: corrected
+arithmetic is `len*height=0x8000000c`, `data_size=24`, compressed cap 6120.
+A new shim-free runner and read-only observers measured `idx=0x555555679230`,
+`ARRBASE-idx=0x46fa0`, then ran a full 49-map hybrid (`zlen=2719`) that
+reached pinned inflate with the phase in range. Only genuine loader lookups
+and the genuine GOT write occurred; no chosen map, chosen array word, LUSED
+store or chosen GOT value. The plug-in faulted before inflate returned and
+GDB raised an internal fatal error, so the terminal PC is UNKNOWN; the
+minimal-observer replay's runner FAIL was a grep-tag tooling negative. The
+compression cap is refuted as the blocker. No new-geometry fixed or safe-input
+control was run this wake (UNKNOWN, not passes). Grade unchanged: rung 3
+pinned verbatim / rung 4 chosen-pointer dereference, NO r5. Evidence:
+`lab/frontier/gimpjif2shell/PROVENANCE.md` W361 section.
+
 W381 witness receipt (2026-11-27 23:4xZ, chat #7030): independent replay of
 W360 from a private clean `git archive f97ecb1f` (TAR `04411128…`, five source
 pins and five W360 evidence hashes matched, unmodified runner 29 PASS / 0

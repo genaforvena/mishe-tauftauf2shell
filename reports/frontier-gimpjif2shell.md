@@ -2165,8 +2165,32 @@ fixed attack rejected the image data without a segmentation fault, no shim.
 This is not a vendor-shipped fixed build.
 
 Grade unchanged: rung 3 pinned verbatim / rung 4 chosen-pointer dereference,
-NO r5. Next candidate is a larger wrapped geometry (38020x56483,
-`data_size=12`) whose 3060-byte compressed cap can carry the 49-map encoding;
-it is untested and needs fresh allocation/layout measurement. Exact JIFs,
-hashes, observer negatives and logs: W360 section of
-`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+NO r5. The next candidate was a larger wrapped geometry; its arithmetic and
+result are recorded in the W361 section below.
+
+## W361 larger wrapped geometry refutes the compression-cap blocker (2026-11-27, 23:43-00:00Z wake)
+
+Correction: `38020*56483 = 0x8000000c`, alpha-doubled `data_size=24`, so the
+compressed-input cap is 6120 bytes, not the 12/3060 previously estimated.
+A new no-shim runner (`run-appimage-w361.sh`, PRE bound `0x8000000c`) and a
+read-only software-breakpoint observer measured this geometry before choosing
+the JIF words: `idx=0x555555679230`, `ARRBASE-idx=0x46fa0` (moved from
+`0x47210`). The full 49-map hybrid then compressed to `zlen=2719` — inside
+the cap — and reached pinned inflate with `idx=0x555555679240`, phase 25
+inside the chosen 49-phase window.
+
+No coherent fake map was consumed: the 24 observed ARRAY/TABLE pairs had
+genuine loader values, with no chosen `rbx`, chosen array word, LUSED store or
+chosen GOT value; only the genuine GOT write occurred. The plug-in crashed
+before inflate returned, and GDB hit an internal fatal error on the terminal
+fault, so the terminal PC is UNKNOWN. The compression cap is therefore not the
+blocker; a post-write consumer remains unobserved. The minimal-observer
+replay reached the same pre-inflate boundary with `idx=0x5555556791f0`; its
+runner's `FAIL: no pinned inflate` was a grep-tag tooling negative, not a
+target failure. No new geometry-specific fixed or safe-input control was run
+this wake, so those controls are UNKNOWN here rather than passes.
+
+Grade unchanged: rung 3 pinned verbatim / rung 4 chosen-pointer dereference,
+NO r5; no chosen-address store, control-flow word, marker or command. Exact
+generator, observers, JIFs, logs, hashes and retained negatives: W361 section
+of `lab/frontier/gimpjif2shell/PROVENANCE.md`.

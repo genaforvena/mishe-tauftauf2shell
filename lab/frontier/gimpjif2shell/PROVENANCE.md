@@ -3916,3 +3916,94 @@ Next bounded repair: a larger wrapped geometry such as 38020x56483 has
 offline for the 49-map `zlen=2646` encoding. This is an UNTESTED candidate;
 its different allocations require fresh `idx`/delta measurement and a matching
 runner/observer PRE bound. No memory-limit change is needed or authorized.
+
+## W361 larger wrapped geometry: 49 maps fit, still no coherent-map consumer (2026-11-27, 23:43-00:00Z wake)
+
+Question: W360's 49-map hybrid could not pass the 1020-byte compressed-input
+cap of the minimal geometry. Test the wall's next candidate geometry with the
+full map set, after measuring its allocation layout, to separate the cap from
+the post-write-consumer gap.
+
+Correction to the W360 note: `38020*56483 = 0x8000000c` (not `0x80000006`),
+alpha-doubled `data_size = 0x18 = 24` (not 12), so `data_size*255 = 6120`
+(not 3060). All W361 runs used the SHA256SUMS-verified GIMP 3.2.8 AppImage
+and a re-generated shim-free `AppRun.w361`; no target memory or register was
+written by GDB.
+
+New artifacts:
+
+- `live/w361-hybrid.py` SHA
+  `3ca51a2232b28eb6a8545bab9bc74239f5242a53a06a8b71aa34793c237d0be8`
+  (W360 mechanics with LEN/HEIGHT, delta, array sweep and plain length as
+  parameters).
+- `live/run-appimage-w361.sh` SHA
+  `28ff45a8d1567e36a2121d3e2320a9013a7f19fcde00ee7840e0809b0b799120`,
+  structurally the W340 runner with PRE bound `0x8000000c`; it strips every
+  `gimpjif2shell/live/*shim.so` line and verifies the AppImage checksum.
+- `live/gdb-w361-layout.cmd` SHA
+  `663ab0db9cc5c012fde7f2528ae98ca06e1d338a5676f6f8d4e40d2b2792d9bb`
+  (software breakpoints only; the W360 hardware-watchpoint combination broke
+  its own positive control).
+- `live/gdb-w361-min.cmd` SHA
+  `607e76bd40105ecd0748bc71c636fb6aca6f8cf2825f58fe3ee53bb37817fbea`
+  (inflate entry/return only; signal handler reads no registers).
+- JIFs `w361-layoutprobe.jif` SHA
+  `bae6b88aee47c7bdc0dff5d397b773aade814b5f19b4241ed4678d12e31ce725`
+  and `w361-49map.jif` SHA
+  `94c6485654508c723b40d55b458245b2f79c9448483743c8c51c38db938aabdd`.
+  Both were run at absolute 101-character paths
+  (`/tmp/w361-layout-<80 x>.jif`, `/tmp/w361-49map-<81 x>.jif`, equal
+  basename lengths), preserving the W353 path-length layout condition.
+
+### Layout measurement
+
+The K=0 probe (zlen=928, file 966 bytes, array sweep `0x46a10..0x47a10`)
+passed PRE with `avail=0x8000000c`, `idx=0x555555679230`,
+`ld.so base=0x7ffff7fc7000`. `ARRAY` logged `r14=0x5555556c01d0`, so
+`ARRBASE-idx=0x46fa0`, not W360's `0x47210`. The observer logged 24 genuine
+ARRAY/TABLE pairs through `adler32`/`adler32_z`, the genuine `MATCH`/`GOT`
+write `rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0`, and no chosen word.
+Logs `w361-layout-run.log` SHA
+`b61a86573e5d96cf31d0259c58848903d1744beca9905dda334910cab8c86fad` and
+`w361-layout-gdb.log` SHA
+`b4b4923bd19975ea744a82a5e95d0d9de4f2fc642cd155afc327f840aced6f9c`
+are committed under `live/evidence/`.
+
+### 49-map replay
+
+Generator arguments: `noise=0 K=0x30 spacing=0x600 idx_nom=0x5555556790b0
+delta=0x46fa0 M=0x5555556a0050 arr=0x45000..0x49000`; `base=0x26fa0`,
+`plain=0xc0000`, `plain_sha256=256620af…`, `zlen=2719`, file 2764 bytes —
+comfortably under the 6120-byte cap. `idx_nom` was centered 0x180 below the
+measured idx so the 49 phases covered a 0x300-byte drift window; the
+resulting live `idx-nom=0x190` is phase 25, inside that window.
+
+Run log SHA `1f27defc91b9c2c14a95482da84d9539e99a3aedcdf2431e192da579c8ea8bd8`,
+GDB log SHA `259c9cfbf44daec63c1b40dff687da936c811765656c0153f2a532092d0daa51`:
+PRE `idx=0x555555679240`, `delta=0x46fa0` (stable across both 49-map runs),
+24 ARRAY/TABLE pairs with genuine `rbx` values and genuine sampled array
+words, one genuine MATCH, one genuine GOT write. No `rbx` in the
+`M..M+0x30*0x600` map band, no chosen-array word, no `0xb200` LUSED store,
+no chosen GOT value, no marker and no command. The plug-in crashed
+(`Plug-in crashed: "file-gif-load"`); the GDB log contains neither
+`INFLATE_RETURN` nor a `SIGNAL` line because GDB hit an internal fatal error
+on the terminal fault. Terminal PC is UNKNOWN for this wake.
+
+The minimal-observer replay of the same JIF (run SHA
+`65c9c575b20b95f27f5f669b99f2d9f0d978012557234d678def392bfa8ed247`, GDB SHA
+`fb38b5644311b62ce8058503da95a1783eacec4a3d7d6e959523184d5e8634a7`) logged
+PRE `idx=0x5555556791f0` and no inflate return or signal before the plug-in
+crash; this places the fault before `inflate` returns in the measured layout
+but does not name an instruction. The runner's `FAIL: no pinned inflate`
+is a grep-tag tooling negative (`W361-MIN PRE` versus the runner's
+`W361 PRE` pattern), not a failed target probe; PRE is present in the log.
+
+Conclusion: the compressed-input cap was not the blocking gap. With all 49
+phases present, the phase index in range and the array delta measured rather
+than assumed, no coherent fake map was consumed; only the genuine pre-write
+lookups occurred, and the process faulted before a post-write consumer could
+be observed. This does not refute W359/W360's post-write chosen-`M`
+dereference — it fails to extend it to a chosen map or store on this
+geometry. Grade unchanged: rung 3 pinned verbatim / rung 4 chosen-pointer
+dereference, NO r5. No fixed-control or safe-input control was run on the new
+geometry this wake; those controls remain UNKNOWN here, not passes.
