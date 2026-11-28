@@ -16632,11 +16632,37 @@ follow-up from §08:4xZ.
   on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
   at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
-Next: W376, a bounded steerability probe. Add a post-`_method` multipart field
-and compare response bytes plus the valgrind write target across vulnerable,
-fixed and safe-input arms. Prediction: no response-byte difference, one write
-per odd request; falsifier: any response change or crash attributable to the
-write.
+## 2026-11-28 09:2xZ — Ruby W376 post-field steerability probe CLOSED
+
+Current research limb for a reader arriving now. Operator #7223's named
+experiment is complete; the client change is committed in
+`lab/repro/ruby2shell-w371-wire.py`, raw logs are gitignored under
+`lab/build/evidence/casemap-chain/{w369,w376}/`. No grade, rung cell, manifest
+entry or `established` flag moved.
+
+- **Prediction supported, falsifier not met.** A multipart `after` field
+  following the odd `_method` part neither changes response bytes attributable
+  to the fold nor becomes the write target. Sinatra's raw 404 response is
+  identical across odd / post-field / even-N safe shapes; on vuln rails-full
+  and patched Rails the post-field and even-N responses are identical after
+  canonicalising per-request headers (session id, request id, timings,
+  `content-length`) and reflected parameters.
+- **Valgrind, one shape per process.** Vuln 3.4.12 Sinatra and full Rails:
+  odd and post-field each 1 invalid write / 1 read / 1 `case_map` frame,
+  every write 0 bytes after the 66-byte `rb_str_casemap` allocation; even-N
+  safe 0/0/0. Bootable patched Rails 3.4.13 with the post-field 0/0/0,
+  ready and alive. All HTTP 404; no crash.
+- **Scope limit.** The trace arm's fold counts were contaminated by a
+  concurrent docs replay on the same loopback port (recorded in
+  `docs/reproducibility.md` §09:17–09:20Z); fold-count claims here rest on the
+  one-shape valgrind arms. Still one stock caller, no chosen address, marker or
+  command: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at
+  its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next: W377, a bounded post-field size sweep on vulnerable Sinatra valgrind.
+Prediction: the write stays 0 bytes after the 66-byte block for every wire
+chosen post-field length; falsifier: any write target that is a wire-chosen
+block or byte.
 
 ## 2026-11-28 06:2xZ — Ruby W370 closes Rack boundary token and header tagging
 

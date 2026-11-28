@@ -15,8 +15,11 @@ target (percent-encoded there) so the server parses the request at all.
 W372 adds charset-tagged (ISO-8859-1) JSON and urlencoded bodies with raw 0xDF
 keys/values; the opt-in form-charset-method is the known `_method` sink.
 W375 adds the other 11 single-byte encodings fixed in the same Ruby commit.
+W376 adds a multipart field AFTER the `_method` part, plus an even-N safe
+control; opt-in response digests make response bytes comparable across arms.
 """
 
+import hashlib
 import os
 import socket
 import sys
@@ -27,6 +30,8 @@ N = 21
 SHARP = b"\xdf" * N
 PCT = b"%DF" * N
 ODD = b"a" + SHARP
+SAFE = b"a" + b"\xdf" * 20
+POST = b"postfield-marker-W376-ABCDEFGH"
 BOUNDARY = b"XW371BOUND"
 
 ALL = [
@@ -124,6 +129,21 @@ def build(surface):
                 headers + [(b"Content-Type",
                             b"multipart/form-data; boundary=" + BOUNDARY)],
                 body)
+    if surface in ("method-postfield", "method-postfield-safe"):
+        operand = ODD if surface == "method-postfield" else SAFE
+        body = (b"--" + BOUNDARY + b"\r\n"
+                b'Content-Disposition: form-data; name="_method"\r\n'
+                b"Content-Type: text/plain; charset=ISO-8859-1\r\n\r\n"
+                + operand +
+                b"\r\n--" + BOUNDARY + b"\r\n"
+                b'Content-Disposition: form-data; name="after"\r\n'
+                b"Content-Type: text/plain; charset=ISO-8859-1\r\n\r\n"
+                + POST +
+                b"\r\n--" + BOUNDARY + b"--\r\n")
+        return (b"POST", PATH,
+                headers + [(b"Content-Type",
+                            b"multipart/form-data; boundary=" + BOUNDARY)],
+                body)
     if surface == "form-charset-method":
         return (b"POST", PATH,
                 headers + [(b"Content-Type",
@@ -134,6 +154,7 @@ def build(surface):
 
 def main():
     port = int(sys.argv[1])
+    response_summary = os.environ.get("RUBY2SHELL_W376_RESPONSE", "0") == "1"
     surfaces = os.environ.get("RUBY2SHELL_W371_SURFACES", ",".join(ALL)).split(",")
     if os.environ.get("RUBY2SHELL_W371_CONTROL", "0") == "1":
         surfaces.append("method-odd")
@@ -146,6 +167,7 @@ def main():
         request += b"Content-Length: " + str(len(body)).encode() + b"\r\n"
         request += b"Connection: close\r\n\r\n" + body
         head = "ERR unknown"
+        response = b""
         try:
             with socket.create_connection((HOST, port), timeout=5) as sock:
                 sock.sendall(request)
@@ -160,6 +182,11 @@ def main():
         except Exception as exc:
             head = "ERR %s" % type(exc).__name__
         print("surface=%s head=%s" % (surface, head), flush=True)
+        if response_summary:
+            print("surface=%s response-len=%d response-sha256=%s response-body=%r"
+                  % (surface, len(response),
+                     hashlib.sha256(response).hexdigest(),
+                     response.decode("latin-1")), flush=True)
 
 
 if __name__ == "__main__":

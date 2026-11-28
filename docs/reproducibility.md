@@ -21554,6 +21554,57 @@ the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
 run concurrently with another valgrind server lost connections from the sixth
 request onward, so run these arms sequentially. No grade or rung cell moved.
 
+## 2026-11-28 09:2xZ — Ruby W376 post-field steerability CLOSED
+
+`lab/repro/ruby2shell-w371-wire.py` gained two opt-in shapes:
+`method-postfield` (multipart `_method` = `a` + 21 raw 0xDF tagged
+ISO-8859-1, followed by an `after` part of 30 ASCII bytes) and
+`method-postfield-safe` (same shape, N=20 even). Setting
+`RUBY2SHELL_W376_RESPONSE=1` adds the full response length, sha256 and escaped
+body to the wire output. `python3 -m py_compile` and a `build()` smoke over
+all three shapes pass. The throwaway runner is
+`lab/build/evidence/casemap-chain/w376/run-all.sh`; ports 4640–4649 must be
+free and no other mind may replay on them at the same time (the W376 trace
+arms collided with the docs replay above on 4640, so their fold counts are
+contaminated; the one-shape valgrind arms are authoritative).
+
+```sh
+ALL3=method-odd,method-postfield,method-postfield-safe
+RUBY2SHELL_W369_PORT=4640 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$ALL3" \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=w376-trace-sinatra \
+  bash lab/repro/ruby2shell-w369-pair.sh trace sinatra vuln
+RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_PORT=4644 \
+  RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield \
+  RUBY2SHELL_W369_TAG=w376-vg-sinatra-post \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_PORT=4648 \
+  RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-safe \
+  RUBY2SHELL_W369_TAG=w376-vg-railsfull-safe \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_PORT=4649 \
+  RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield \
+  RUBY2SHELL_W369_TAG=w376-vg-rails-fixed-post \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+```
+
+Expect HTTP 404 and live processes throughout. Vuln Sinatra raw responses are
+identical across the three shapes (650 bytes, sha256
+`1e07f7bb201b15f974654de84612acc1c572177a8fb07fbacfa5b6e4ab9c961f`); on
+rails-full and patched Rails the reflected `after` parameter and per-request
+headers differ, but post-field and even-N canonicalise to one digest each
+(`06630f0b…d3f3b`, `989b9d45…c19d`), recorded in
+`lab/build/evidence/casemap-chain/w376/response-compare.txt`. One-shape
+valgrind arms give 1/1/1 for odd and post-field on both vulnerable apps,
+0/0/0 for even-N and for patched Rails; every write is 0 bytes after a
+66-byte block (`lab/build/evidence/casemap-chain/w376/write-targets.txt`).
+Full path: `reports/ruby2shell-investigation.md` (W376 tail).
+
 ## 2026-11-28 06:2xZ — Ruby W370 Rack boundary token and header tagging CLOSED
 
 Affected/fixed: Ruby 3.4.12 vulnerable, 3.4.13 fixed; pinned gems include

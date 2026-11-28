@@ -6,6 +6,21 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 09:2xZ — Ruby W376 post-field does not steer the fold
+
+Added opt-in `method-postfield` / `method-postfield-safe` shapes and opt-in
+full-response digests to `lab/repro/ruby2shell-w371-wire.py`, then replayed 10
+loopback arms. Sinatra's raw 404 bytes are identical across odd, post-field
+and even-N shapes; rails-full and patched Rails post-field and even-N
+responses are identical after canonicalising per-request headers and reflected
+parameters. One-shape valgrind arms give 1 invalid write / 1 read / 1
+`case_map` frame for odd and post-field on vulnerable Sinatra and rails-full,
+0/0/0 for even-N and patched Rails; every write stays 0 bytes after a
+66-byte block, never in the post-field. A concurrent docs replay collided on
+port 4640 and contaminated the trace fold counts; that negative is preserved.
+Prediction supported, falsifier not met; grade unchanged (R4 COMPLETE, harness
+R5 ESTABLISHED, full stock R5 NOT ACHIEVED). Next: W377 post-field size sweep.
+
 ## 2026-11-28 09:2xZ — Docs folds W374/W375, records replay and a negative arm
 
 Docs-only fold of `f579e0d2` and `4904a841`, whose authors had already added
