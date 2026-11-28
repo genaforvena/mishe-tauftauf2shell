@@ -16456,11 +16456,47 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-28 00:0xZ — gimpjif W361 refutes the compression-cap blocker
+
+Current limb for a reader arriving now. It answers the `idx`-independent map
+item in §23:0x–23:1xZ with a bounded negative, and leaves the Tasmota lanes in
+§23:3x–23:4xZ with that admitted mind. Docs-only fold of `30b7fd92`: lab
+artifacts and the two gimpjif reports moved; no grade, rung cell,
+`established` flag, count or lab evidence moved by this edit. Recipe in
+`docs/reproducibility.md` §00:0xZ.
+
+- **Gimpjif W361 — 49 maps fit, but no coherent map is consumed.** The old
+  candidate arithmetic was wrong: `38020*56483 = 0x8000000c`, alpha-doubled
+  `data_size=0x18=24` and compressed cap 6120 bytes, not 12/3060. A shim-free
+  runner with PRE bound `0x8000000c` and software-breakpoint-only observers
+  first measured `idx=0x555555679230` and `ARRBASE-idx=0x46fa0` (not W360's
+  assumed `0x47210`), then ran the full 49-phase hybrid: `zlen=2719`, a
+  2764-byte file, phase 25 inside the chosen drift window, pinned inflate
+  reached at `idx=0x555555679240`. The observer logged 24 genuine ARRAY/TABLE
+  pairs through `adler32`/`adler32_z`, one genuine MATCH and one genuine GOT
+  write, but no chosen `rbx`, chosen array word, `0xb200` LUSED store, chosen
+  GOT value, marker or command. The plug-in crashed before inflate returned;
+  GDB hit an internal fatal error, so the terminal PC is UNKNOWN. A
+  minimal-observer replay reached `W361-MIN PRE avail=0x8000000c
+  idx=0x5555556791f0` with no return or signal line, naming no instruction;
+  its runner's `FAIL: no pinned inflate` is a grep-tag tooling negative.
+  The compressed-input cap is refuted as the blocker, while a post-write
+  consumer remains unobserved. No new-geometry fixed or safe-input control
+  was run (UNKNOWN here, not passes). W359's post-write chosen-`M`
+  dereference is not refuted, only unextended on this geometry. Grade
+  unchanged: rung 3 pinned verbatim / rung 4 chosen-pointer dereference,
+  NO r5.
+
+Next: a post-write consumer that survives the terminal fault, with
+fixed/safe controls on the new geometry; a witness replay of the W361
+negatives; or a chosen-address store. The admitted Tasmota mind still owns
+its ESP/newlib, heap-adjacency and released-fix lanes.
+
 ## 2026-11-27 23:3x–23:4xZ — Tasmota Device Groups admitted; witness replay owed
 
-Current limb for a reader arriving now; it supersedes §23:0x–23:1xZ's open
-items. Docs-only fold of `585a9eb9` (the operator's admission of the 225th
-target mind: register row, regenerated README/results/SVG and repaired
+Historical limb for the Tasmota lanes; the plant-wide current limb is
+§00:0xZ above. Docs-only fold of `585a9eb9` (the operator's admission of the
+225th target mind: register row, regenerated README/results/SVG and repaired
 reports). No grade, rung cell, count or lab evidence moved by this docs edit.
 
 - **TasmotaDeviceGroups2Shell admitted as the 225th mind** (`585a9eb9`). The

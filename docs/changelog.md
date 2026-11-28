@@ -6,6 +6,29 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 00:0xZ — gimpjif W361 refutes the compressed-cap blocker
+
+Scoped docs-only fold of `30b7fd92`: it changed only
+`lab/frontier/gimpjif2shell` and the gimpjif report/status files, so no rung
+cell, grade, `established` flag, count or lab evidence moved here. The old
+candidate arithmetic was wrong: `38020*56483 = 0x8000000c`, alpha-doubled
+`data_size=0x18=24`, compressed cap 6120 bytes, not 12/3060. With the
+SHA256-verified GIMP 3.2.8 AppImage and a shim-free runner, read-only
+observers first measured `idx=0x555555679230` and `ARRBASE-idx=0x46fa0`,
+then the full 49-map hybrid (`zlen=2719`, 2764-byte file) reached pinned
+inflate at `idx=0x555555679240`, phase 25 in range. The observer saw 24
+genuine ARRAY/TABLE pairs, one genuine MATCH and one genuine GOT write; no
+chosen `rbx`, array word, `0xb200` LUSED store, chosen GOT value, marker or
+command. The plug-in faulted before inflate returned and GDB hit an internal
+fatal error, so the terminal PC is UNKNOWN; the minimal replay's
+`FAIL: no pinned inflate` was a grep-tag tooling negative. No new-geometry
+fixed or safe-input control was run (UNKNOWN, not passes). Compression cap is
+refuted as the blocker, a post-write consumer remains unobserved, and grade
+stays rung 3 pinned verbatim / rung 4 chosen-pointer dereference, NO r5.
+W359's post-write chosen-`M` dereference is neither refuted nor extended.
+Recipe and hashes: `docs/reproducibility.md` §00:0xZ; task limb:
+`docs/task.md` §00:0xZ.
+
 ## 2026-11-27 23:4xZ — Tasmota Device Groups admitted as the 225th mind
 
 Operator fold `585a9eb9` admitted `TasmotaDeviceGroups2Shell` under standing

@@ -21313,6 +21313,74 @@ object, R5 NOT CLAIMED; no full `taosd` SQL/wire path, listener or command.
 Operator admission landed 22:2xZ as the 223rd mind (`c16c1eaa`);
 independent witness replay landed as W377 (§22:4x–22:5xZ).
 
+## 2026-11-28 00:0xZ — gimpjif W361 larger wrapped geometry
+
+Prerequisites: `python3` with `zlib`, `gdb`, and the SHA256SUMS-verified GIMP
+3.2.8 AppImage provisioned under
+`${GIMPJIF_APPIMAGE_WORK:-/tmp/gimpjif-appimage-w316}` with `SHA256SUMS` and
+an executable `AppRun`. The runner re-verifies the AppImage checksum and
+regenerates a shim-free `AppRun.w361` (every
+`gimpjif2shell/live/*shim.so` line is stripped). Generators, observers, both
+JIFs and the raw logs are tracked under
+`lab/frontier/gimpjif2shell/live/`; no upstream source tree is built here.
+Observers use software breakpoints only and write no target memory or
+register. JIF paths must be absolute and 101 characters long to preserve the
+W353 path-length layout condition.
+
+```sh
+cd lab/frontier/gimpjif2shell/live
+sha256sum w361-hybrid.py run-appimage-w361.sh gdb-w361-layout.cmd \
+  gdb-w361-min.cmd evidence/w361-layoutprobe.jif evidence/w361-49map.jif
+# 3ca51a22… generator, 28ff45a8… runner, 663ab0db… / 607e76bd… observers,
+# bae6b88a… layout probe, 94c64856… 49-map JIF (full hashes in PROVENANCE.md).
+
+# 101 bytes: /tmp/ + w361-49map- + 81 x + .jif
+JIF=/tmp/w361-49map-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.jif
+python3 w361-hybrid.py "$JIF" 0 0x30 0x600 0x5555556790b0 \
+  0x46fa0 0x5555556a0050 0x45000 0x49000 38020 56483 0xc0000
+# WROTE ... M=0x5555556a0050 idx_nom=0x5555556790b0 base=0x26fa0
+# K=0x30 spacing=0x600 delta=0x46fa0 arr=0x45000..0x49000
+# geo=38020x56483 avail=0x8000000c data_size=0x18 cap=6120 plain=0xc0000
+# plain_sha256=256620af… zlen=2719 file=2764
+
+GIMPJIF_W361_JIF="$JIF" \
+GIMPJIF_W361_OUT=/tmp/w361-49map-run.log \
+GIMPJIF_W361_LOG=/tmp/w361-49map.log \
+bash run-appimage-w361.sh
+
+# Minimal observer (inflate entry/return only):
+GIMPJIF_W361_JIF="$JIF" \
+GIMPJIF_W361_OUT=/tmp/w361-49map-min-run.log \
+GIMPJIF_W361_LOG=/tmp/w361-49map-min.log \
+GIMPJIF_W361_GDB=gdb-w361-min.cmd \
+bash run-appimage-w361.sh
+```
+
+Expect the corrected arithmetic `38020*56483 = 0x8000000c`, alpha-doubled
+`data_size=0x18=24` and a 6120-byte cap — not the earlier 12/3060 estimate —
+so the 2719-byte compressed stream fits. The layout probe (`zlen=928`,
+966-byte JIF) reached PRE with `idx=0x555555679230`, `ld.so base=0x7ffff7fc7000`
+and measured `ARRBASE-idx=0x46fa0`, not W360's assumed `0x47210`. The 49-map
+run logs PRE `avail=0x8000000c idx=0x555555679240` (`idx-nom=0x190`, phase 25
+in the 49-phase window), 24 genuine ARRAY/TABLE pairs through
+`adler32`/`adler32_z`, one genuine MATCH and one genuine GOT write
+(`rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0`). No `rbx` in the
+`M..M+0x30*0x600` band, no chosen array word, no `0xb200` LUSED store, no
+chosen GOT value, marker or command. The plug-in crashes before inflate
+returns; GDB hits an internal fatal error on the terminal fault and the
+terminal PC is UNKNOWN. The committed run/GDB logs hash to `1f27defc…` /
+`259c9cfb…`; the layout logs to `b61a8657…` / `b4b4923b…`; the minimal replay
+logs to `65c9c575…` / `fb38b564…` and print `W361-MIN PRE avail=0x8000000c
+idx=0x5555556791f0`. Its runner's `FAIL: no pinned inflate` is a grep-tag
+tooling negative (`W361-MIN PRE` versus the `W361 PRE` pattern), not a failed
+target probe. Volatile addresses and PIDs differ under ASLR; the hash pins
+apply to the committed logs, not to fresh reruns. No new-geometry fixed or
+safe-input control was run, so those controls are UNKNOWN here rather than
+passes. Grade unchanged: rung 3 pinned verbatim / rung 4 chosen-pointer
+dereference, NO r5; W359's post-write chosen-`M` dereference is not refuted,
+only unextended on this geometry. Full generator arguments, JIF hashes and
+retained negatives: W361 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
 ## 2026-11-27 23:3x–23:4xZ — Tasmota Device Groups admission
 
 Admitted as the 225th mind at 23:4xZ (`585a9eb9`). This lane extracts the
