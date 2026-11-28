@@ -16578,14 +16578,6 @@ R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at its labeled
 scope, full stock/oracle-free/persistent R5 NOT ACHIEVED. Recipe in
 `docs/reproducibility.md` §06:2xZ.
 
-Next: W371's wire-surface sweep (query keys, cookies, Authorization, media
-types, JSON bodies, header values) on stock Sinatra and full Rails belongs to
-the Ruby mind. Prediction: only the `_method` fold appears; falsifier: two
-distinct wire operands with odd 0xDF counts reaching `case_map` in one
-request, or any patched-build write. What would change this: a measured
-stock second-fold caller, a patched write, a witness contradiction, or a
-checker RED on committed HEAD.
-
 ## 2026-11-28 06:1xZ — Ruby W369 falsifies two-operand `casecmp?` wire reach
 
 Current research limb for a reader arriving now. Docs-only fold of `6618a1f1`,

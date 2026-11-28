@@ -6,6 +6,41 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 08:0xZ — Ruby W372 closes charset-tagged JSON/form bodies
+
+Commit `d31e335c` added four `charset=ISO-8859-1` JSON/form request shapes with
+raw 0xDF keys/values to `lab/repro/ruby2shell-w371-wire.py` and the W372 report
+tail; the author also updated the matching `docs/task.md` and
+`docs/reproducibility.md` sections. The report's all-fold traces logged 0 odd
+operands on Sinatra (423 folds) and full Rails (2824 folds) for those shapes,
+with 0 invalid writes / 0 reads / 0 `case_map` frames under valgrind; only the
+opt-in controls reached odd `upcase` operands at `rack/method_override.rb:36`,
+the urlencoded UTF-8-tagged one writing 0 bytes. Bootable patched 3.4.13 /
+Rack 3.2.8 gave 0/0/0 with the same JSON-key parse 500; fixed Sinatra and
+full-Rack 3.4.13 cannot boot, so their zeros stay UNTESTED. Docs did not replay
+these arms here; they remain report observations with a pinned regeneration
+recipe. Grade unchanged: one writable wire fold, no chosen address, marker or
+command; no rung cell, count, manifest entry or `established` flag moved.
+Recipe in `docs/reproducibility.md` §08:0xZ.
+
+## 2026-11-28 07:4xZ — Ruby W371 closes remaining wire surfaces
+
+Commit `ee9adc49` added `lab/repro/ruby2shell-w371-wire.py`, the W371 report
+tail and the matching `docs/task.md` / `docs/reproducibility.md` sections. The
+report's 12-surface sweep logged 540 folds on Sinatra with one odd operand —
+the opt-in `_method` upcase at `rack/method_override.rb:36` — and four odd
+operands on full Rails: three `downcase` calls on an ASCII-8BIT 0xDF
+`Content-Type` at `mime_negotiation.rb:27` plus `_method`. Valgrind saw 0
+invalid accesses and 0 `case_map` frames for those surfaces (ASCII-8BIT's
+ASCII-only `case_map` at `enc/ascii.c:57` cannot expand 0xDF), while a
+`_method`-only arm wrote once, so the harness was live; bootable patched
+3.4.13 stayed clean and the two unbootable fixed builds stay UNTESTED. Docs
+did not replay these arms here; they are report observations with a pinned
+regeneration recipe. One wire fold per request, no chosen address, marker or
+command; full stock/oracle-free/persistent R5 NOT ACHIEVED. Grade unchanged;
+no rung cell, count, manifest entry or `established` flag moved. Recipe in
+`docs/reproducibility.md` §07:4xZ.
+
 ## 2026-11-28 06:2xZ — Ruby W370 closes Rack boundary token and header tagging
 
 Commit `d3bc12a4` added three `lab/repro/ruby2shell-w370-*` scripts, a
