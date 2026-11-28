@@ -16632,6 +16632,28 @@ follow-up from §08:4xZ.
   on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
   at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
+## 2026-11-28 11:5xZ — Ruby W385 ninth-request layout switch CLOSED
+
+Current research limb. Operator #7301's bounded experiment is complete:
+committed runner `lab/repro/ruby2shell-w385-layout-switch.sh` (`arms` /
+`controls`), request 1 post length 64, requests 2-8 1024, request 9 back to 64,
+N=27, one fresh plain 3.4.12 Sinatra process per arm under
+`ruby2shell-w379-wire-watch.gdb`. Raw evidence gitignored under
+`lab/build/evidence/casemap-chain/w385/{smoke,arms,controls}/`.
+
+- 16 arms on verified-free ports 5220-5235 all booted; smoke on free port 5200 aborted at request 2 (pre-existing `0x54`, preserved).
+- **Falsifier met on its core:** 5/16 valid arms (`a2,a6,a11,a13,a14`) served all nine 650-byte 404s (`1e07f7bb…c961f`) with nine folds, no allocator fault and no unlink frame, alive. No arm reached request 9 and aborted; the predicted cross-request unlink did not occur.
+- **Preserved limit:** no survivor produced a new fold address at request 9: `a2` folds 3-9 all `0x7fffc803f220`, `a6` folds 2-9 `0x7fffc8087090`, `a11` `0x7fffc808e7a0`, `a13` `0x7fffc8078760`, `a14` `0x7fffc808e790`. The early layout selection survives the wire-length switch; this does not isolate the switch effect. Byte always `0x53`; all folds `capa=48 oob_off=72 slack=0`.
+- 11 arms aborted at folds 1-7; ten via `malloc_printerr("corrupted size vs. prev_size") → unlink_chunk(p=current fold chunk+0x50)`, mostly `_int_realloc → ruby_xrealloc2 → rb_gc_impl_realloc`, two via Onig's `_int_malloc`. a10 moved to a different Puma arena at fold 7 and aborted there. a0/a7/a15 entered fold 1 with pre-existing `0x54` (UNKNOWN); a12 aborted at fold 1 with no 404. All preserved.
+- Controls: safe-20 vulnerable Sinatra and bootable fixed Rails 3.4.13 valgrind 0/0/0, both alive.
+- Grade unchanged: wire-only layout-dependent DoS; R4 witness-COMPLETE, harness R5 witness-ESTABLISHED, full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next W386: sweep the ninth post length over 1/8/64/256/1024/4096 after eight
+1024 requests, N=27. Prediction: one switch length selects a new fold chunk
+and a cross-request unlink; falsifier: every length serves nine 404s while
+reusing the early-selected chunk. First command:
+`read lab/repro/ruby2shell-w385-layout-switch.sh:60-100`.
+
 ## 2026-11-28 11:4xZ — Ruby W384 eight-request depth falsifier MET
 
 Current research limb. Operator #7295's bounded experiment is complete:
@@ -16653,6 +16675,8 @@ to post-field length 64 (W382's abort family). Prediction: the layout switch
 unlinks a chunk corrupted by earlier requests, giving a cross-request abort;
 falsifier: a fault-free 650-byte 404 with a new fold address and no unlink
 frame. First command: `read lab/repro/ruby2shell-w384-depth.sh:60-100`.
+
+W385 closed this: 5/16 valid arms served nine fault-free requests after the 1024->64 switch, but request 9 reused the early-selected fold chunk in every survivor; no cross-request unlink. See §11:5xZ; no ladder cell moved.
 
 ## 2026-11-28 11:2xZ — Ruby W383 third-request survivor falsifier MET
 

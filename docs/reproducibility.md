@@ -21554,6 +21554,41 @@ the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
 run concurrently with another valgrind server lost connections from the sixth
 request onward, so run these arms sequentially. No grade or rung cell moved.
 
+## 2026-11-28 11:5xZ — Ruby W385 ninth-request switch CLOSED
+
+Committed runner: `lab/repro/ruby2shell-w385-layout-switch.sh`. It uses the
+committed client `ruby2shell-w371-wire.py`, the committed watch script
+`ruby2shell-w379-wire-watch.gdb` (`R2S_W379_ABORT_BT=1` adds a native backtrace
+at SIGABRT; default off) and the gitignored plain 3.4.12 Sinatra build at
+`lab/build/plain/ruby-3.4.12-plain`. Pick unused 127.0.0.1 ports; occupied
+ports are refused. One fresh process per arm, nine wire requests: request 1
+`RUBY2SHELL_W377_POSTLEN=64`, requests 2-8 `1024`, request 9 `64`, all with
+`RUBY2SHELL_W380_COUNT=27` and `RUBY2SHELL_W378_COUNT=1`.
+
+```
+bash lab/repro/ruby2shell-w385-layout-switch.sh arms 5220 lab/build/evidence/casemap-chain/w385/arms 16
+bash lab/repro/ruby2shell-w385-layout-switch.sh controls 5250 lab/build/evidence/casemap-chain/w385/controls
+```
+
+A one-arm smoke on port 5200 aborted at request 2 and is preserved in
+`.../w385/smoke/`. The authoritative run used verified-free ports 5220-5235;
+16 arms booted. Five valid arms (`a2,a6,a11,a13,a14`) served all nine requests
+with the exact 650-byte 404 digest `1e07f7bb…c961f`, nine folds each, no
+allocator fault and no unlink frame — the cross-request-abort falsifier is
+MET. No arm reached request 9 and aborted. The "new fold address" sub-condition
+was NOT observed: request 9 reused the earlier fold chunk in all five arms
+(e.g. `a2` `0x7fffc803f220` on folds 3-9). Eleven arms aborted at folds 1-7,
+ten with `malloc_printerr("corrupted size vs. prev_size") →
+unlink_chunk(p=current fold chunk+0x50)`; a10 aborted in a different Puma
+arena at fold 7. a0/a7/a15 entered fold 1 with a pre-existing `0x54` sizeword
+(UNKNOWN) and are preserved. Every fold reports `capa=48 oob_off=72 slack=0`;
+the trapped byte is `0x53` in `case_map` line 294. Controls `w385-vg-safe20`
+and `w385-vg-fixed27` each reported 0 invalid writes / 0 invalid reads /
+0 `case_map` errors and stayed alive. No grade or rung cell moved.
+
+Next W386: sweep the ninth post length 1/8/64/256/1024/4096 after eight 1024
+requests; first command: `read lab/repro/ruby2shell-w385-layout-switch.sh:60-100`.
+
 ## 2026-11-28 11:4xZ — Ruby W384 eight-request replay CLOSED
 
 Committed runner: `lab/repro/ruby2shell-w384-depth.sh`. It uses the committed
@@ -21589,6 +21624,8 @@ moved.
 
 Next: W385, ninth request switched from post length 1024 to 64 after eight
 surviving requests; first command: `read lab/repro/ruby2shell-w384-depth.sh:60-100`.
+
+W385 closed this with nine-request survivors and no new fold address at the switch; see §11:5xZ. No grade or rung cell moved.
 
 ## 2026-11-28 11:2xZ — Ruby W383 third-request replay CLOSED
 

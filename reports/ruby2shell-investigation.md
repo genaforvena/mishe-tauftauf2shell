@@ -10318,6 +10318,62 @@ across vulnerable, fixed and safe-input arms. Prediction: no response-byte
 difference, one write per odd request; falsifier: any response change or crash
 attributable to the write.
 
+## 2026-11-28 11:5xZ — W385: ninth-request layout switch; no cross-request abort
+
+Operator #7301's bounded follow-up to W384. The committed runner
+`lab/repro/ruby2shell-w385-layout-switch.sh` drives nine ordinary
+`ruby2shell-w371-wire.py` invocations against ONE fresh plain 3.4.12 Sinatra
+process under `ruby2shell-w379-wire-watch.gdb`: request 1 at post-field length
+64, requests 2-8 at 1024, request 9 back to 64, N=27 sharp-s on every request.
+`RUBY2SHELL_W377_POSTLEN` is read per wire-process invocation, so request 9
+really carries a 64-byte post field. Reproduction:
+
+```
+bash lab/repro/ruby2shell-w385-layout-switch.sh arms 5220 lab/build/evidence/casemap-chain/w385/arms 16
+bash lab/repro/ruby2shell-w385-layout-switch.sh controls 5250 lab/build/evidence/casemap-chain/w385/controls
+```
+
+A one-arm smoke on verified-free port 5200 aborted on request 2 with a
+pre-existing `0x54` sizeword and is preserved in `.../w385/smoke/`. The
+authoritative 16 arms used verified-free ports 5220-5235; all booted. Raw logs
+are gitignored under `lab/build/evidence/casemap-chain/w385/arms/`. Every fold
+reports `capa=48 oob_off=72 slack=0` and the watched byte is `0x53` in
+`case_map` line 294; `W379TRAP` lines count distinct watched destinations,
+not writes.
+
+**Falsifier met on its core, with a preserved limit.** Five arms (`a2`, `a6`,
+`a11`, `a13`, `a14`) served all nine requests with the exact 650-byte 404
+digest `1e07f7bb…c961f`, nine folds each, no `malloc_printerr`, no
+`unlink_chunk` frame, and stayed alive. No arm reached request 9 and aborted:
+the predicted cross-request unlink at the layout switch was not observed. The
+falsifier's "new fold address on request 9" sub-condition was NOT observed:
+all five survivors reused the fold chunk already selected by request 2/3 —
+`a2` chunk `0x7fffc803f220` on folds 3-9, `a6` `0x7fffc8087090` on folds 2-9,
+`a11` `0x7fffc808e7a0`, `a13` `0x7fffc8078760` and `a14` `0x7fffc808e790` on
+folds 2-9. Early layout selection persists across the wire length switch, so
+this experiment does not isolate a switch effect; it does not upgrade any
+ladder cell. The written byte remains `0x53`, never wire-shaped.
+
+Eleven arms aborted: `a12`/`a15` at fold 1 before returning a response, and
+`a0`,`a3`,`a7`,`a8`,`a9` after 1, `a4`/`a5` after 2, `a1` after 3 and `a10`
+after 6. Ten show `malloc_printerr("corrupted size vs. prev_size") →
+unlink_chunk(p=current fold chunk+0x50)`, mostly via `_int_realloc(oldp=current
+fold chunk, oldsize=80, nb=144) → ruby_xrealloc2 → rb_gc_impl_realloc`, two via
+`_int_malloc(bytes=32) → onig_region_resize → onig_search_gpos`. No arm showed
+a later request unlinking a chunk corrupted by an earlier one.
+
+Preserved anomalies: `a0`, `a7` and `a15` entered fold 1 with a pre-existing
+`0x54` sizeword (provenance UNKNOWN before the first request); `a10`'s fold 7
+moved into a different Puma arena (`chunk=0x7fffd4001300`, region
+`0x7fffd4000000-0x7fffd4021000`) and aborted on its own chunk there. Controls
+`w385-vg-safe20` and `w385-vg-fixed27` logged 0 invalid writes / 0 invalid
+reads / 0 `case_map` errors and stayed alive.
+
+Grade unchanged: wire-only, layout-dependent DoS on unmodified Sinatra; no
+chosen address, no marker and no second distinct command. R4 witness-COMPLETE,
+harness-condition R5 witness-ESTABLISHED at its labeled scope, full
+stock/oracle-free/persistent R5 NOT ACHIEVED.
+
 ## 2026-11-28 11:4xZ — W384: eight post-1024 requests; falsifier MET, reuse without fault
 
 Operator #7295's bounded follow-up to W383's surviving three-request family.

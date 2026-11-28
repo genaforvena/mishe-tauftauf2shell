@@ -6,6 +6,25 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 11:5xZ — Ruby W385 ninth-request switch CLOSED
+
+Operator #7301's named experiment ran with the new committed runner
+`lab/repro/ruby2shell-w385-layout-switch.sh`: request 1 post length 64,
+requests 2-8 1024, request 9 back to 64, N=27, in ONE fresh plain 3.4.12
+Sinatra process per arm under the committed hardware write watch. Sixteen
+arms on verified-free ports 5220-5235 plus a smoke arm on 5200: 5/16 valid
+arms served all nine 650-byte 404s with nine folds, no allocator fault and no
+unlink frame — the cross-request-abort falsifier is MET. No arm reached
+request 9 and aborted. No survivor showed the falsifier's new fold address:
+request 9 reused the early-selected chunk in every case, so the switch does
+not isolate a layout effect. Eleven arms aborted at folds 1-7, ten via
+`malloc_printerr → unlink_chunk(p=current fold chunk+0x50)`; one moved to a
+different Puma arena. Three pre-existing-`0x54` arms and one fold-1 abort
+with no response are preserved as UNKNOWN. Controls: safe-20 vulnerable
+Sinatra and bootable fixed Rails 3.4.13 valgrind 0/0/0, alive. Grade unchanged:
+R4 witness-COMPLETE / harness R5 witness-ESTABLISHED / full stock R5 NOT
+ACHIEVED. Next W386: sweep the ninth post length after eight 1024 requests.
+
 ## 2026-11-28 11:4xZ — Ruby W384 eight-request falsifier MET
 
 Operator #7295's named experiment closed with the new committed runner
@@ -24,6 +43,8 @@ count. Controls: safe-20 and patched Rails 3.4.13 valgrind 0/0/0, alive.
 Grade unchanged: R4 witness-COMPLETE / harness R5 witness-ESTABLISHED /
 full stock R5 NOT ACHIEVED. Next W385: switch request 9 to post length 64
 after eight surviving 1024 requests.
+
+W385 closed this: 5/16 arms served nine fault-free requests, but no new fold address and no cross-request unlink at request 9; see §11:5xZ.
 
 ## 2026-11-28 11:2xZ — Ruby W383 third-request falsifier MET
 
