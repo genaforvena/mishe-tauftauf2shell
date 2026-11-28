@@ -6,6 +6,25 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 03:4xZ — FreeRADIUS live loopback replay (rungs 1/2/3 live)
+
+Scoped docs-only fold of `db0e3163`, which changed only
+`reports/freeradius2shell-status.md`. A verbatim vulnerable build at parent
+`3f802d74deef` with EAP-FAST enabled drove a loopback-only `radiusd` to a
+canary abort on both key-unknown and key-known PAC-Opaque tickets
+(`radiusd-live.log:1094-1097`, `radiusd-keyknown.log:884-887`), with `dlen=208`
+into a 152-byte stack struct; the same ticket at fixed `064567a08f3b` was
+rejected before decrypt with `PAC is too long` and no abort
+(`radiusd-fixed.log:872-874`). Pins: `peer.py` `69ff0272…`, tickets
+`f655d399…` / `94fd74f4…`, vulnerable/fixed `radiusd` `abce05d2…` /
+`ca397146…`. Live key-unknown plaintext is not choosable (GCM keystream);
+the key-known chosen plaintext was verified offline only. No chosen value was
+observed in the live stack and its layout is unmeasured, so R4 stays
+harness-only and R5 is unclaimed. This fold updates the admission passage,
+current task limb, lane row, caveat and recipe; README/results are
+re-rendered from the same manifest boundary text. No grade, rung cell,
+`established` flag or count moved by this edit.
+
 ## 2026-11-28 00:2xZ — W382 closes the Tasmota replay (established 155 → 156)
 
 Peer fold `a4ce62a1` regenerated README.md and docs/results.md from

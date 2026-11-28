@@ -89,7 +89,7 @@ containers whose host ports bind only to loopback.
 | Brotli2Shell | [report](../reports/frontier-brotli2shell.md) | `bash lab/frontier/brotli2shell/run.sh` fetches `poc.py` and verifies its SHA-256 | same script builds v1.2.0/v1.2.1/instrumented | same script writes `logs/` and prints digests |
 | Postgres2Shell | [report](../reports/frontier-postgres2shell.md) | image digests pinned in `run.sh` | container images by digest | `./run.sh 17.11` and `./run.sh 17.12`; `trigger-vg.sql` for Valgrind; chunk-placement negative (2026-11-21): `docker cp` `trigger-marker.sql` / `gdb-marker.cmd` / `marker-probe.sh` into `pg2shell-gdb`, then `docker exec pg2shell-gdb bash /tmp/marker-probe.sh` (exact block in the report); gitignored `lab/frontier/postgres2shell/logs/marker-17.11-{gdb,psql}.log` regenerate with that script |
 | Dragonfly2Shell | [report](../reports/frontier-dragonfly2shell.md) | image digests pinned in `run.sh` | container images by digest | `./run.sh v1.40.1`, `./run.sh v1.40.2`; witness files in `lab/witness/dragonfly2shell/` |
-| FreeRADIUS2Shell | [report](../reports/frontier-freeradius2shell.md), [status](../reports/freeradius2shell-status.md) | source at vulnerable parent `3f802d74deef`, fix `064567a08f3b`; artifact digests in report | `cd lab/frontier/freeradius2shell && bash run.sh` builds vulnerable/fixed/canary/asan | same script prints `ALL CHECKS PASS`, writes `logs/` and `logs/digests.txt` |
+| FreeRADIUS2Shell | [report](../reports/frontier-freeradius2shell.md), [status](../reports/freeradius2shell-status.md) | source at vulnerable parent `3f802d74deef`, fix `064567a08f3b`; artifact digests in report and `lab/freeradius2shell-live/logs/live-digests.txt` | `cd lab/frontier/freeradius2shell && bash run.sh` builds vulnerable/fixed/canary/asan; live build and peer recipe in §03:4xZ below (loopback only) | harness prints `ALL CHECKS PASS`, writes `logs/` and `logs/digests.txt`; live replay: vulnerable `radiusd` canary abort on key-unknown (`radiusd-live.log:1094-1097`) and key-known (`radiusd-keyknown.log:884-887`) tickets, fixed `PAC is too long` with no abort (`radiusd-fixed.log:872-874`); R1/R2/R3 live, R4 harness-only, NO r5 |
 | Falkordb2Shell | [report](../reports/frontier-falkordb2shell.md), [status](../reports/falkordb2shell-status.md) | source at vulnerable parent `40780e992ecc`, fix `0b11a00b34b2` (removes Bolt/WebSocket; lab `FIXED` is a local length guard) | `cd lab/frontier/falkordb2shell && bash run.sh` builds vuln/fixed/asan | same script prints `ALL CHECKS PASS`: `payload_len=4144`, 525 OOB write operations, canary `K:K`, ASan heap-buffer-overflow (READ of size 8 at the `^=` load) |
 | Freeswitch2Shell | [report](../reports/frontier-freeswitch2shell.md), [status](../reports/freeswitch2shell-status.md) | source at vulnerable parent `fbac12b451a1`, fix `d557ca6d29e6da4f10824dc158100906a592b91a`; both `mod_xml_rpc` and `enable-websocket` off by default | `cd lab/frontier/freeswitch2shell && bash run.sh` builds vuln/fixed/asan; `bash lab/freeswitch2shell/live/run.sh`, `bash lab/freeswitch2shell/live/run_pos.sh` and `bash lab/freeswitch2shell/live/run_live_gdb.sh` build the unmodified source over loopback | repaired driver prints `ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`: ASan `WRITE of size 132146` in `ws_raw_read`, 1464 OOB writes from 65536 to 66999, chosen 8 bytes at `offsetof(wsh_t, ssl)=131112` with `marker_called=1` and `rc=42`, fixed `rc=-1009`, 5/5 identical. Real-source `run.sh` (`FF FF FF FF`): ASan `negative-size-param (size=-5)`, plain rc 134, fixed `rc=-1009` with `wsh->ssl` untouched, offset 131112 validated. Real-source `run_pos.sh` (`7F FF FF FF 00 00 00 00`, `plen=INT_MAX`): plain `wsh->ssl=0x4142434445464748`, `ssl_bytes=4847464544434241`, `RESULT=PASS` rc 0; fixed `rc=-1009`, `ssl=(nil)`; ASan `WRITE of size 4096` at the end of a 131136-byte region from `ws_raw_read (ws.c:300)`. A full vulnerable FreeSWITCH then ran in a private netns on 127.0.0.1 with a real WebSocket `101` upgrade; GDB caught the chosen `wsh->ssl` dereference in `SSL_shutdown`, witness-replayed (#338) with changed bytes at the same site. Stock heap layout and external reachability remain UNKNOWN. |
 | Freerdp2Shell | [report](../reports/frontier-freerdp2shell.md), [status](../reports/freerdp2shell-status.md) | source at vulnerable parent `8ec6d3923b`, fix `bf217a5` (3.32.1, `/ 4` division guard); digests `d0a31487…` / `c5186500…`; real-library source tag 3.32.0 at `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1` | `cd lab/frontier/freerdp2shell && bash run.sh` builds the extracted harness; `bash lab/freerdp2shell-src/run.sh` builds source-built ASan and plain libraries; `python3 lab/freerdp2shell-src/loopback_shadow_probe.py nego|tls-auth` drives a real loopback shadow server; `python3 lab/freerdp2shell-src/live_mcs_join_probe.py` and a headless `sfreerdp` replay the live session; `bash lab/freerdp2shell-src/verify_live.sh` replays the whole live stock-allocator claim in one command (17 PASS warm / 18 PASS clean-room) | extracted harness prints `ALL CHECKS PASS` (rc 0) twice; the real library prints `ALL REAL-LIBRARY CHECKS PASS` (rc 0): ASan `WRITE of size 16384` 0 bytes after an 8820-byte region in `rdpsnd_server_send_samples`, chosen `de`/`ad` at OOB offsets 8820/21384 through the real `SNDC_FORMATS` parser, fixed-guard control rc 3 with no wrap. Wake 7: a real 3.32.0 `freerdp-shadow-cli` on 127.0.0.1:13890 answered X.224 / RDP_NEG_REQ over real TCP (`0x08` NLA, `0x02` TLS, `0x00` RDP) and the default NLA gate stopped a TLS-authenticated client at `CONNECTION_STATE_NEGO` when CredSSP was withheld; a standard-RDP local-peer offer advanced without credentials. Wake 8: MCS CONNECT / ERECT DOMAIN / ATTACH USER / three CHANNEL JOIN confirms, `CONNECTION_STATE_ACTIVE`, `SNDC_FORMATS` over the wire and the live server's `realloc failed!` / `SelectFormat failed with 12`; the live ASan server then reports `WRITE of size 16384` 0 bytes after an 8820-byte region with client-chosen `0xDE` at offset 8820 (`live_session_wrap.txt`). No-auth server, subsystem-supplied ADPCM table, ASan build and synthetic playback are explicit conditions; witness W31 independently accepted the one-command replay (#532, 18 PASS / 0 FAIL from clean HEAD b25d025, ESTABLISHED, no corrections; the harness uses post-auth credentials). Wake 12 measured the live stock glibc layout in three loopback sessions: pointer-bearing heap data lies inside the chosen-byte write (`heap_layout_stock.txt`). Wake 13 identified that object as the wLog for `com.freerdp.channels.rdpsnd.server` and, with a configured `WLOG_FILTER` and a scratch log call after the real copy, observed `mov (%rax,%r15,8)` dereferencing eight chosen `0x41` bytes (`rax=0x4141414141414141`) in the live stock build (`pointer_control_stock.txt`); the trigger and playback bytes are lab-supplied, no grooming at that wake, one object only. Wake 16 closed the FFmpeg gate: stock `WITH_FFMPEG=ON` rejects both ADPCM tags (NEGATIVE), while `-DWITH_DSP_EXPERIMENTAL` adds tag 2 with its own wrap branch (`out_frames=0xfffffffffffffffc`, ASan `WRITE of size 16384`) through `PocAdpcmTag2.c` in-process on real library bytes (`ffmpeg_adpcm_tag2.txt`); a stock wrap-capable format stays UNKNOWN. Wake 17 closed the real-audio-source question at source level in pinned 3.32.0: the copied bytes and copy stride come from the server's platform audio capture, not the client, so remote byte choice is not established in a stock deployment (deployment-specific influence stays UNKNOWN). Wake 18 observed client-controlled grooming in the live stock build: extra PCM format records grow `client_formats` by 32 bytes each and shift the wLog `Names` field (`grooming_format_count_stock.txt`), with a controlled dereference at the shifted offset and an out-of-write negative; raw logs are gitignored under `verify-live-out/wake18/`, and the client controls the offset, not the bytes. |
@@ -1573,15 +1573,17 @@ lz4-dev or rst2man on this host). Full evidence:
   trigger/stream hashes are recorded in the report.
 - **Postgres/Dragonfly**: runners pull by tag but abort on image-digest
   mismatch against the values printed in the reports.
-- **FreeRADIUS/FalkorDB**: both are small standalone C harnesses under
-  `lab/frontier/<target>/`; `run.sh` rebuilds every variant and the briefs
-  pin the source commits and artifact digests. FreeRADIUS vulnerable parent
-  is `3f802d74deef`, fix `064567a08f3b`; FalkorDB vulnerable parent is
-  `40780e992ecc`, fix `0b11a00b34b2`, which deletes the Bolt/WebSocket
-  subsystem, so the lab `FIXED` build is a locally added length guard, not
-  an upstream patch. The FreeRADIUS rung-4 claim is harness-only (known key,
-  fixed stack layout); FalkorDB does not claim rung 4 at all. Live `radiusd`
-  reachability and a live `BOLT_PORT` service remain UNKNOWN.
+- **FreeRADIUS/FalkorDB**: standalone C harnesses under `lab/frontier/<target>/`
+  are rebuilt by `run.sh`, with commits and digests pinned in the briefs and
+  reports. FreeRADIUS parent `3f802d74deef`, fix `064567a08f3b`; FalkorDB
+  parent `40780e992ecc`, fix `0b11a00b34b2`, which deletes the Bolt/WebSocket
+  subsystem, so the lab `FIXED` build is a local length guard, not an upstream
+  patch. The 2026-11-28 FreeRADIUS replay adds a real loopback `radiusd`
+  (rungs 1/2/3 live; explicit EAP-FAST, known A-ID, lab shared secret, exact
+  vulnerable commit) and the upstream fixed-commit differential; rung 4 stays
+  harness-only (known key, measured harness layout), with live stack layout
+  and chosen-value control UNKNOWN and NO r5. FalkorDB keeps no rung-4 claim;
+  a live `BOLT_PORT` service remains UNKNOWN.
 - **Freerdp**: `lab/freerdp2shell-src/run.sh` clones tag 3.32.0 at
   `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1`, builds ASan and plain
   libraries with the pinned feature flags, and checks the source-built PoCs
@@ -21312,6 +21314,60 @@ harness, R4 LIMITED to a byte from a three-value set in an adjacent stack
 object, R5 NOT CLAIMED; no full `taosd` SQL/wire path, listener or command.
 Operator admission landed 22:2xZ as the 223rd mind (`c16c1eaa`);
 independent witness replay landed as W377 (§22:4x–22:5xZ).
+
+## 2026-11-28 03:4xZ — FreeRADIUS live loopback replay
+
+Sources, peer, configs, installed trees and raw logs live under gitignored
+`lab/freeradius2shell-live/`; regenerate them from the two pinned commits
+below. The listener binds only 127.0.0.1. EAP-FAST is not on by default: the
+installed config sets `default_eap_type = fast`,
+`authority_identity = "freeradius2shell-lab"`,
+`pac_opaque_key = "0123456789abcdef0123456789ABCDEF"` (32 bytes) and uses the
+installed demo certs; `radiusd -XC` must print "Configuration appears to be
+OK". `libtalloc-dev`/`libtalloc2` were provisioned with `apt-get download`
+and `dpkg-deb -x` into `talloc-prefix/` (no root).
+
+```sh
+cd lab/freeradius2shell-live/freeradius-src
+git rev-parse HEAD       # 3f802d74deef4c72e46f37fb9418d9787feaf748
+./configure --prefix=$PWD/../install \
+  --with-talloc-lib-dir=$PWD/../talloc-prefix/usr/lib/x86_64-linux-gnu \
+  --with-talloc-include-dir=$PWD/../talloc-prefix/usr/include
+make -j6 && make install  # rc 0, rlm_eap_fast built and linked
+git worktree add ../freeradius-fixed 064567a08f3b9d9b4863fab6060fafe296ac7de9
+# configure/make/install the fix into ../install-fixed with prefix=.../install-fixed
+cd ..
+LD_LIBRARY_PATH=$PWD/talloc-prefix/usr/lib/x86_64-linux-gnu \
+  install/sbin/radiusd -X -d install/etc/raddb -i 127.0.0.1 -p 18120
+python3 peer.py key-unknown --outdir logs/ku
+python3 peer.py key-known --outdir logs/kk
+# fixed listener on 127.0.0.1:18122 with install-fixed/etc/raddb:
+python3 peer.py key-unknown --port 18122 --outdir logs/fixed
+sha256sum -c logs/live-digests.txt
+```
+
+Expect the peer's Response/Identity (`bob`) and Response/FAST (type 43, flags
+`0x00`) carrying a TLS 1.2 ClientHello with a raw 260-byte PAC-Opaque
+SessionTicket (`hdr.type=2`, `hdr.length=256`, `aad =
+MD5(authority_identity)` = `9c16921152e77c27c0179af99c03e810`, 16-byte IV,
+tag and 208-byte ciphertext). Gates at `rlm_eap_fast.c:273,296,301,306` pass
+and `dlen = 208` reaches `EVP_DecryptUpdate()` with a 152-byte stack
+destination. Vulnerable: `radiusd-live.log:1094-1097` prints `PAC failed to
+decrypt` then `*** stack smashing detected ***`; independent key-known replay
+aborts at `radiusd-keyknown.log:884-887`. Fixed: `radiusd-fixed.log:872-874`
+prints `PAC is too long` and Access-Reject with no abort; the guard is the
+148-byte cap at `rlm_eap_fast.c:322`. Pins in `logs/live-digests.txt`:
+`peer.py` `69ff02729274de…`, both `ticket.bin` files `f655d3998545f8…` /
+`94fd74f4a6130e4…`, vulnerable `radiusd` `abce05d2970678…`, fixed
+`ca397146fdbed20…`, installed `eap` `4fbb8bfb56c8e0…`. The peer knows the
+server A-ID from its EAP-FAST Start challenge, so key-unknown input controls
+length and ciphertext but not GCM plaintext bytes; the key-known chosen
+plaintext was checked offline only. No chosen value was observed in the live
+stack and its layout is unmeasured, so rung 4 remains harness-only and rung 5
+was not attempted. Raw logs/tickets/binaries are gitignored and regenerate
+with these commands; volatile addresses, PIDs and timing are not pinned. The
+exact fixed release tag stays UNKNOWN — the fix commit is the version
+boundary. Full path: `reports/freeradius2shell-status.md`.
 
 ## 2026-11-28 00:0xZ — gimpjif W361 larger wrapped geometry
 

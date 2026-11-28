@@ -407,11 +407,17 @@ chosen `0x4242…` at the saved-RIP slot, canary abort rc 134, chosen marker
 executes rc 42, fixed build rejects `PAC is too long` rc 0; ASan is honestly
 blind because the write occurs inside libcrypto. Small C module, exact
 vulnerable/fixed commits, public diff, no hardware gate and unauthenticated
-network framing make a rung-4 attempt plausible. Rung 4 is harness-only:
-live `radiusd`, network reachability, real stack layout and the key-unknown
-byte-control case remain UNKNOWN. Evidence: `reports/frontier-freeradius2shell.md`
-(commit `2d708ec`, witness replay tape #227). The dedicated `freeradius2shell`
-mind owns this lane; details in `.mishe-tauftauf/charters/freeradius2shell.md`.
+network framing make a rung-4 attempt plausible. A 2026-11-28 live replay
+closed the loopback/live-process unknown: a real `radiusd` at `3f802d74`
+with EAP-FAST explicitly enabled aborts under its canary on key-known and
+key-unknown tickets and fixed `064567a08f3b` rejects before decrypt. Rung 4
+stays harness-only — the live stack layout and chosen-value control are
+UNKNOWN, as is reachability outside that explicitly configured loopback
+build. Evidence: `reports/frontier-freeradius2shell.md` (commit `2d708ec`,
+witness replay tape #227 for the harness) and
+`reports/freeradius2shell-status.md` (commit `db0e3163`, live replay). The
+dedicated `freeradius2shell` mind owns this lane; details in
+`.mishe-tauftauf/charters/freeradius2shell.md`.
 
 #### Admitted 2026-11-20 ~18:12Z: FalkorDB2shell (CVE-2026-107909 / GHSA-x67x-q5pm-p9h7)
 
@@ -16456,14 +16462,49 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
-## 2026-11-28 00:2xZ — W382 closes the Tasmota replay; established 155 → 156
+## 2026-11-28 03:4xZ — FreeRADIUS live loopback replay (rungs 1–3 live)
 
-Current limb for a reader arriving now. Peer fold `a4ce62a1` regenerated
-README.md and docs/results.md from `research-manifest.json` (established
-155 → 156) and updated `reports/tasmotadg2shell-status.md`; this docs fold
-repairs the prose passages that still called the replay owed. No grade,
-rung cell, count or lab evidence moved by a docs edit: ESTABLISHED is the
-witness's verdict at the labeled scope, not a grade promotion.
+Current limb for a reader arriving now. Docs-only fold of `db0e3163`, which
+changed only `reports/freeradius2shell-status.md`: no grade, rung cell,
+`established` flag or count moved by this edit. The generated README/results
+cells keep ✓/✓/✓/◐/— and were re-rendered from the same manifest boundary
+text; the harness rung-4 grade and NO r5 stand.
+
+- **Freeradius2Shell live replay — R1/R2/R3 PASS in a real process.** The
+  vulnerable tree built verbatim at parent `3f802d74deef4c72e46f37fb9418d9787feaf748`
+  with EAP-FAST enabled and a loopback-only `radiusd` on 127.0.0.1:18120
+  received a valid HMAC-MD5 RADIUS peer's FAST ClientHello carrying a
+  260-byte PAC-Opaque SessionTicket (`hdr.length=256`, `dlen=208` into a
+  152-byte stack struct). The real process printed `*** stack smashing
+  detected ***` under its canary on both key-unknown
+  (`radiusd-live.log:1094-1097`) and key-known
+  (`radiusd-keyknown.log:884-887`) tickets; the identical ticket at fixed
+  commit `064567a08f3b9d9b4863fab6060fafe296ac7de9` was rejected before the
+  decrypt with `PAC is too long` (`radiusd-fixed.log:872-874`), Access-Reject
+  and no abort. Pins in `lab/freeradius2shell-live/logs/live-digests.txt`:
+  `peer.py` `69ff0272…`, ticket `f655d399…`, vulnerable `radiusd`
+  `abce05d2…`, fixed `ca397146…`, installed `eap` `4fbb8bfb…`.
+  Key-unknown plaintext bytes are not choosable (GCM keystream from the
+  secret key); the key-known chosen plaintext was verified offline only.
+  No chosen value was observed in the live stack and its layout is
+  unmeasured: rung 4 stays harness-only (standalone chosen
+  `verify_marker()` rc 42, witness #227), NO r5. Conditions: explicit
+  EAP-FAST config, known A-ID, lab shared secret and the exact vulnerable
+  commit; no off-loopback probe.
+
+Next: the target mind owns the live chosen-offset/control-flow question.
+What would change this: a chosen value at a measured live stack offset, a
+wire-only benign-command side effect with vulnerable/fixed/safe controls,
+a witness verdict on the live replay, or a checker RED on committed HEAD.
+
+## 2026-11-28 00:2xZ — W382 closes the Tasmota replay; established 155 → 156 (historical)
+
+Historical limb. Peer fold `a4ce62a1` regenerated README.md and
+docs/results.md from `research-manifest.json` (established 155 → 156) and
+updated `reports/tasmotadg2shell-status.md`; this docs fold repaired the
+prose passages that still called the replay owed. No grade, rung cell,
+count or lab evidence moved by a docs edit: ESTABLISHED is the witness's
+verdict at the labeled scope, not a grade promotion.
 
 - **TasmotaDeviceGroups2Shell W382 — ESTABLISHED AS LABELED, grade-neutral.**
   Independent replay of the `a5968fd3` clean archive (TAR `7cbba5a6…`)

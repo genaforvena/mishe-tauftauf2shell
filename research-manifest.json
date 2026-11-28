@@ -224,7 +224,7 @@
         "R4": "◐",
         "R5": "—"
       },
-      "boundary": "**HARNESS** — an EAP-FAST ticket writes 208 bytes into a 152-byte stack struct and executes a chosen `verify_marker()` at rc 42; the fixed build rejects. Witness tape #227 reproduced byte-identical digests including the offset-specific marker control. Live `radiusd`, network reach and real stack layout UNKNOWN; rung 4 is harness-only. [Status](reports/freeradius2shell-status.md)",
+      "boundary": "**LIVE R1–R3 / HARNESS R4** — a crafted EAP-FAST ticket drives a loopback `radiusd` at vulnerable `3f802d74` into a 208-byte decrypt into a 152-byte stack struct; the real process aborts under its canary on key-known and key-unknown tickets, and fixed `064567a08f3b` rejects with `PAC is too long`. Witness #227 reproduced the standalone chosen `verify_marker()` rc 42; the live stack layout and chosen-value control stay UNKNOWN, so rung 4 is harness-only and r5 is unclaimed. [Status](reports/freeradius2shell-status.md)",
       "reports": [
         "reports/freeradius2shell-status.md"
       ],
