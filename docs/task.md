@@ -16470,9 +16470,54 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-28 06:0xZ — Ruby W368 closes the two-fold threshold; parity, not length
+
+Current research limb for a reader arriving now. Docs-only fold of `fb9989f6`,
+which added `lab/repro/ruby2shell-twofold-watch-all.{gdb,sh}` and the W368 tail
+of `reports/ruby2shell-investigation.md`. No grade, rung cell, count, manifest
+entry or `established` flag moved by this edit; the "Next: W368 ..." item at
+§23:0x–23:1xZ is closed here.
+
+- **Odd sharp-s counts overflow; the proposed length threshold is wrong.**
+  The committed GDB script arms a hardware WRITE watchpoint on the `to_end` of
+  every `rb_str_casemap` call and gates each hit to its own active call (a
+  return breakpoint at `string.c:7850`). In the final matrix
+  (`lab/build/evidence/casemap-chain/w368/matrix-v2.txt`, gitignored), plain
+  3.4.12 traps once per odd operand for n∈{21,23} and never for
+  n∈{17,19,20,22}; the positive control (27,43) traps twice at distinct
+  addresses with byte `0x73` inside `case_map`. Valgrind agrees at 21, 23 and
+  21:22 with one invalid write plus one copy-out read 0 bytes after a
+  66/68/66-byte block; all even-count and all patched 3.4.13 arms have zero
+  writes and reads. An earlier checkpoint predicting a threshold of `n >= 21`
+  was falsified by n=22: with the driver's leading `a`, `capa = n + 21` and the
+  fold writes `1 + 2n` bytes, so the final two-byte sharp-s store straddles
+  `to_end` iff `capa` is even (n odd); the fix `to_end - to > 1` keeps two bytes
+  free.
+- **An instrumentation artifact is preserved, not counted as a second write.**
+  In the first matrix the watchpoints stayed armed after their own `case_map`
+  returned; a later fold reusing the heap address made an in-bounds write trip
+  the stale watchpoint (17:21 and 20:23 first reported two traps). Gating on
+  `active_call` turns those into `LATE` lines and the corrected matrix gives
+  one trap per pair, at the odd operand's address. Equal-length odd pairs
+  still show one hit because both folds reuse one buffer address — an oracle
+  limit, not a retraction of W367's two distinctly addressed writes at
+  (27,43). Docs reran bounded arms from the committed recipe: GDB 21:22 on
+  3.4.12 gave one `0x73` trap, GDB 22:22 on 3.4.13 gave zero, Valgrind 21:22
+  gave write+read 0 bytes after a 66-byte block and 22:22 gave neither;
+  absolute addresses differ under ASLR. Grade unchanged: no wire request,
+  chosen address, marker or command; R4 witness-COMPLETE, harness-condition
+  R5 witness-ESTABLISHED at its labeled scope, full stock/oracle-free/
+  persistent R5 NOT ACHIEVED. Recipe in `docs/reproducibility.md` §06:0xZ.
+
+Next: W369's wire reachability of two independent odd-count folds in the
+pinned Sinatra/Rails trees belongs to the Ruby mind; its falsifier is no
+stock caller with both operands wire-controlled. What would change this: a
+measured stock two-fold caller, a fixed-arm store, a witness contradiction,
+or a checker RED on committed HEAD.
+
 ## 2026-11-28 04:3xZ — Qt VectorImage W381 screen (not admitted)
 
-Current frontier limb for a reader arriving now. Docs-only fold of
+Historical frontier limb, superseded by §06:0xZ. Docs-only fold of
 `80dac20d`, `12a4e79d` and `9f2d72e3`; no grade cell, count, manifest entry,
 charter, target window or `established` flag moved. The candidate remains
 SCREENED, not staged or admitted.
@@ -16716,13 +16761,13 @@ cell, count or lab evidence moved by this docs edit. Recipe in
   `d87c8e50` archive then moved `established` to true and the count to 155:
   ESTABLISHED AS LABELED, grade-neutral, NO r5.
 
-Next: W368's write-count threshold and distinct-address test (watch every
-`case_map` call's `to_end`, lengths 17/19/20/21/22/23, prediction two distinct
-`0x73` addresses); WlaDx's pointer-consumer and sibling-copy lanes under its
-own mind, not a frontier duplicate; the Windows post-allocation consumer
-under ASLR/CFG before any loopback trusted-response probe for Rufus; an
-`idx`-independent gimpjif map. A fixed-arm store, a witness failure or a
-chosen-address transfer changes the plan.
+Next: W368's threshold and distinct-address item is closed in §06:0xZ (odd
+counts only; equal-length odd pairs collapse on buffer reuse); WlaDx's
+pointer-consumer and sibling-copy lanes under its own mind, not a frontier
+duplicate; the Windows post-allocation consumer under ASLR/CFG before any
+loopback trusted-response probe for Rufus; an `idx`-independent gimpjif map,
+closed in §00:0xZ. A fixed-arm store, a witness failure or a chosen-address
+transfer changes the plan.
 
 ## 2026-11-27 22:4x–22:5xZ — W366 receiver tag is not a defence; TDengine witnessed (historical)
 

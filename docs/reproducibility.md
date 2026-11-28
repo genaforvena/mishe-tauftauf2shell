@@ -21321,6 +21321,46 @@ object, R5 NOT CLAIMED; no full `taosd` SQL/wire path, listener or command.
 Operator admission landed 22:2xZ as the 223rd mind (`c16c1eaa`);
 independent witness replay landed as W377 (§22:4x–22:5xZ).
 
+## 2026-11-28 06:0xZ — Ruby W368 odd-count threshold and watchpoint artifact
+
+The two committed scripts are `lab/repro/ruby2shell-twofold-watch-all.gdb`
+(hardware WRITE watch on each `rb_str_casemap` `to_end`, gated by a return
+breakpoint at `string.c:7850`) and `lab/repro/ruby2shell-twofold-watch-all.sh`
+(gdb/valgrind/plain matrix). They drive the committed
+`lab/repro/ruby2shell-twofold.rb` against the pinned plain 3.4.12 and 3.4.13
+builds from `lab/ruby2shell/provision.sh`. Raw per-arm logs and both matrices
+are gitignored under `lab/build/evidence/casemap-chain/w368/`; `matrix-v2.txt`
+is final and `matrix-v1.txt` preserves the failed ungated instrumentation.
+
+```sh
+cd /home/mesh-home/mishe-tauftauf2shell
+R2S_N1=21 R2S_N2=22 gdb -q -batch \
+  -x lab/repro/ruby2shell-twofold-watch-all.gdb \
+  lab/build/plain/ruby-3.4.12-plain/bin/ruby
+lab/repro/ruby2shell-twofold-watch-all.sh
+```
+
+Expect the 21:22 vulnerable GDB arm to print one `TRAP ... byte=0x73 ...
+frame=case_map line=293` and `SUMMARY ... traps=1`; 22:22 patched prints
+`traps=0` and only `LATE` lines from a later in-bounds write. In the recorded
+matrix, n∈{21,23} trap once per odd operand and n∈{17,19,20,22} never trap;
+(27,43) traps twice at distinct addresses. Valgrind reports one `Invalid
+write of size 1` plus one copy-out `Invalid read of size 1` 0 bytes after a
+66/68/66-byte block for 21/23/21:22 and zero on even-count and patched arms;
+all plain reruns are rc=0 with no glibc diagnostic. Docs reran the 21:22 and
+22:22 GDB/Valgrind arms on 2026-11-28: one `0x73` trap and write+read after
+66 bytes on vulnerable, zero traps and zero invalid accesses on patched;
+absolute addresses vary under ASLR and are not pins. The `n >= 21` threshold
+from an earlier checkpoint is falsified by n=22: `capa = n + 21` and a
+`1 + 2n`-byte fold make the two-byte sharp-s store straddle `to_end` iff n is
+odd, and the fix keeps `to_end - to > 1`. Stale watchpoints from the first
+matrix are an instrumentation artifact, not extra writes; equal-length odd
+pairs collapse to one hit on a reused buffer (oracle limit, not a retraction
+of W367's two distinct addresses). No wire request, chosen address, marker or
+command: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at
+its labeled scope, stock/oracle-free/persistent R5 NOT ACHIEVED. Full path:
+`reports/ruby2shell-investigation.md` (W368 tail).
+
 ## 2026-11-28 04:3xZ — Qt VectorImage W381 extracted-sink screen
 
 Sources, extracted blocks, harness and stable evidence are tracked under

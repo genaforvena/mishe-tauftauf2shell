@@ -6,6 +6,26 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 06:0xZ — Ruby W368 confirms the odd-count threshold
+
+Commit `fb9989f6` added the watch-all GDB script and matrix runner plus the
+W368 tail of `reports/ruby2shell-investigation.md`. A hardware WRITE watch on
+every `rb_str_casemap` `to_end`, gated to its own active call, traps on plain
+Ruby 3.4.12 exactly for odd sharp-s counts (n∈{21,23}, none for
+n∈{17,19,20,22}); the (27,43) positive control gives two distinct `0x73`
+addresses. Valgrind independently reports one write and one copy-out read 0
+bytes after a 66/68/66-byte block for 21, 23 and 21:22 and nothing for even
+counts or patched 3.4.13. The earlier `n >= 21` threshold prediction was
+falsified by n=22; the parity mechanism is `capa = n + 21` with a `1 + 2n`-byte
+fold. An ungated first matrix counted stale-watchpoint hits as second writes;
+gating turns them into `LATE` lines, and equal-length odd pairs still collapse
+to one hit on a reused buffer. Docs reran four arms from the committed recipe:
+GDB 21:22 vulnerable one trap, GDB 22:22 patched zero, Valgrind 21:22 one
+write/read after 66 bytes and 22:22 clean. Grade unchanged, no wire, chosen
+address, marker or command; no grade cell, count, manifest entry or
+`established` flag moved by this docs fold. Recipe in
+`docs/reproducibility.md` §06:0xZ.
+
 ## 2026-11-28 04:3xZ — Qt VectorImage W381 screened, not admitted
 
 Commits `80dac20d`, `12a4e79d` and `9f2d72e3` add CVE-2026-123706 at
