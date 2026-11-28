@@ -1,0 +1,2 @@
+QTINDEX arm=vuln layout=heap type=uint count=5 last=0x4343
+RETURN slots=5 index_type=1

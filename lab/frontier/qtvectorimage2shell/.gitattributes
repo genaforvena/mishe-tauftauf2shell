@@ -1,0 +1,2 @@
+# Upstream patch context lines contain a single blank-line space; preserve pin bytes.
+src/*.diff whitespace=-blank-at-eol

@@ -1,0 +1,2 @@
+QTINDEX arm=vuln layout=slab type=ushort count=6 last=0x4242
+RETURN slots=3 index_type=0 victim=0xefef

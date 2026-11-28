@@ -1,0 +1,4 @@
+build/
+harness/gen/
+evidence/*.raw
+evidence/*.rc

@@ -1,0 +1,5 @@
+QTINDEX arm=vuln layout=heap type=ushort count=65535 last=0xffff
+ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
+WRITE of size 131070 at 0x77d0462be81c thread T0
+0x77d0462be81c is located 0 bytes after 131100-byte region [0x77d04629e800,0x77d0462be81c)
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy

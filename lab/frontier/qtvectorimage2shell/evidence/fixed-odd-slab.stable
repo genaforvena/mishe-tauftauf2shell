@@ -1,0 +1,2 @@
+QTINDEX arm=fixed layout=slab type=ushort count=5 last=0x4141
+RETURN slots=3 index_type=0 victim=0xefef
