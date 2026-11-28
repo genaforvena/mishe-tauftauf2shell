@@ -21644,6 +21644,47 @@ seven lengths and the safe control. Summary files:
 `lab/build/evidence/casemap-chain/w369/valgrind-*`. Full path:
 `reports/ruby2shell-investigation.md` (W377 tail).
 
+Docs replay, 10:04–10:06Z, pinned plain 3.4.12 / 3.4.13, one valgrind server
+at a time on ports 4650–4654 (W378 was using 4660–4669). Fresh tags
+`docs-w377-*`; the checked-out wire client carried W378's uncommitted count
+and alternate-charset additions, both inert at
+`RUBY2SHELL_W378_COUNT=1` for these shapes, and those edits landed in commit
+`43febd20` during the replay.
+
+```sh
+RUBY2SHELL_W369_PORT=4650 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=1 \
+  RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_TAG=docs-w377-vg-sinatra-l1 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4651 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=4096 \
+  RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_TAG=docs-w377-vg-sinatra-l4096 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4652 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size-safe RUBY2SHELL_W377_POSTLEN=1024 \
+  RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_TAG=docs-w377-vg-sinatra-safe-l1024 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4653 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=1024 \
+  RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_TAG=docs-w377-vg-rails-fixed-l1024 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+RUBY2SHELL_W369_PORT=4654 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=4096 \
+  RUBY2SHELL_W376_RESPONSE=1 RUBY2SHELL_W369_TAG=docs-w377-vg-railsfull-l4096 \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+```
+
+Observed: both odd Sinatra arms gave HTTP 404, a live process, 1 invalid
+write / 1 invalid read / 1 `case_map` frame at `iso_8859_1.c:293` via
+`rb_str_casemap (string.c:7839)`, each write 0 bytes after a 66-byte block
+and a raw 650-byte response with the digest above. The even-N safe Sinatra
+arm and the patched Rails arm each gave 0/0/0, HTTP 404 and a live process;
+the vulnerable rails-full arm gave 1/1/1 at the same frame and block offset.
+The rails responses carry per-request headers, so their digests are not a
+cross-arm comparison. Raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w369/valgrind-*/docs-w377-*`; no grade or
+rung cell moved.
+
 ## 2026-11-28 09:2xZ — Ruby W376 post-field steerability CLOSED
 
 `lab/repro/ruby2shell-w371-wire.py` gained two opt-in shapes:

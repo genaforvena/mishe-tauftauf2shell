@@ -16638,7 +16638,8 @@ Current research limb for a reader arriving now. Operator #7243's named
 experiment is complete; the client change is committed in
 `lab/repro/ruby2shell-w371-wire.py`, raw logs are gitignored under
 `lab/build/evidence/casemap-chain/w378/` and `.../w369/`. No grade, rung cell,
-manifest entry or `established` flag moved.
+manifest entry or `established` flag moved; this closes W377's named follow-up
+from §09:4xZ.
 
 - **Prediction supported, falsifier not met.** Two odd `_method` requests in
   one vulnerable 3.4.12 Sinatra process, with post-field length 64 or 1024,
@@ -16673,7 +16674,8 @@ Current research limb for a reader arriving now. Operator #7232's named
 experiment is complete; the client change is committed in
 `lab/repro/ruby2shell-w371-wire.py`, raw logs are gitignored under
 `lab/build/evidence/casemap-chain/{w369,w377}/`. No grade, rung cell, manifest
-entry or `established` flag moved.
+entry or `established` flag moved; this closes W376's named follow-up from
+§09:2xZ.
 
 - **Prediction supported, falsifier not met.** Sweeping the `after` part from
   1 to 4096 ASCII bytes never moved the fold's write target: vulnerable
@@ -16693,18 +16695,14 @@ entry or `established` flag moved.
   R5 witness-ESTABLISHED at its labeled scope, full stock/oracle-free/
   persistent R5 NOT ACHIEVED.
 
-Next: W378, two requests in one vulnerable Sinatra valgrind process with a
-wire-chosen post-field length. Prediction: the second odd request either
-faults or writes again 0 bytes after a 66-byte block; falsifier: a survivor
-whose second request writes into a wire-shaped block or executes a marker.
-
 ## 2026-11-28 09:2xZ — Ruby W376 post-field steerability probe CLOSED
 
 Current research limb for a reader arriving now. Operator #7223's named
 experiment is complete; the client change is committed in
 `lab/repro/ruby2shell-w371-wire.py`, raw logs are gitignored under
 `lab/build/evidence/casemap-chain/{w369,w376}/`. No grade, rung cell, manifest
-entry or `established` flag moved.
+entry or `established` flag moved; this closes W375's named follow-up from
+§09:0xZ.
 
 - **Prediction supported, falsifier not met.** A multipart `after` field
   following the odd `_method` part neither changes response bytes attributable
@@ -16724,11 +16722,6 @@ entry or `established` flag moved.
   one-shape valgrind arms. Still one stock caller, no chosen address, marker or
   command: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at
   its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
-
-Next: W377, a bounded post-field size sweep on vulnerable Sinatra valgrind.
-Prediction: the write stays 0 bytes after the 66-byte block for every wire
-chosen post-field length; falsifier: any write target that is a wire-chosen
-block or byte.
 
 ## 2026-11-28 06:2xZ — Ruby W370 closes Rack boundary token and header tagging
 

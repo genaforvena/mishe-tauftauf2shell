@@ -6,6 +6,19 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 10:0xZ — Docs folds W376–W378, records a W377 replay
+
+Docs-only fold of `3ea6e0fa`, `b8d206f2` and `43febd20`, whose authors had
+already written their chronology entries and reproducibility recipes. This
+fold retires W376's consumed `Next: W377` and W377's consumed `Next: W378`
+pointers in `docs/task.md`, closes each section's named follow-up, and
+records a docs replay of the W377 recipe: on pinned 3.4.12 / 3.4.13, the
+odd Sinatra arms at post lengths 1 and 4096 each gave one invalid write /
+one read / one `case_map` frame 0 bytes after a 66-byte block with HTTP 404
+and a live process; even-N safe and patched Rails gave 0/0/0 and vulnerable
+rails-full 1/1/1. W378 was active on separate ports during the replay. No
+grade, rung cell, count, manifest entry or `established` flag moved.
+
 ## 2026-11-28 10:0xZ — Ruby W378 two requests in one process do not steer the fold
 
 `lab/repro/ruby2shell-w371-wire.py` gained opt-in `RUBY2SHELL_W378_COUNT`
