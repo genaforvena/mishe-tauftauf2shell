@@ -16632,6 +16632,45 @@ follow-up from §08:4xZ.
   on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
   at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
+## 2026-11-28 10:3xZ — Ruby W380 next-chunk size LSB write CLOSED
+
+Current research limb for a reader arriving now. Operator #7260's bounded
+experiment is complete. `lab/repro/ruby2shell-w371-wire.py` gained opt-in
+`RUBY2SHELL_W380_COUNT` (default 21, so old request bytes are unchanged);
+raw logs and runners are gitignored under
+`lab/build/evidence/casemap-chain/w380/`.
+
+- **Prediction supported.** With 27 wire sharp-s characters the fold call
+  reports `capa=48`, `oob_off=72`, `slack=0`. Hardware WRITE watchpoints on
+  two distinct `to_end`s trapped byte `0x53` in `case_map` line 294 over the
+  next chunk's size LSB: dump before `+0:4500000000000000`, after
+  `+0:5300000000000000` (sizeword 0x45 → 0x53, PREV_INUSE still set).
+- **Wire-only DoS, causal chain observed.** One request returns the usual
+  650-byte 404 and no abort. Two sequential requests in one plain 3.4.12
+  Sinatra process: first 404 digest
+  `1e07f7bb201b15f974654de84612acc1c572177a8fb07fbacfa5b6e4ab9c961f`,
+  second empty, then `corrupted size vs. prev_size`. Backtrace:
+  `malloc_printerr` → `unlink_chunk(p=0x7fffc80230c0)` →
+  `_int_realloc(oldsize=80,nb=144)` → `rb_gc_impl_realloc` →
+  `str_buf_cat4`/`inspect_ary` on the second request. No chosen address,
+  wire-shaped write target or marker: not rung 5.
+- **Controls.** One-shape valgrind: vulnerable N=27 → 1 invalid write / 1
+  read / 1 `case_map` frame, `Address ... is 0 bytes after a block of size
+  72`; safe 20 → 0/0/0; bootable patched 3.4.13 `rails new` N=27 → 0/0/0.
+  A first "safe" arm with 26 sharp-s still overflowed (`capa=46`,
+  `oob_off=70`) and is preserved as an invalid control; the client now pins
+  SAFE to 20. The patched-Rails gdb arm again read garbage `$rcx`/`$r8`;
+  the valgrind arm is the fixed control.
+- Grade unchanged: R4 witness-COMPLETE, harness-condition R5
+  witness-ESTABLISHED at its labeled scope, full stock/oracle-free/persistent
+  R5 NOT ACHIEVED. The two-request survivor condition fails: the process
+  aborts instead of serving a second command.
+
+Next: W381, sweep wire sharp-s counts 22–28 and map `capa`/`oob_off` to
+slack → prev_size → size LSB → upper sizeword bytes; replay two requests for
+each sizeword-hitting count. Prediction: abort only when the byte reaches
+the next chunk's sizeword.
+
 ## 2026-11-28 10:1xZ — Ruby W379 second byte recipient CLOSED
 
 Current research limb for a reader arriving now. Operator #7252's named

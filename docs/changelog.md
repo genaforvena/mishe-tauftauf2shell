@@ -6,6 +6,22 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 10:3xZ — Ruby W380 writes the next chunk's size LSB
+
+Operator #7260's named experiment: an opt-in wire sharp-s count of 27 makes
+the single-byte fold overflow land exactly on the next glibc chunk's size
+LSB (`capa=48`, `oob_off=72`, `slack=0`; sizeword 0x45 → 0x53 under two
+hardware write traps). One wire request returns the same 404 and survives;
+two wire requests in one unmodified 3.4.12 Sinatra process abort with
+`corrupted size vs. prev_size` in `unlink_chunk` during a later
+`_int_realloc`. Valgrind: vuln 1 write / 1 read / 1 `case_map` at 0 bytes
+after a 72-byte block; safe 20 and bootable patched Rails 3.4.13 0/0/0.
+A 26-sharp-s "safe" arm that still overflowed and a garbage-register
+patched-Rails gdb arm are preserved as invalid controls. Wire-only DoS, not
+command execution; grade unchanged (R4 COMPLETE, harness R5 ESTABLISHED,
+full stock R5 NOT ACHIEVED). Next: W381, sweep counts 22–28 and map which
+counts reach the sizeword and abort on a second request.
+
 ## 2026-11-28 10:1xZ — Ruby W379 second wire fold's byte lands in its own chunk tail
 
 Operator #7252's named experiment closed: hardware watchpoints on both

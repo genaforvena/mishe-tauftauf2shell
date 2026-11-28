@@ -10318,6 +10318,70 @@ across vulnerable, fixed and safe-input arms. Prediction: no response-byte
 difference, one write per odd request; falsifier: any response change or crash
 attributable to the write.
 
+## 2026-11-28 10:3xZ — W380: the OOB byte hits the next chunk's size LSB CLOSED
+
+W380 ran operator #7260's named follow-up to W379. Question: with a
+wire-chosen sharp-s count, does the single overflow byte reach the next
+chunk's size LSB and change glibc behaviour? `lab/repro/ruby2shell-w371-wire.py`
+gained opt-in `RUBY2SHELL_W380_COUNT` (default 21 keeps W371–W379 bytes).
+Raw evidence and throwaway runners: `lab/build/evidence/casemap-chain/w380/`
+(`w380-vuln-odd.summary`, `w380-abort.gdb.out`, `w380-abort2.gdb.out`,
+`valgrind-summary.txt`), loopback ports 4680–4689 only.
+
+**Measurement.** Two fresh plain 3.4.12 Sinatra processes with 27 sharp-s
+and post length 64 logged calls 72 and 75, each `capa=48`, chunk sizeword
+`0x55`/`0x54` (0x50 chunk, 72 usable bytes), `oob_off=72`, `slack=0`. Each
+hardware WRITE watchpoint trapped once at `to_end`, byte `0x53` in
+`case_map` line 294 (`iso_8859_1.c:293`). At `to_end` the pre-write dump was
+`+0:4500000000000000` and after the trap `+0:5300000000000000`: the next
+chunk's size LSB changed 0x45 → 0x53 (both odd, so PREV_INUSE survives),
+in an anonymous rw-p Puma worker arena. The wire `postfield-marker` was
+still absent at the write; no control-flow target was touched.
+
+**Causal outcome.** ONE request with the same count returned the unmodified
+650-byte 404 and no abort. TWO sequential wire requests in one process
+(ports 4680 and 4689): request 1 HTTP 404 with digest
+`1e07f7bb201b15f974654de84612acc1c572177a8fb07fbacfa5b6e4ab9c961f`;
+request 2 returned no bytes and the process aborted with
+`corrupted size vs. prev_size`. GDB backtrace:
+`__libc_message_impl` → `malloc_printerr` →
+`unlink_chunk(p=0x7fffc80230c0)` → `_int_realloc(oldp=0x7fffc8023070,
+oldsize=80, nb=144)` → `rb_gc_impl_realloc(old_size=72)` →
+`ruby_sized_xrealloc2` → `str_buf_cat4` → `inspect_ary`. The abort is an
+unrelated second-request allocation detecting the corrupted metadata, not a
+debugger write or a harness marker. This is wire-only denial of service on
+an unmodified stock Sinatra app; it is not pointer control or command
+execution.
+
+**Controls and invalid arms.** One-shape valgrind on the vulnerable build
+(N=27, port 4685): 1 invalid write / 1 read / 1 `case_map` frame,
+`Address 0x22629468 is 0 bytes after a block of size 72 alloc'd`, frames
+`case_map (iso_8859_1.c:293)` and `rb_str_casemap (string.c:7834)`, process
+alive. Even-N safe at 20 sharp-s (port 4686) and bootable patched Rails
+3.4.13 at N=27 (port 4687): 0/0/0 and alive. The initial "safe" arm at 26
+sharp-s still overflowed (`capa=46`, `oob_off=70`, two traps) and is
+preserved as a failed control; SAFE is now fixed at 20 sharp-s. The
+patched-Rails gdb arm read garbage `$rcx`/`$r8` (capa ~9e13), invalid; the
+valgrind fixed arm is the control.
+
+Falsifier not met; prediction supported. Grade unchanged: R4
+witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at its labeled
+scope, full stock/oracle-free/persistent R5 **NOT ACHIEVED** — the process
+does not survive to execute a second command.
+
+Reproduce (raw logs gitignored, use free loopback ports):
+
+```sh
+RUBY2SHELL_W380_COUNT=27 R2S_W380_ARM=odd \
+  bash lab/build/evidence/casemap-chain/w380/run-gdb.sh
+```
+
+Next named experiment W381: sweep counts 22–28 to map `capa`/`oob_off`
+against slack, prev_size and sizeword bytes; replay two requests for each
+sizeword-hitting count. Prediction: abort only when the byte reaches the
+next chunk's sizeword; falsifier: abort with the byte in slack or survival
+with a rewritten size LSB. Keep safe/fixed controls.
+
 ## 2026-11-28 10:1xZ — W379: the second wire fold's byte lands in its own chunk tail CLOSED
 
 W379 ran operator #7252's named follow-up to W378. Question: in ONE plain

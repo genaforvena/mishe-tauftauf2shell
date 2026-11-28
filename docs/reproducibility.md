@@ -21554,6 +21554,35 @@ the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
 run concurrently with another valgrind server lost connections from the sixth
 request onward, so run these arms sequentially. No grade or rung cell moved.
 
+## 2026-11-28 10:3xZ — Ruby W380 size-LSB write CLOSED
+
+The committed change is one opt-in environment variable in
+`lab/repro/ruby2shell-w371-wire.py`: `RUBY2SHELL_W380_COUNT` (default 21,
+minimum 2) selects the sharp-s count; SAFE remains 20 sharp-s. Smoke:
+`python3 -m py_compile lab/repro/ruby2shell-w371-wire.py` and a `build()`
+import check at count 27. Raw runners and logs are gitignored under
+`lab/build/evidence/casemap-chain/w380/`; use free loopback ports.
+
+```sh
+bash lab/build/evidence/casemap-chain/w380/run-gdb.sh odd      # port 4680
+bash lab/build/evidence/casemap-chain/w380/run-abort2.sh      # port 4689, bt
+bash lab/build/evidence/casemap-chain/w380/run-vg.sh          # ports 4685-4687
+```
+
+Expect two `W379CALL` lines with `capa=48`, `oob_off=72`, `slack=0` and two
+`W379TRAP` lines with byte `0x53` at the next chunk size LSB (dump
+`+0:4500000000000000` before, `+0:5300000000000000` after). With two wire
+requests, request 1 is the 650-byte 404 digest
+`1e07f7bb201b15f974654de84612acc1c572177a8fb07fbacfa5b6e4ab9c961f`,
+request 2 is empty and the process aborts with
+`corrupted size vs. prev_size` inside `unlink_chunk` from `_int_realloc`
+on a later `str_buf_cat4`. One request alone does not abort.
+`run-vg.sh` writes `valgrind-summary.txt`: vuln N=27 1 write / 1 read /
+1 `case_map` at 0 bytes after a 72-byte block; safe 20 and patched Rails
+3.4.13 N=27 give 0/0/0. An earlier 26-sharp-s "safe" arm was invalid
+(it still overflowed) and is preserved in `w380-vuln-safe.gdb.out`;
+the patched-Rails gdb arm read garbage registers, so use valgrind.
+
 ## 2026-11-28 10:1xZ — Ruby W379 two fold destinations watched CLOSED
 
 New committed scripts: `lab/repro/ruby2shell-w379-wire-watch.gdb` (per-call
