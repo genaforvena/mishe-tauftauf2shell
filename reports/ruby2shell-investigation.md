@@ -9966,3 +9966,82 @@ Falsifier: two distinct wire operands with odd sharp-s counts reaching
 `case_map` in one request, or any patched-build write. First command:
 `RUBY2SHELL_W369_PORT=4600 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb bash lab/repro/ruby2shell-w369-pair.sh trace sinatra vuln`
 (wire script to be added in W371); keep `--again 300`.
+
+## 2026-11-28 07:4xZ — W371: remaining wire surfaces CLOSED, no second fold
+
+W371 ran the named follow-up from W370: sweep the request surfaces not covered
+by the multipart boundary/header lanes, looking for a second odd-0xDF wire
+operand that reaches a case fold. `lab/repro/ruby2shell-w371-wire.py` sends 12
+ordinary loopback HTTP/1.1 requests, each on its own connection: percent-encoded
+query key and value, cookie name and value, Authorization scheme, `Accept`,
+`Content-Type`, raw and `\\u00df`-escaped JSON bodies, an arbitrary header
+value, a form body, and an ISO-8859-1 multipart part. A 13th `_method` request
+is opt-in (`RUBY2SHELL_W371_CONTROL=1`) as the known-sink liveness control. No
+middleware, debugger or memory write is injected. The W369 runner supplies the
+all-fold preload through `RUBY2SHELL_W369_HOOK` and `CASE_PAIR_CONTROL=0`.
+
+**Trace (observability only).** On unmodified classic Sinatra (3.4.12, Rack
+3.2.8) the preload logged 540 folds; exactly one carried an odd sharp-s count —
+`upcase recv[ISO-8859-1 len=22 sharp_s=21 odd=true]` at
+`rack/method_override.rb:36`, the opt-in `_method` control. Every other surface
+logged zero 0xDF bytes. Evidence:
+`lab/build/evidence/casemap-chain/w369/trace-sinatra-vuln/w371-sinatra-vuln.out`
+and its `.trace`.
+
+On full `rails new` (3.4.12, Rack 3.2.9) the same sweep logged 2969 folds with
+four odd operands: three `downcase` calls on the raw
+`Content-Type: application/<21×0xDF>` receiver at
+`action_dispatch/http/mime_negotiation.rb:27` (`$1.strip.downcase`, HTTP 406),
+plus the same `_method` upcase. Evidence:
+`.../trace-rails-full-vuln/w371-railsfull-vuln.out` and `.trace`.
+
+**The apparent falsifier is REJECTED by valgrind.** `content-type` alone and
+the complete 12-surface sweep on vulnerable full Rails each logged zero invalid
+writes, zero invalid reads and zero `case_map` frames
+(`.../valgrind-rails-full-vuln/w371-ct-railsfull-vuln.out`,
+`.../w371-all-railsfull-vuln.out`). The mechanism is an encoding gate, not a
+missing hit: the MIME receiver is ASCII-8BIT with 0xDF, so its coderange is not
+7-bit; `case_option_single_p` (`string.c:7769`) cannot take the ASCII-only fast
+path, and ASCII-8BIT's `case_map` is
+`onigenc_single_byte_ascii_only_case_map` (`enc/ascii.c:57`), which never
+expands 0xDF. The all-fold hook logs a String case operation, not a proven
+`case_map` expansion.
+
+**Controls.** The same valgrind harness, given only `_method` on vulnerable
+full Rails, logged one invalid 1-byte write, one invalid read and one
+`case_map` frame (`.../w371-method-railsfull-vuln.out`), so the zero sweeps are
+not a dead harness. The 12-surface sweep on vulnerable Sinatra also logged
+0/0/0 (`.../valgrind-sinatra-vuln/w371-all-sinatra-vuln.out`). A patched
+3.4.13 bootable stock `rails new` (Rack 3.2.8) with `content-type` plus
+`_method` returned HTTP 406/404 with 0/0/0
+(`.../valgrind-rails-fixed/w371-ct-method-rails-fixed.out`). Fixed Sinatra
+3.4.13 exited `ready=NO` (the 3.4.13 plain tree has no Sinatra gems), so its
+zeros are UNTESTED, not a pass; the full-Rack 3.4.13 app still cannot boot,
+preserved from W370.
+
+Reproduce, one loopback app per command:
+
+```
+RUBY2SHELL_W369_PORT=4600 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W371_CONTROL=1 \
+  RUBY2SHELL_W369_TAG=w371-sinatra-vuln \
+  bash lab/repro/ruby2shell-w369-pair.sh trace sinatra vuln
+RUBY2SHELL_W369_PORT=4601 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W371_CONTROL=1 \
+  RUBY2SHELL_W369_TAG=w371-railsfull-vuln \
+  bash lab/repro/ruby2shell-w369-pair.sh trace rails-full vuln
+RUBY2SHELL_W369_PORT=4603 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_CONTROL=0 RUBY2SHELL_W369_TAG=w371-all-railsfull-vuln \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+```
+
+Conclusion: W371 is closed on the tested builds. The only wire operand that
+both reaches a case fold and writes is still `Rack::MethodOverride`'s `_method`
+upcase. Rung 4 remains witness-COMPLETE and harness-condition rung 5
+witness-ESTABLISHED at its labeled scope; full stock/oracle-free/persistent
+rung 5 remains **NOT ACHIEVED**. Next named experiment W372: charset-tagged
+JSON/form bodies (`charset=ISO-8859-1`) with raw 0xDF keys and values on both
+apps. Prediction: `JSON.parse` forces UTF-8, so no fold. Falsifier: any
+odd-0xDF operand reaching `case_map` with a vulnerable write and fixed zero.

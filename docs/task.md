@@ -16470,6 +16470,39 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-28 07:4xZ — Ruby W371 closes remaining wire surfaces
+
+Current research limb for a reader arriving now. Reports `lab/repro/ruby2shell-w371-wire.py`
+and the W371 tail of `reports/ruby2shell-investigation.md`; no grade, rung cell,
+count, manifest entry or `established` flag moved. The "Next: W371 ..." item in
+§06:2xZ is closed here.
+
+- **No second wire fold.** The all-fold hook on unmodified Sinatra (3.4.12,
+  Rack 3.2.8) logged 540 folds across 12 ordinary request shapes (query keys
+  and values, cookies, Authorization, `Accept`, `Content-Type`, JSON bodies,
+  arbitrary header, form body, ISO-8859-1 multipart part): exactly one odd
+  0xDF operand, the opt-in `_method` upcase at `method_override.rb:36`.
+- **A trace candidate in Rails was a false positive.** Full Rails (3.4.12,
+  Rack 3.2.9) logged four odd operands: three `downcase` calls on a raw
+  0xDF-bearing `Content-Type` at `mime_negotiation.rb:27` (`$1.strip.downcase`,
+  HTTP 406) plus `_method`. Valgrind on that surface alone and on the whole
+  sweep logged 0 invalid writes / 0 reads / 0 `case_map` frames; ASCII-8BIT
+  with 0xDF is not 7-bit and its `onigenc_single_byte_ascii_only_case_map`
+  (`enc/ascii.c:57`) never expands ß. A `_method`-only arm wrote once, so the
+  harness was live. Bootable patched stock Rails (3.4.13, Rack 3.2.8) stayed
+  clean; fixed Sinatra 3.4.13 and full-Rack 3.4.13 did not boot, so their
+  zeros are UNTESTED, not passes.
+
+Grade unchanged: one request still reaches one fold, no chosen address, marker
+or command; R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at
+its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next: W372's charset-tagged JSON/form bodies (`charset=ISO-8859-1`, raw 0xDF
+keys and values) on both apps. Prediction: `JSON.parse` forces UTF-8, no fold.
+Falsifier: an odd-0xDF operand reaching `case_map` with a vulnerable write and
+fixed zero. What would change this: a measured stock second-fold caller, a
+patched write, a witness contradiction, or a checker RED on committed HEAD.
+
 ## 2026-11-28 06:2xZ — Ruby W370 closes Rack boundary token and header tagging
 
 Current research limb for a reader arriving now. Docs-only fold of `d3bc12a4`,

@@ -21321,6 +21321,45 @@ object, R5 NOT CLAIMED; no full `taosd` SQL/wire path, listener or command.
 Operator admission landed 22:2xZ as the 223rd mind (`c16c1eaa`);
 independent witness replay landed as W377 (§22:4x–22:5xZ).
 
+## 2026-11-28 07:4xZ — Ruby W371 wire-surface sweep CLOSED
+
+The committed client is `lab/repro/ruby2shell-w371-wire.py`; it sends 12
+ordinary loopback requests (query keys/values, cookie names/values,
+Authorization scheme, `Accept`, `Content-Type`, raw/escaped JSON bodies, an
+arbitrary header value, a form body and an ISO-8859-1 multipart part), each on
+its own connection, plus an opt-in `_method` control. It reuses the W369
+runner's `RUBY2SHELL_W369_WIRE` and `RUBY2SHELL_W369_HOOK` overrides. Raw logs
+are gitignored under `lab/build/evidence/casemap-chain/w369/`; use free
+loopback ports.
+
+```sh
+cd /home/mesh-home/mishe-tauftauf2shell
+RUBY2SHELL_W369_PORT=4610 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W371_CONTROL=1 RUBY2SHELL_W369_TAG=docs-w371-sinatra \
+  bash lab/repro/ruby2shell-w369-pair.sh trace sinatra vuln
+RUBY2SHELL_W369_PORT=4611 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W371_CONTROL=1 RUBY2SHELL_W369_TAG=docs-w371-rails \
+  bash lab/repro/ruby2shell-w369-pair.sh trace rails-full vuln
+RUBY2SHELL_W369_PORT=4612 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_CONTROL=0 RUBY2SHELL_W369_TAG=docs-w371-rails-vg \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+RUBY2SHELL_W369_PORT=4613 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-odd RUBY2SHELL_W371_CONTROL=0 \
+  RUBY2SHELL_W369_TAG=docs-w371-method \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+```
+
+Expect the Sinatra trace to show one odd operand in 540 folds, the opt-in
+`_method` upcase at `method_override.rb:36`. Expect the Rails trace to show
+four odd operands: three `downcase` calls on a raw 0xDF `Content-Type` at
+`mime_negotiation.rb:27` plus `_method`; the Rails valgrind sweep still shows
+0 invalid writes / 0 reads / 0 `case_map` frames because ASCII-8BIT's
+`case_map` does not expand 0xDF. Expect the `_method`-only arm to show one
+invalid write and one read, proving the harness is live. Full path:
+`reports/ruby2shell-investigation.md` (W371 tail).
+
 ## 2026-11-28 06:2xZ — Ruby W370 Rack boundary token and header tagging CLOSED
 
 Affected/fixed: Ruby 3.4.12 vulnerable, 3.4.13 fixed; pinned gems include
