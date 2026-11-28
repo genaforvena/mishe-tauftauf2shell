@@ -10318,6 +10318,78 @@ across vulnerable, fixed and safe-input arms. Prediction: no response-byte
 difference, one write per odd request; falsifier: any response change or crash
 attributable to the write.
 
+## 2026-11-28 10:1xZ — W379: the second wire fold's byte lands in its own chunk tail CLOSED
+
+W379 ran operator #7252's named follow-up to W378. Question: in ONE plain
+vulnerable 3.4.12 Sinatra process fed two loopback `_method` requests, what
+receives the byte written past the second `rb_str_casemap` buffer? Prediction:
+an unrelated live object or free gap; falsifier: a second write into
+wire-shaped bytes or a control-flow target. New committed scripts:
+`lab/repro/ruby2shell-w379-wire-watch.gdb` (per-call hardware WRITE
+watchpoints gated to their own `case_map` call, plus chunk/mapping reporting)
+and `lab/repro/ruby2shell-w379-wire-watch.sh`. Gitignored raw evidence:
+`lab/build/evidence/casemap-chain/w379/` (`w379-vuln-odd.summary`,
+`run-vuln-repeat.out`, `committed-smoke.out`, `detail.gdb.out`,
+`w379-vuln-safe.summary`, `run-fixed-vg.out`).
+
+**Both folds trapped.** Three fresh processes on loopback ports 4670/4675
+each armed two watchpoints and logged exactly two traps at distinct `to_end`
+addresses, both byte `0x53` in `case_map` (line-table line 294,
+`iso_8859_1.c:293`), with calls 72 and 74 at `capa=42`. Examples:
+`0x7fffc802a632` / `0x7fffc80230c2` (first run), `0x7fffc809d5a2` /
+`0x7fffc80898c2` (repeat), `0x7fffc808e712` / `0x7fffc8040dd2` (committed
+script smoke). Both requests returned the same 650-byte 404
+(`1e07f7bb201b15f974654de84612acc1c572177a8fb07fbacfa5b6e4ab9c961f`) and
+the process was alive after them. Still no fault, chosen address, marker or
+command. The same-charset valgrind report-count caveat from W378 is
+unchanged: this is the watchpoint oracle, not a new claim about memcheck.
+
+**Recipient, measured.** Both destinations lie in one anonymous rw-p mapping
+(`0x7fffc8000000-0x7fffc80a4000`, a Puma worker-thread malloc arena). At
+each call the `mapping_buffer` header is 24 bytes and the glibc chunk header
+16 bytes before that: size word `0x55` (or `0x54`) means a 0x50-byte chunk,
+72 usable bytes. In the detail arm an inferior call to
+`malloc_usable_size(to-24)` returned **72** with `oob_off=66`, i.e. the write
+lands 6 bytes inside the fold buffer's own usable tail (`to_end = chunk+0x52`),
+overlapping the next in-use chunk's `prev_size` field, which glibc ignores
+while `PREV_INUSE` is set. The next chunk's size LSB (at `to_end+6`, e.g.
+`0x45` or `0x75`) is unchanged across the write; the only changed byte at
+`to_end` is `0x00 → 0x53`. A ±8 KiB byte search found the wire's
+`postfield-marker` string 0 bytes (none), +256 or +464 bytes away — near one
+write in two runs, never at the write address. So neither fold reaches a
+live Ruby object, a free gap, wire-shaped allocation bytes or a control-flow
+target. This is the allocation-level reason W377/W378 measured no steering.
+
+**Controls.** Even-N safe input twice on vulnerable Sinatra (port 4671): two
+`capa=41` calls armed, zero traps, process alive, same 404 bytes. Bootable
+patched `rails new` 3.4.13 with two odd requests under valgrind (port 4674):
+0 invalid writes, 0 invalid reads, 0 `case_map` errors, process alive; both
+404s carried request-specific ids/timings. Two instrumentation failures are
+preserved, not counted: calling `malloc_usable_size()` from gdb in the detail
+arm stalled its second request (`ERR TimeoutError`), so that arm supports
+only the 72-byte measurement; and a patched-Rails gdb arm read garbage
+`capa` from `$rcx`/`$r8` (breakpoint line mapping differs on 3.4.13; cause
+UNKNOWN), so its bogus watchpoints are invalid, with the valgrind arm as the
+fixed control.
+
+Falsifier not met; prediction supported. Grade unchanged: R4
+witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at its labeled
+scope, full stock/oracle-free/persistent R5 **NOT ACHIEVED**.
+
+Reproduce (free loopback ports; raw logs gitignored):
+
+```sh
+R2S_W379_PORT=4675 R2S_W379_TAG=w379-primary \
+  bash lab/repro/ruby2shell-w379-wire-watch.sh
+```
+
+Next named experiment W380: add an opt-in wire-chosen odd sharp-s count
+(e.g. 27, giving `capa=48` with a leading `'a'`) so the overflow byte lands
+exactly on the next chunk's size LSB. Prediction: the LSB becomes `0x53`
+and neighbouring metadata or glibc behaviour changes; falsifier: the byte
+stays in slack with unchanged next-chunk size. Keep even-N and patched
+controls, loopback only.
+
 ## 2026-11-28 10:0xZ — W378: two requests in one process CLOSED
 
 W378 ran operator #7243's bounded follow-up to W377: does a second odd

@@ -21554,6 +21554,42 @@ the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
 run concurrently with another valgrind server lost connections from the sixth
 request onward, so run these arms sequentially. No grade or rung cell moved.
 
+## 2026-11-28 10:1xZ — Ruby W379 two fold destinations watched CLOSED
+
+New committed scripts: `lab/repro/ruby2shell-w379-wire-watch.gdb` (per-call
+hardware WRITE watchpoints on `rb_str_casemap`'s `to_end`, gated by
+`active_call`, with a return breakpoint at `string.c:7850`) and
+`lab/repro/ruby2shell-w379-wire-watch.sh` (one stock Sinatra process under
+gdb, two loopback requests). Raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w379/`; use free ports.
+
+```sh
+R2S_W379_PORT=4675 R2S_W379_TAG=w379-primary \
+  bash lab/repro/ruby2shell-w379-wire-watch.sh
+R2S_W379_PORT=4671 R2S_W379_SURFACE=method-postfield-size-safe \
+  R2S_W379_TAG=w379-safe bash lab/repro/ruby2shell-w379-wire-watch.sh
+RUBY2SHELL_W369_PORT=4674 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W378_COUNT=2 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W369_TAG=w379-fixed \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+```
+
+Expect `ready=YES`, `alive-after-requests=YES`, two `W379CALL` lines with
+`capa=42` (calls 72 and 74) and two `W379TRAP` lines with byte `0x53` in
+`case_map` at distinct addresses, each `oob_off=66 slack=6`; both requests
+return a 650-byte 404 with sha256
+`1e07f7bb201b15f974654de84612acc1c572177a8fb07fbacfa5b6e4ab9c961f`.
+The safe arm shows two `capa=41` calls and zero traps; the fixed valgrind
+arm shows 0 invalid writes / 0 invalid reads / 0 `case_map` errors.
+The gitignored detail arm (`.../w379/wire-detail.gdb`) measures
+`malloc_usable_size=72` at the fold allocation, but its inferior function
+call stalled its second request — it is not a two-request arm. The
+patched-Rails gdb arm read garbage registers (`$rcx`/`$r8`) and is invalid;
+use the valgrind control. Full path: `reports/ruby2shell-investigation.md`
+(W379 section).
+
 ## 2026-11-28 10:0xZ — Ruby W378 two requests in one server process CLOSED
 
 `lab/repro/ruby2shell-w371-wire.py` gained opt-in `RUBY2SHELL_W378_COUNT`

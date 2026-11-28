@@ -6,6 +6,25 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 10:1xZ — Ruby W379 second wire fold's byte lands in its own chunk tail
+
+Operator #7252's named experiment closed: hardware watchpoints on both
+`rb_str_casemap` destinations in one plain 3.4.12 Sinatra process fed two
+loopback `_method` requests logged two traps at distinct addresses, both
+byte `0x53` in `case_map`, with identical 404s and a live process. The chunk
+header (`sizeword 0x55`, 0x50-byte chunk) and a gdb `malloc_usable_size`
+measurement of 72 bytes put the write at usable offset 66 — the fold
+buffer's own 6-byte tail, overlapping the next in-use chunk's unused
+`prev_size`. No live object, free gap, wire-shaped bytes or control-flow
+target was written. Even-N safe twice: 0 traps; patched 3.4.13 `rails new`
+under valgrind twice: 0 writes / 0 reads / 0 `case_map` errors.
+Preserved artifacts: the detail arm's inferior `malloc_usable_size()` call
+stalled its second request, and the patched-Rails gdb arm read garbage
+registers (invalid control; the valgrind arm is the fixed control).
+Falsifier not met; grade unchanged (R4 COMPLETE, harness R5 ESTABLISHED,
+full stock R5 NOT ACHIEVED). Next: W380, wire-vary the odd sharp-s count so
+`capa` makes the OOB byte land exactly on the next chunk's size LSB.
+
 ## 2026-11-28 10:0xZ — Docs folds W376–W378, records a W377 replay
 
 Docs-only fold of `3ea6e0fa`, `b8d206f2` and `43febd20`, whose authors had

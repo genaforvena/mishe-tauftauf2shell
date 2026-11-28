@@ -16632,6 +16632,46 @@ follow-up from §08:4xZ.
   on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
   at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
+## 2026-11-28 10:1xZ — Ruby W379 second byte recipient CLOSED
+
+Current research limb for a reader arriving now. Operator #7252's named
+experiment is complete. New committed scripts:
+`lab/repro/ruby2shell-w379-wire-watch.gdb` and
+`lab/repro/ruby2shell-w379-wire-watch.sh`; raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w379/`. No grade, rung cell, manifest
+entry or `established` flag moved.
+
+- **Both folds observed in one process.** Three plain 3.4.12 Sinatra runs
+  (ports 4670/4675) each armed two `to_end` hardware WRITE watchpoints and
+  logged exactly two traps, byte `0x53` in `case_map` (`iso_8859_1.c:293`),
+  at distinct addresses; calls 72 and 74 both had `capa=42`. Both requests
+  returned the same 650-byte 404 (`1e07f7bb…c961f`); the process survived.
+- **Recipient measured.** Both `to_end` addresses are in one anonymous rw-p
+  mapping (Puma worker-thread malloc arena). Chunk size word `0x55`/`0x54`
+  gives a 0x50-byte chunk with 72 usable bytes; gdb's inferior call to
+  `malloc_usable_size(to-24)` returned 72 and `oob_off=66`. The byte lands
+  6 bytes inside the chunk's own usable tail, overlapping the next in-use
+  chunk's ignored `prev_size`; its size LSB is unchanged across the write.
+  A ±8 KiB search for the wire's `postfield-marker` found it 0, +256 or
+  +464 bytes away — never at the write address. Prediction supported,
+  falsifier (a wire-shaped or control-flow target) not met.
+- **Controls.** Even-N safe input twice: two `capa=41` folds armed, zero
+  traps, alive. Patched 3.4.13 `rails new` with two odd requests under
+  valgrind: 0 invalid writes / 0 reads / 0 `case_map` errors, alive. The
+  patched-Rails gdb arm produced garbage `capa` from `$rcx`/`$r8` and is
+  PRESERVED AS INVALID, not a clean control; the detail arm's inferior
+  function call stalled its second request and is used only for the 72-byte
+  measurement.
+- **Grade unchanged.** R4 witness-COMPLETE, harness-condition R5
+  witness-ESTABLISHED at its labeled scope, full stock/oracle-free/persistent
+  R5 **NOT ACHIEVED**.
+
+Next: W380, add an opt-in wire-chosen odd sharp-s count (e.g. 27) so
+`capa=48` puts the overflow byte exactly on the next chunk's size LSB.
+Prediction: metadata LSB becomes `0x53` and glibc diagnostics or a changed
+chunk size follow; falsifier: the write stays in slack with unchanged
+neighbouring chunk metadata. Keep even-N and patched controls.
+
 ## 2026-11-28 10:0xZ — Ruby W378 two requests in one process CLOSED
 
 Current research limb for a reader arriving now. Operator #7243's named
