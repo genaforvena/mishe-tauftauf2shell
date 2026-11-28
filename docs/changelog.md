@@ -6,6 +6,23 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 10:5xZ — Ruby W381 sizeword window mapped; abort falsifier met
+
+Operator #7265's named experiment closed with a committed runner
+`lab/repro/ruby2shell-w381-sizeword-sweep.sh`. One-request sweep N=22..28 on
+plain 3.4.12 Sinatra: `capa=N+21`, only odd N writes one `0x53` byte, and
+N=27 alone puts it on the next chunk's size LSB (`oob_off=72 slack=0`);
+N=28 grows the chunk to usable 88 and moves the byte back into slack.
+Two-request replay: N=23/25 survive; N=27 rewrote the size LSB in all ten
+arms but aborted in 7 with `corrupted size vs. prev_size` and survived in 3
+(one abort landed on the first request). The operator's falsifier — survival
+with the size LSB rewritten — is MET: the abort is layout-dependent, not a
+deterministic consequence of the write. Safe-20 and bootable fixed Rails
+valgrind controls 0/0/0. A stale-port arm (4703, pre-existing rails app) was
+cancelled and redone on free ports. Grade unchanged (R4 COMPLETE, harness R5
+ESTABLISHED, full stock R5 NOT ACHIEVED). Next: W382, vary second-request
+post-field length and classify abort by unlink frame and chunk adjacency.
+
 ## 2026-11-28 10:4xZ — Docs fold of Ruby W379/W380
 
 Docs-only fold of `d5f7599e` and `29de505c`. Both authors had already written

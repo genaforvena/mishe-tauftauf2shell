@@ -10318,6 +10318,52 @@ across vulnerable, fixed and safe-input arms. Prediction: no response-byte
 difference, one write per odd request; falsifier: any response change or crash
 attributable to the write.
 
+## 2026-11-28 10:5xZ — W381: the sizeword window is one odd count, and the abort is layout-dependent CLOSED
+
+W381 ran operator #7265's named follow-up: sweep wire-chosen sharp-s count
+N=22..28 in fresh one-request plain 3.4.12 Sinatra processes under the
+committed hardware-write watch `ruby2shell-w379-wire-watch.gdb`, then replay
+two requests for the counts that write. Committed runner:
+`bash lab/repro/ruby2shell-w381-sizeword-sweep.sh one <free-port> <outdir>`
+and `two <free-port> <outdir>`; raw evidence is gitignored under
+`lab/build/evidence/casemap-chain/w381/`.
+
+**Sweep (one request per process).** The fold capacity is `capa = N+21`.
+For N=22..27 the chunk sizeword is `0x55`/`0x54` (0x50 chunk, 72 usable
+bytes), so `oob_off = capa+24` and `slack = 27-N`: N=22 67/5, N=23 68/4,
+N=25 70/2, N=26 71/1, N=27 72/0. Only ODD N traps the write watch: even
+N=22/24/26 produces zero traps because the fold ends exactly at `to_end`;
+odd N=23/25/27 writes one byte `0x53` at `to_end` in `case_map` line 294.
+N=28 grows the chunk to sizeword `0x65` (usable 88), giving `oob_off=73`,
+`slack=15` and no trap. In this range only N=27 lands on the next chunk's
+size LSB. Every arm returned the same 650-byte 404 digest
+`1e07f7bb…c961f` and stayed alive.
+
+**Two requests.** N=23 (slack 4) and N=25 (slack 2) both served two 404s
+and survived. N=27 rewrote the size LSB in every arm (pre `0x55`/`0x54` →
+post `0x53`) but aborted in 7 of 10 observed two-request arms with
+`corrupted size vs. prev_size`; the other 3 served two 404s and survived.
+One arm aborted on the FIRST request. Recurring layout families separate
+the outcomes: fold-1 chunk `0x7fffc803dd50` with fold-2 at `+0xf0` aborted
+twice, `0x7fffc8084620` with fold-2 `0xc0` before it survived twice. The
+operator's stated falsifier ("survival with the size LSB rewritten") is
+therefore MET: reaching the sizeword is necessary, not sufficient; the
+abort depends on which later allocation unlinks the corrupted chunk. Two
+fresh valgrind controls, safe-20 on vulnerable Sinatra and N=27 on bootable
+patched Rails 3.4.13, both gave 0 invalid writes / 0 reads / 0 `case_map`
+errors and stayed alive.
+
+**Invalid arm preserved.** The first sweep used port 4703, already owned by
+a pre-existing `rails-stock-app` (pid 879113). GDB's Sinatra exited with
+`EADDRINUSE`, curl readiness hit the stale server and the arm hung; it was
+cancelled and N=25..28 redone on verified-free ports 4730-4733. The
+committed runner now refuses a busy port.
+
+Grade unchanged: R4 witness-COMPLETE, harness-condition R5
+witness-ESTABLISHED, full stock/oracle-free/persistent R5 **NOT ACHIEVED** —
+sizeword corruption is a layout-dependent DoS, with no wire-shaped write
+target, no pointer control and no survivor executing a second command.
+
 ## 2026-11-28 10:3xZ — W380: the OOB byte hits the next chunk's size LSB CLOSED
 
 W380 ran operator #7260's named follow-up to W379. Question: with a

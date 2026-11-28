@@ -21554,6 +21554,34 @@ the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
 run concurrently with another valgrind server lost connections from the sixth
 request onward, so run these arms sequentially. No grade or rung cell moved.
 
+## 2026-11-28 10:5xZ — Ruby W381 count sweep and sizeword replay CLOSED
+
+Committed runner: `lab/repro/ruby2shell-w381-sizeword-sweep.sh`. It uses the
+committed client `ruby2shell-w371-wire.py`, the committed watch script
+`ruby2shell-w379-wire-watch.gdb`, and the gitignored plain 3.4.12 Sinatra
+build at `lab/build/plain/ruby-3.4.12-plain`. Pick unused 127.0.0.1 ports;
+the script refuses a busy port and writes raw logs plus `summary.txt` to the
+caller's output directory. Smoke run at 10:49Z (ports 4800-4806 and
+4810-4813, gitignored output under `lab/build/evidence/casemap-chain/w381/`):
+
+```sh
+bash lab/repro/ruby2shell-w381-sizeword-sweep.sh one 4800 lab/build/evidence/casemap-chain/w381/replay-one
+bash lab/repro/ruby2shell-w381-sizeword-sweep.sh two 4810 lab/build/evidence/casemap-chain/w381/replay-two
+```
+
+Expect on `one`: N=22/24/26/28 `folds=1 traps=0`, N=23/25/27 exactly one
+`W379TRAP` with byte `0x53` at `to_end`; `capa=N+21`, `oob_off=capa+24`,
+`slack=27-N` for N<=27, and N=28 `sizeword=0x65 usable=88 slack=15`. Every
+response is the 650-byte 404 digest
+`1e07f7bb201b15f974654de84612acc1c572177a8fb07fbacfa5b6e4ab9c961f` and the
+process survives. On `two`: N=23/25 serve two 404s and survive; N=27 rewrites
+the size LSB in all arms and aborts in a layout-dependent majority with
+`corrupted size vs. prev_size` (7 of 10 author arms overall; the 10:49Z
+smoke had 2 of 2). Do not treat a single N=27 survival as a clean control —
+the byte was written in every arm. Safe-20 and bootable patched Rails 3.4.13
+valgrind controls are in `lab/build/evidence/casemap-chain/w381/valgrind-summary.txt`
+and both report 0/0/0. No grade or rung cell moved.
+
 ## 2026-11-28 10:3xZ — Ruby W380 size-LSB write CLOSED
 
 The committed change is one opt-in environment variable in

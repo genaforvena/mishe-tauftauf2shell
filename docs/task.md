@@ -16632,6 +16632,38 @@ follow-up from §08:4xZ.
   on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
   at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
+## 2026-11-28 10:5xZ — Ruby W381 sizeword window and falsifier CLOSED
+
+Current research limb for a reader arriving now. Operator #7265's bounded
+experiment is complete; committed runner
+`lab/repro/ruby2shell-w381-sizeword-sweep.sh` (modes `one`/`two`, caller
+supplies free ports and a gitignored output directory), raw evidence under
+`lab/build/evidence/casemap-chain/w381/`.
+
+- **Sweep, one request per fresh plain 3.4.12 Sinatra process:** `capa=N+21`,
+  `oob_off=capa+24`. Only odd N writes: N=23 68/4, N=25 70/2, N=27 72/0
+  (`slack` shown after `oob_off`); even N=22/24/26 and N=28 (which grows the
+  chunk to usable 88, `oob_off=73 slack=15`) give zero traps. N=27 is the
+  only count in 22..28 whose byte lands on the next chunk's size LSB.
+- **Two-request replay:** N=23 and N=25 survive with two 404s; N=27 rewrote
+  the size LSB in all ten two-request arms but aborted in 7 (`corrupted size
+  vs. prev_size`) and survived in 3, with recurring heap-layout families
+  separating the outcomes. One arm aborted on the first request.
+- **Operator's falsifier MET** ("survival with the size LSB rewritten"):
+  sizeword hit is necessary, not sufficient; layer the claim as
+  layout-dependent DoS, not deterministic abort. Safe-20 and bootable fixed
+  Rails 3.4.13 valgrind controls 0/0/0, both alive. An EADDRINUSE arm on
+  port 4703 (pre-existing rails-stock-app) was cancelled and redone on free
+  ports; the committed runner now refuses busy ports.
+- Grade unchanged: R4 witness-COMPLETE, harness-condition R5
+  witness-ESTABLISHED, full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next: W382, in fresh N=27 processes vary the second request's post-field
+length (`RUBY2SHELL_W377_POSTLEN` 1..4096) and classify abort vs survivor by
+initial sizeword flags and fold-1/fold-2 chunk adjacency. Prediction: abort
+requires a later allocation that unlinks the corrupted chunk; falsifier: an
+abort with no unlink frame, or attacker-shaped bytes at the corrupted sizeword.
+
 ## 2026-11-28 10:3xZ — Ruby W380 next-chunk size LSB write CLOSED
 
 Current research limb for a reader arriving now. Operator #7260's bounded
