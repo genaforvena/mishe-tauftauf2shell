@@ -10318,6 +10318,63 @@ across vulnerable, fixed and safe-input arms. Prediction: no response-byte
 difference, one write per odd request; falsifier: any response change or crash
 attributable to the write.
 
+## 2026-11-28 11:4xZ — W384: eight post-1024 requests; falsifier MET, reuse without fault
+
+Operator #7295's bounded follow-up to W383's surviving three-request family.
+W383 showed that a corrupted size LSB can persist into a third request, but
+also that three third-request aborts unlinked that same request's chunk. The
+committed runner `lab/repro/ruby2shell-w384-depth.sh` drives eight ordinary
+`ruby2shell-w371-wire.py` invocations against ONE fresh plain 3.4.12 Sinatra
+process under the committed hardware-write watch
+`ruby2shell-w379-wire-watch.gdb`: request 1 at post-field length 64, requests
+2-8 all at 1024, N=27 sharp-s on every request. Reproduction:
+
+```
+bash lab/repro/ruby2shell-w384-depth.sh arms 5120 lab/build/evidence/casemap-chain/w384/arms 16
+bash lab/repro/ruby2shell-w384-depth.sh controls 5140 lab/build/evidence/casemap-chain/w384/controls
+```
+
+A one-arm smoke on verified-free port 5100 aborted on request 1 and is
+preserved in `lab/build/evidence/casemap-chain/w384/smoke/`. The authoritative
+16 arms used verified-free ports 5120-5135; raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w384/arms/`. Every fold reports
+`capa=48 oob_off=72 slack=0`; trapped byte is `0x53` in `case_map` line 294.
+`W379TRAP` lines count distinct watched destinations (the watch script logs
+the first trap per breakpoint), so 2-3 traps across eight folds is expected.
+
+**Falsifier MET.** Eight arms (`a1`, `a2`, `a6`, `a10`, `a11`, `a13`, `a14`,
+`a15`) served all eight requests with the same 650-byte 404 digest
+`1e07f7bb…c961f`, logged eight folds each, stayed alive and showed neither
+`malloc_printerr` nor an `unlink_chunk` frame. In seven of those eight arms the
+fold chunk selected by request 2 was reused unchanged by requests 3-8: e.g.
+`a1` used `0x7fffc808dd20` for request 1, then `0x7fffc80a03d0` for all seven
+later requests; `a2` used `0x7fffc8087590` then `0x7fffc803f220`. `a15` changed
+fold chunk once at request 6 (`0x7fffc8033a90` → `0x7fffc807d040`) without an
+allocator fault. Reuse of the corrupted victim is therefore not sufficient to
+fault; early layout selection, not request count, decides the abort.
+
+**The seven aborted arms faulted on their own current request.** `a0` and `a8`
+stopped after one fold, `a3`/`a5`/`a7`/`a9` after two and `a4` after three.
+Each abort shows `malloc_printerr("corrupted size vs. prev_size") →
+unlink_chunk(p=current fold chunk+0x50)`. Five continue through
+`_int_realloc(oldp=current fold chunk, oldsize=80, nb=144) → libc_realloc →
+rb_gc_impl_realloc → ruby_xrealloc2`; two through `_int_malloc(bytes=32) →
+onig_region_resize → onig_search_gpos`. No arm showed a later request
+unlinking a chunk corrupted by an earlier request, and the written byte was
+always `0x53`, never wire-shaped.
+
+Preserved anomaly: `a12` served all eight requests fault-free but entered fold
+1 with a pre-existing `0x54` sizeword (provenance before the first request
+UNKNOWN), so it is not counted as a valid survivor. Safe-20 vulnerable Sinatra
+and bootable patched Rails 3.4.13 valgrind controls on ports 5140/5141 each
+logged 0 invalid writes / 0 invalid reads / 0 `case_map` errors and stayed
+alive.
+
+Grade unchanged: wire-only, layout-dependent DoS on unmodified Sinatra; no
+chosen address, no marker and no second distinct command. R4 witness-COMPLETE,
+harness-condition R5 witness-ESTABLISHED at its labeled scope, full
+stock/oracle-free/persistent R5 NOT ACHIEVED.
+
 ## 2026-11-28 11:2xZ — W383: a third wire request survives on the 1024 family; falsifier MET
 
 Operator #7282's named follow-up to W382's all-survivor post-length family.

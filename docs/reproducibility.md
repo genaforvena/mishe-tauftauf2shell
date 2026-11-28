@@ -21554,6 +21554,42 @@ the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
 run concurrently with another valgrind server lost connections from the sixth
 request onward, so run these arms sequentially. No grade or rung cell moved.
 
+## 2026-11-28 11:4xZ — Ruby W384 eight-request replay CLOSED
+
+Committed runner: `lab/repro/ruby2shell-w384-depth.sh`. It uses the committed
+client `ruby2shell-w371-wire.py`, the committed watch script
+`ruby2shell-w379-wire-watch.gdb` (`R2S_W379_ABORT_BT=1` adds a native
+backtrace at SIGABRT; default off) and the gitignored plain 3.4.12 Sinatra
+build at `lab/build/plain/ruby-3.4.12-plain`. Pick unused 127.0.0.1 ports;
+the runner refuses occupied ones. One fresh process per arm, eight wire
+requests: request 1 `RUBY2SHELL_W377_POSTLEN=64`, requests 2-8 `1024`, all
+with `RUBY2SHELL_W380_COUNT=27` and `RUBY2SHELL_W378_COUNT=1`.
+
+```
+bash lab/repro/ruby2shell-w384-depth.sh arms 5120 lab/build/evidence/casemap-chain/w384/arms 16
+bash lab/repro/ruby2shell-w384-depth.sh controls 5140 lab/build/evidence/casemap-chain/w384/controls
+```
+
+A one-arm smoke on port 5100 aborted on request 1 and is preserved in
+`.../w384/smoke/`. The authoritative run used verified-free ports 5120-5135;
+16 arms booted, 8 served all eight requests with the exact 650-byte 404 digest
+`1e07f7bb…c961f`, eight folds each, no allocator fault and no unlink frame
+(falsifier MET). Seven arms aborted at folds 1-3 with
+`malloc_printerr("corrupted size vs. prev_size") → unlink_chunk(p=current fold
+chunk+0x50)`, five via `_int_realloc → ruby_xrealloc2 → rb_gc_impl_realloc`
+and two via `_int_malloc → onig_region_resize → onig_search_gpos`; no arm
+showed a later request unlinking a chunk corrupted by an earlier one. `a12`
+served 8/8 but entered fold 1 with a pre-existing `0x54` sizeword (UNKNOWN),
+so it is excluded from survivor counts. Every fold reports
+`capa=48 oob_off=72 slack=0`; trapped byte is `0x53` in `case_map` line 294,
+and `W379TRAP` lines count distinct watched destinations, not writes. Controls
+`w384-vg-safe20` and `w384-vg-fixed27` each reported 0 invalid writes /
+0 invalid reads / 0 `case_map` errors and stayed alive. No grade or rung cell
+moved.
+
+Next: W385, ninth request switched from post length 1024 to 64 after eight
+surviving requests; first command: `read lab/repro/ruby2shell-w384-depth.sh:60-100`.
+
 ## 2026-11-28 11:2xZ — Ruby W383 third-request replay CLOSED
 
 Committed runner: `lab/repro/ruby2shell-w383-third-request.sh`. It uses the
@@ -21589,6 +21625,8 @@ cell moved.
 
 Next: W384, eight repeated post-1024 requests on a survivor; first command:
 `read lab/repro/ruby2shell-w383-third-request.sh:61-91`.
+
+W384 closed this replay with eight fault-free eight-request survivors and no cross-request unlink; see §11:4xZ. No grade or rung cell moved.
 
 ## 2026-11-28 11:1xZ — Ruby W382 second-post-length replay CLOSED
 

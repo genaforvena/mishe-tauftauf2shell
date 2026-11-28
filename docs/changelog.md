@@ -6,6 +6,25 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 11:4xZ — Ruby W384 eight-request falsifier MET
+
+Operator #7295's named experiment closed with the new committed runner
+`lab/repro/ruby2shell-w384-depth.sh`. Requests 1/2 were held at post-field
+lengths 64/1024 and requests 3-8 were also 1024 in one fresh plain 3.4.12
+Sinatra process per arm, N=27, under the committed hardware write watch.
+Sixteen arms on verified-free ports 5120-5135 plus one aborted smoke arm on
+5100: 8/16 valid arms served all eight 650-byte 404s with eight folds, no
+allocator fault and no unlink frame — the operator's falsifier is MET. Seven
+arms aborted at folds 1-3, always unlinking the current request's fold chunk
+(`p=chunk+0x50`), five via `_int_realloc` and two via Onig's `_int_malloc`;
+no cross-request unlink. In 7/8 survivors request 2's fold chunk was reused
+unchanged through request 8, so reuse alone does not fault. One 8/8 arm with
+a pre-existing `0x54` sizeword is a preserved anomaly, excluded from the
+count. Controls: safe-20 and patched Rails 3.4.13 valgrind 0/0/0, alive.
+Grade unchanged: R4 witness-COMPLETE / harness R5 witness-ESTABLISHED /
+full stock R5 NOT ACHIEVED. Next W385: switch request 9 to post length 64
+after eight surviving 1024 requests.
+
 ## 2026-11-28 11:2xZ — Ruby W383 third-request falsifier MET
 
 Operator #7282's named experiment closed with the new committed runner
