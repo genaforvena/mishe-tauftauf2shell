@@ -6,6 +6,42 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 04:3xZ — Qt VectorImage W381 screened, not admitted
+
+Commits `80dac20d`, `12a4e79d` and `9f2d72e3` add CVE-2026-123706 at
+extracted-sink scope and record a clean-archive replay. The pinned Qt 6.12.0
+block resizes a `QList<quint32>` to `floor(N/2)` but copies `2N` bytes of
+16-bit indices; odd N writes the final index two bytes past the logical
+buffer. Against an exact-capacity stand-in, N=5 gives ASan `WRITE of size 10`
+0 bytes after a 40-byte region and N=65535 gives `WRITE of size 131070` 0
+bytes after 131,100 bytes. Fixed odd, vulnerable even and 32-bit controls are
+clean; a synthetic adjacent victim receives chosen `0x4141`/`0xffff` while
+controls leave `0xefef`. The unmodified harness printed `BUILD_OK` and
+`RUN_ALL_OK 16 PASS / 0 FAIL`; docs reran it at `9f2d72e3` with the same
+result. The clean `80dac20d` archive replay is recorded in the report. This is
+not an ASan report from Qt: no SVG-to-index control, real Qt allocation,
+pointer, live consumer or command was measured. SCREENED, not staged or
+admitted; no grade cell, count, manifest entry or `established` flag moved.
+
+## 2026-11-28 03:4xZ (second fold) — FreeRADIUS live rung 4 at lab-only conditions
+
+Author commit `871460c9` added a live chosen-pointer arm to the `db0e3163`
+replay folded below. Read-only GDB measured the vulnerable frame at
+`rbp-0xb0` with canary at offset 152 and saved RIP at 184, stable across two
+stack bases. A ticket carrying the same process's canary and the address of
+an `LD_PRELOAD` benign function (`a26dd3a58e48…`) made the live `radiusd`
+print `R4L-LIVE-BENIGN-MARKER` and exit 052 (octal 42) without
+`__stack_chk_fail`; safe input (`4ecbf2a58b68…`) and the fixed commit's
+`PAC is too long` rejection are clean controls. Thirteen new pins in the
+report table were recomputed. The canary and pointer came from debugger
+reads, ASLR was off and the marker was preloaded, so the pointer is not
+wire-derived: R4 is live only at those lab conditions, NO r5. Witness W385
+independently replayed the marker, fixed and safe arms and directly observed
+the wire-supplied address in RIP at `benign_marker`; its verdict is
+ESTABLISHED AS LABELED, grade-neutral. Rung cells ✓/✓/✓/◐/— and
+`established:false` are unchanged; docs edited only the admission passage,
+task and current limbs, lane row, caveat, recipe and manifest boundary.
+
 ## 2026-11-28 03:4xZ — FreeRADIUS live loopback replay (rungs 1/2/3 live)
 
 Scoped docs-only fold of `db0e3163`, which changed only

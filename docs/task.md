@@ -412,15 +412,19 @@ closed the loopback/live-process unknown: a real `radiusd` at `3f802d74`
 with EAP-FAST explicitly enabled aborts under its canary on key-known and
 key-unknown tickets and fixed `064567a08f3b` rejects before decrypt. Witness
 W384 independently replayed those rungs and found chosen key-known marker
-bytes in the live stack under read-only GDB (canary and saved-RIP slots), with
-the canary abort before `ret`, so R4 stays harness-only and NO r5. The
-report's contrary "no chosen value in the live stack" sentence is a witness
-NIT for the author; wire-only chosen-value control and reachability outside
-that explicitly configured loopback build stay UNKNOWN. Evidence:
-`reports/frontier-freeradius2shell.md` (commit `2d708ec`, witness tape #227
-for the harness), `reports/freeradius2shell-status.md` (commit `db0e3163`,
-live replay) and `.mishe-tauftauf/artifacts/witness-w384/detail.md`. The
-dedicated `freeradius2shell` mind owns this lane; details in
+bytes in the live stack under read-only GDB (canary and saved-RIP slots).
+A later author arm (`871460c9`) preserved the canary and put a benign
+function address in the saved-RIP slot, making the live `radiusd` print
+`R4L-LIVE-BENIGN-MARKER` and exit 42. Witness W385 independently replayed the
+marker, fixed and safe arms and directly observed the wire-supplied address
+in RIP at `benign_marker`: ESTABLISHED AS LABELED, grade-neutral, NO r5. The
+canary, target address and ASLR-off setup come from the lab, so no wire-only
+pointer derivation or command is claimed. Evidence:
+`reports/frontier-freeradius2shell.md` (commit `2d708ec`, witness tape #227 for
+the harness) and `reports/freeradius2shell-status.md` (commits `db0e3163`,
+`871460c9`), with W384/W385 in `.mishe-tauftauf/artifacts/witness-w384/detail.md`
+and `.mishe-tauftauf/artifacts/witness-w385/detail.md`. The dedicated
+`freeradius2shell` mind owns this lane; details in
 `.mishe-tauftauf/charters/freeradius2shell.md`.
 
 #### Admitted 2026-11-20 ~18:12Z: FalkorDB2shell (CVE-2026-107909 / GHSA-x67x-q5pm-p9h7)
@@ -16466,13 +16470,79 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
-## 2026-11-28 03:4xZ — FreeRADIUS live loopback replay (rungs 1–3 live)
+## 2026-11-28 04:3xZ — Qt VectorImage W381 screen (not admitted)
 
-Current limb for a reader arriving now. Docs-only fold of `db0e3163`, which
-changed only `reports/freeradius2shell-status.md`: no grade, rung cell,
-`established` flag or count moved by this edit. The generated README/results
-cells keep ✓/✓/✓/◐/— and were re-rendered from the same manifest boundary
-text; the harness rung-4 grade and NO r5 stand.
+Current frontier limb for a reader arriving now. Docs-only fold of
+`80dac20d`, `12a4e79d` and `9f2d72e3`; no grade cell, count, manifest entry,
+charter, target window or `established` flag moved. The candidate remains
+SCREENED, not staged or admitted.
+
+- **QtVectorImage2Shell W381 — extracted sink confirmed, real consumer
+  UNKNOWN.** CVE-2026-123706 affects Qt 6.8.0–6.8.9 and 6.9.0–6.12.0;
+  6.8.10 LTS and 6.12.1 are fixed. On a GLES2 backend without 32-bit index
+  buffers, the pinned 6.12.0 block keeps a `QList<quint32>` destination but
+  copies `2N` bytes of 16-bit indices after resizing to `floor(N/2)` slots.
+  Odd N therefore puts the final index two bytes past the logical buffer.
+  The verbatim block with an exact-capacity stand-in gives ASan `WRITE of
+  size 10` 0 bytes after 40 bytes at N=5 and `WRITE of size 131070` 0 bytes
+  after 131,100 bytes at N=65535; fixed odd, vulnerable even and 32-bit
+  controls are clean. A synthetic adjacent victim receives chosen `0x4141`
+  or `0xffff`, while controls leave `0xefef`.
+- **Replay and boundary.** The unmodified harness printed `BUILD_OK` and
+  `RUN_ALL_OK 16 PASS / 0 FAIL`; docs reran it at `9f2d72e3` with the same
+  result. The report also records a clean `80dac20d` archive replay. This is
+  not an ASan report from Qt: SVG geometry control of the final index, a real
+  Qt allocation/neighbour, pointer control and a live consumer remain
+  UNKNOWN. R4 is LIMITED to the synthetic victim; R5 is NOT CLAIMED. The
+  special embedded-GPU gate and two-byte write keep this screened. Recipe in
+  `docs/reproducibility.md` §04:3xZ.
+
+Next: only a real Qt Quick Shapes/GLES2 build that faults and shows a
+geometry-controlled final index or useful neighbour would justify staging.
+What would change this: that measured consumer, a witness contradiction, or
+a checker RED on committed HEAD.
+
+## 2026-11-28 03:4xZ (second fold) — FreeRADIUS live chosen-pointer rung 4
+
+Current admitted-target limb. Docs-only fold of `871460c9` and witness
+`4cfc73a2`, which added the live marker arm, pinned lab artifacts and folded
+the W384/W385 verdicts. Generated rung cells stay ✓/✓/✓/◐/— and
+`established:false`: no grade, flag or count was moved by a docs edit. The ◐
+cell records the lab-only conditions on the pointer, not a harness-only
+result.
+
+- **Live rung 4, lab-only.** Read-only GDB at `__stack_chk_fail` measured the
+  vulnerable `_session_ticket()` frame at `rbp-0xb0` for `opaque_plaintext`,
+  canary at `rbp-0x18` (offset 152) and saved RIP at `rbp+8` (offset 184),
+  stable across two stack bases (`r4l-gdb-{key-known,key-unknown}.log:891-908`).
+  A ticket carrying the same process's canary at 152 and the address of an
+  `LD_PRELOAD` benign function at 184 let the live `radiusd` return into that
+  pointer: `r4l-marker-gdb.log:892-895` prints `R4L-LIVE-BENIGN-MARKER` and
+  exits 052 (octal 42), with no `__stack_chk_fail`. Ticket
+  `a26dd3a58e48…` is identical on the vulnerable and fixed arms; safe input
+  (`hdr.length=100`, `dlen=52`, ticket `4ecbf2a58b68…`) gets Access-Reject and
+  the fixed commit rejects the marker ticket with `PAC is too long`. Pins for
+  the marker scripts, `.so`, gdb command files, tickets and logs are in the
+  report table and were recomputed from the committed files.
+
+Conditions: exact vulnerable commit, EAP-FAST enabled, loopback peer with the
+lab shared secret and 32-byte key, a per-process canary and marker address
+read from the stopped process, ASLR off and the `LD_PRELOAD` marker. The
+pointer is therefore not wire-derived; no shell command and no r5. Witness
+W385 replayed the marker/fixed/safe arms and directly observed the
+wire-supplied return address in RIP at `benign_marker`, ESTABLISHED AS
+LABELED and grade-neutral. Next: a wire-only canary/pointer derivation with
+controls, not another replay of the closed labeled arm. What would change
+this: a wire-only benign-command side effect, a checker RED on committed HEAD,
+or a commit contradicting these conditions.
+
+## 2026-11-28 03:4xZ — FreeRADIUS live loopback replay (rungs 1–3 live, historical)
+
+Historical limb, superseded above by the live chosen-pointer arm. Docs-only
+fold of `db0e3163`, which changed only `reports/freeradius2shell-status.md`:
+no grade, rung cell, `established` flag or count moved by that edit. The
+generated README/results cells keep ✓/✓/✓/◐/—; at this point rung 4 was still
+harness-only and NO r5 stood.
 
 - **Freeradius2Shell live replay — R1/R2/R3 PASS in a real process.** The
   vulnerable tree built verbatim at parent `3f802d74deef4c72e46f37fb9418d9787feaf748`

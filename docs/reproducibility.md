@@ -44,6 +44,7 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
+| QtVectorImage2Shell W381 (SCREENED, not staged or admitted) | [brief](../reports/frontier-qtvectorimage2shell.md), [provenance](../lab/frontier/qtvectorimage2shell/PROVENANCE.md) | CVE-2026-123706, Qt 6.8.0–6.8.9 and 6.9.0–6.12.0 affected, 6.8.10 LTS/6.12.1 fixed; vulnerable v6.12.0 source SHA-256 `ebfdc04f…`, fixed `e1d8923e…` source `5a0f8706…`; five pins in `SHA256SUMS` | `cd lab/frontier/qtvectorimage2shell && sha256sum -c SHA256SUMS && bash harness/build.sh && bash harness/run-all.sh` (verbatim extracted index-copy block, exact-capacity `QList` stand-in; no Qt, GPU, SVG parser, listener or wire) | `BUILD_OK`, `RUN_ALL_OK 16 PASS / 0 FAIL`; N=5 ASan `WRITE of size 10` 0 bytes after 40 bytes, N=65535 `WRITE of size 131070` 0 bytes after 131,100 bytes; fixed-odd/even/uint controls clean, synthetic victim `0x4141`/`0xffff` vs control `0xefef`; R3 at extracted-sink scope, R4 LIMITED to synthetic victim, R5 NOT CLAIMED; real consumer UNKNOWN |
 | RufusSbat2Shell W369 (ADMITTED 21:1xZ, 221st; W372 ESTABLISHED AS LABELED at stage `0415fa78`, W373 at correction `553bfad5`, NO r5) | [status](../reports/rufussbat2shell-status.md), [brief](../reports/frontier-rufussbat2shell.md), [provenance](../lab/frontier/rufussbat2shell/PROVENANCE.md) | GHSA-hcpc-vq8c-923h, Rufus `>=4.11, <=4.16_BETA`, patched `4.16`; fix `842873017f289713a5d5009320c11f31cfee36ed`, parent `de4cf676c2aedf73b0ddfc234e420d19c8969c2e`; stable source/harness/control pins in `SHA256SUMS` | `cd lab/frontier/rufussbat2shell && sha256sum -c SHA256SUMS && ./harness/run-all.sh` (exact extracted `GetSbatEntries()`, local file only; no Windows/network) | GCC and Clang: `RUN_ALL_OK 11 PASS / 0 FAIL`; vulnerable CR-60 ASan heap WRITE-8 at `parser.c:1651`, 0 bytes after 32; CR-2 terminator READ-8; fixed 60/2 clean; synthetic adjacent victim/no-PIE chosen callback prints `BENIGN_MARKER`; R4 LIMITED, R5 NOT CLAIMED. Witness W372 replayed stage `0415fa78` (TAR `178726d9…`, 16/16 pins, upstream blobs matched) and graded ESTABLISHED AS LABELED at that exact scope, grade-neutral, NO r5. Witness W373 then replayed the corrected harness from clean TAR `d8ec9e29…`: 16/16 pins before and after, 11/0 under GCC and Clang, source-true citation fixes and two-slot/62-slot accounting, read-only GDB at list+32 and a tampered-copy post-pin control rc 1, graded ESTABLISHED AS LABELED, grade-neutral, R4 LIMITED, NO r5. The operator's earlier correction replay also showed a controlled stable-output mismatch failing the post-regeneration pin check rc 1. Recipe and gitignored evidence in §21:0x–21:1xZ |
 | ScreenSendCmd2Shell W370 (ADMITTED 21:4xZ, 222nd; W375 ESTABLISHED AS LABELED at stage `95161177`, NO r5) | [status](../reports/screensendcmd2shell-status.md), [brief](../reports/frontier-screensendcmd2shell.md), [provenance](../lab/frontier/screensendcmd2shell/PROVENANCE.md) | CVE-2026-71409, CWE-120, Screen `<5.0.2`, fixed 5.0.2; GNU tarballs 5.0.1 `2dae36f4…09869d` / 5.0.2 `ca9a2c7e…b332`; 5.0.3 `941c98ff…` read-only for the `SendCreateMsg()` sibling; six input pins in `SHA256SUMS`, eight evidence pins in `evidence/SHA256SUMS`, exact fix hunk in `src/fix.patch` | `cd lab/frontier/screensendcmd2shell && ./harness/build.sh && ./harness/run-all.sh` (three in-tree ASan builds of the real client, loopback-local deep `SCREENDIR`, no listener or wire) | Operator clean replay 21:47Z from HEAD `95161177` (plain tar `519f6fde…`): 6/6 pins, own BUILD_OK and `RUN_ALL_OK 13 PASS / 0 FAIL`; real `screen -X` ASan `global-buffer-overflow`, `WRITE of size 302`, 0 bytes after `SocketPath` and 62 before the real `attach_tty_name_in_ns`, at `attacher.c:434` ← `screen.c:950`; fixed 5.0.2 and safe input clean; recover-ASan GDB shows chosen `0x43` at nine victim offsets; R4 LIMITED, R5 NOT CLAIMED; full procedure in §21:4xZ. Witness W375 (private artifact) rechecked 6/6 + 8/8 pins before and after, 13 PASS / 0 FAIL and all nine chosen bytes; grade-neutral NIT: plain GCC PIE and -no-pie builds FORTIFY-abort (rc 134) before any write, so the old BSS-padding claim is withdrawn |
 | TdengineEscape2Shell W371 (ADMITTED 22:2xZ, 223rd; W377 ESTABLISHED AS LABELED at stage `c522d973`, NO r5) | [brief](../reports/frontier-tdengineescape2shell.md), [status](../reports/tdengineescape2shell-status.md), [provenance](../lab/frontier/tdengineescape2shell/PROVENANCE.md) | GHSA-4v5h-fxjw-vrmq / TD-SEC-2026-004, `<= v3.4.1.6`, fixed `v3.4.1.14` by commit `64ff9a8f…` (no such tag), parent `d91020e5…`; six input pins in `SHA256SUMS`, five stable-evidence pins in `evidence/SHA256SUMS` | `cd lab/frontier/tdengineescape2shell && sha256sum -c SHA256SUMS && ./harness/build.sh && ./harness/run-all.sh` (verbatim pinned `trimString()` in caller-shaped frames, no server or wire) | `RUN_ALL_OK 28 PASS / 0 FAIL` twice; GCC/Clang ASan `stack-buffer-overflow WRITE of size 1` at `parUtil.c:461`, fixed and safe arms clean; plain adjacent `victim` `0x25`/`0x5f`/`0x78`. Operator clean replay 22:18Z from `c522d973` tar `95050b3b…`: 6/6 input pins, own `BUILD_OK`, 28 PASS / 0 FAIL and 5/5 evidence pins. W377 clean-archive replay matched 6/6 input and 5/5 evidence pins before and after, with fixed/safe and non-special-escape counterexamples; ESTABLISHED AS LABELED, grade-neutral, NO r5. R4 LIMITED to one chosen byte from a three-value set in the local adjacent stack object; no live parser or vendor RCE. |
@@ -89,7 +90,7 @@ containers whose host ports bind only to loopback.
 | Brotli2Shell | [report](../reports/frontier-brotli2shell.md) | `bash lab/frontier/brotli2shell/run.sh` fetches `poc.py` and verifies its SHA-256 | same script builds v1.2.0/v1.2.1/instrumented | same script writes `logs/` and prints digests |
 | Postgres2Shell | [report](../reports/frontier-postgres2shell.md) | image digests pinned in `run.sh` | container images by digest | `./run.sh 17.11` and `./run.sh 17.12`; `trigger-vg.sql` for Valgrind; chunk-placement negative (2026-11-21): `docker cp` `trigger-marker.sql` / `gdb-marker.cmd` / `marker-probe.sh` into `pg2shell-gdb`, then `docker exec pg2shell-gdb bash /tmp/marker-probe.sh` (exact block in the report); gitignored `lab/frontier/postgres2shell/logs/marker-17.11-{gdb,psql}.log` regenerate with that script |
 | Dragonfly2Shell | [report](../reports/frontier-dragonfly2shell.md) | image digests pinned in `run.sh` | container images by digest | `./run.sh v1.40.1`, `./run.sh v1.40.2`; witness files in `lab/witness/dragonfly2shell/` |
-| FreeRADIUS2Shell | [report](../reports/frontier-freeradius2shell.md), [status](../reports/freeradius2shell-status.md) | source at vulnerable parent `3f802d74deef`, fix `064567a08f3b`; artifact digests in report and `lab/freeradius2shell-live/logs/live-digests.txt` | `cd lab/frontier/freeradius2shell && bash run.sh` builds vulnerable/fixed/canary/asan; live build and peer recipe in §03:4xZ below (loopback only) | harness prints `ALL CHECKS PASS`, writes `logs/` and `logs/digests.txt`; live replay: vulnerable `radiusd` canary abort on key-unknown (`radiusd-live.log:1094-1097`) and key-known (`radiusd-keyknown.log:884-887`) tickets, fixed `PAC is too long` with no abort (`radiusd-fixed.log:872-874`); R1/R2/R3 live, R4 harness-only, NO r5; witness W384 ESTABLISHED AS LABELED, grade-neutral, with key-known chosen stack bytes under read-only GDB and a report NIT |
+| FreeRADIUS2Shell | [report](../reports/frontier-freeradius2shell.md), [status](../reports/freeradius2shell-status.md) | source at vulnerable parent `3f802d74deef`, fix `064567a08f3b`; artifact digests in report and `lab/freeradius2shell-live/logs/live-digests.txt` | `cd lab/frontier/freeradius2shell && bash run.sh` builds vulnerable/fixed/canary/asan; live and R4 recipes in §03:4xZ below (loopback only) | harness prints `ALL CHECKS PASS`; live replay: vulnerable `radiusd` canary abort on key-known (`radiusd-keyknown.log:884-887`) and key-unknown (`radiusd-live.log:1094-1097`) tickets, fixed `PAC is too long` with no abort (`radiusd-fixed.log:872-874`); W384 replayed rungs 1–3 ESTABLISHED AS LABELED; author arm `871460c9` adds a live benign marker (rc 42) with gdb-read canary and `LD_PRELOAD` target under ASLR-off, safe/fixed controls clean; W385 replayed all three arms and directly observed the wire-supplied return address, ESTABLISHED AS LABELED at lab-only R4, NO r5 |
 | Falkordb2Shell | [report](../reports/frontier-falkordb2shell.md), [status](../reports/falkordb2shell-status.md) | source at vulnerable parent `40780e992ecc`, fix `0b11a00b34b2` (removes Bolt/WebSocket; lab `FIXED` is a local length guard) | `cd lab/frontier/falkordb2shell && bash run.sh` builds vuln/fixed/asan | same script prints `ALL CHECKS PASS`: `payload_len=4144`, 525 OOB write operations, canary `K:K`, ASan heap-buffer-overflow (READ of size 8 at the `^=` load) |
 | Freeswitch2Shell | [report](../reports/frontier-freeswitch2shell.md), [status](../reports/freeswitch2shell-status.md) | source at vulnerable parent `fbac12b451a1`, fix `d557ca6d29e6da4f10824dc158100906a592b91a`; both `mod_xml_rpc` and `enable-websocket` off by default | `cd lab/frontier/freeswitch2shell && bash run.sh` builds vuln/fixed/asan; `bash lab/freeswitch2shell/live/run.sh`, `bash lab/freeswitch2shell/live/run_pos.sh` and `bash lab/freeswitch2shell/live/run_live_gdb.sh` build the unmodified source over loopback | repaired driver prints `ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`: ASan `WRITE of size 132146` in `ws_raw_read`, 1464 OOB writes from 65536 to 66999, chosen 8 bytes at `offsetof(wsh_t, ssl)=131112` with `marker_called=1` and `rc=42`, fixed `rc=-1009`, 5/5 identical. Real-source `run.sh` (`FF FF FF FF`): ASan `negative-size-param (size=-5)`, plain rc 134, fixed `rc=-1009` with `wsh->ssl` untouched, offset 131112 validated. Real-source `run_pos.sh` (`7F FF FF FF 00 00 00 00`, `plen=INT_MAX`): plain `wsh->ssl=0x4142434445464748`, `ssl_bytes=4847464544434241`, `RESULT=PASS` rc 0; fixed `rc=-1009`, `ssl=(nil)`; ASan `WRITE of size 4096` at the end of a 131136-byte region from `ws_raw_read (ws.c:300)`. A full vulnerable FreeSWITCH then ran in a private netns on 127.0.0.1 with a real WebSocket `101` upgrade; GDB caught the chosen `wsh->ssl` dereference in `SSL_shutdown`, witness-replayed (#338) with changed bytes at the same site. Stock heap layout and external reachability remain UNKNOWN. |
 | Freerdp2Shell | [report](../reports/frontier-freerdp2shell.md), [status](../reports/freerdp2shell-status.md) | source at vulnerable parent `8ec6d3923b`, fix `bf217a5` (3.32.1, `/ 4` division guard); digests `d0a31487…` / `c5186500…`; real-library source tag 3.32.0 at `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1` | `cd lab/frontier/freerdp2shell && bash run.sh` builds the extracted harness; `bash lab/freerdp2shell-src/run.sh` builds source-built ASan and plain libraries; `python3 lab/freerdp2shell-src/loopback_shadow_probe.py nego|tls-auth` drives a real loopback shadow server; `python3 lab/freerdp2shell-src/live_mcs_join_probe.py` and a headless `sfreerdp` replay the live session; `bash lab/freerdp2shell-src/verify_live.sh` replays the whole live stock-allocator claim in one command (17 PASS warm / 18 PASS clean-room) | extracted harness prints `ALL CHECKS PASS` (rc 0) twice; the real library prints `ALL REAL-LIBRARY CHECKS PASS` (rc 0): ASan `WRITE of size 16384` 0 bytes after an 8820-byte region in `rdpsnd_server_send_samples`, chosen `de`/`ad` at OOB offsets 8820/21384 through the real `SNDC_FORMATS` parser, fixed-guard control rc 3 with no wrap. Wake 7: a real 3.32.0 `freerdp-shadow-cli` on 127.0.0.1:13890 answered X.224 / RDP_NEG_REQ over real TCP (`0x08` NLA, `0x02` TLS, `0x00` RDP) and the default NLA gate stopped a TLS-authenticated client at `CONNECTION_STATE_NEGO` when CredSSP was withheld; a standard-RDP local-peer offer advanced without credentials. Wake 8: MCS CONNECT / ERECT DOMAIN / ATTACH USER / three CHANNEL JOIN confirms, `CONNECTION_STATE_ACTIVE`, `SNDC_FORMATS` over the wire and the live server's `realloc failed!` / `SelectFormat failed with 12`; the live ASan server then reports `WRITE of size 16384` 0 bytes after an 8820-byte region with client-chosen `0xDE` at offset 8820 (`live_session_wrap.txt`). No-auth server, subsystem-supplied ADPCM table, ASan build and synthetic playback are explicit conditions; witness W31 independently accepted the one-command replay (#532, 18 PASS / 0 FAIL from clean HEAD b25d025, ESTABLISHED, no corrections; the harness uses post-auth credentials). Wake 12 measured the live stock glibc layout in three loopback sessions: pointer-bearing heap data lies inside the chosen-byte write (`heap_layout_stock.txt`). Wake 13 identified that object as the wLog for `com.freerdp.channels.rdpsnd.server` and, with a configured `WLOG_FILTER` and a scratch log call after the real copy, observed `mov (%rax,%r15,8)` dereferencing eight chosen `0x41` bytes (`rax=0x4141414141414141`) in the live stock build (`pointer_control_stock.txt`); the trigger and playback bytes are lab-supplied, no grooming at that wake, one object only. Wake 16 closed the FFmpeg gate: stock `WITH_FFMPEG=ON` rejects both ADPCM tags (NEGATIVE), while `-DWITH_DSP_EXPERIMENTAL` adds tag 2 with its own wrap branch (`out_frames=0xfffffffffffffffc`, ASan `WRITE of size 16384`) through `PocAdpcmTag2.c` in-process on real library bytes (`ffmpeg_adpcm_tag2.txt`); a stock wrap-capable format stays UNKNOWN. Wake 17 closed the real-audio-source question at source level in pinned 3.32.0: the copied bytes and copy stride come from the server's platform audio capture, not the client, so remote byte choice is not established in a stock deployment (deployment-specific influence stays UNKNOWN). Wake 18 observed client-controlled grooming in the live stock build: extra PCM format records grow `client_formats` by 32 bytes each and shift the wLog `Names` field (`grooming_format_count_stock.txt`), with a controlled dereference at the shifted offset and an out-of-write negative; raw logs are gitignored under `verify-live-out/wake18/`, and the client controls the offset, not the bytes. |
@@ -1581,11 +1582,14 @@ lz4-dev or rst2man on this host). Full evidence:
   patch. The 2026-11-28 FreeRADIUS replay adds a real loopback `radiusd`
   (rungs 1/2/3 live; explicit EAP-FAST, known A-ID, lab shared secret, exact
   vulnerable commit) and the upstream fixed-commit differential; witness W384
-  replayed it ESTABLISHED AS LABELED, grade-neutral, NO r5, and observed
-  key-known chosen bytes at measured live stack offsets under read-only GDB,
-  with a canary abort before `ret`. Wire-only chosen-value control, control
-  transfer and rung 4 stay UNKNOWN / harness-only. FalkorDB keeps no rung-4
-  claim; a live `BOLT_PORT` service remains UNKNOWN.
+  replayed those rungs ESTABLISHED AS LABELED, grade-neutral. Author commit
+  `871460c9` adds a live rung-4 marker (rc 42) with the process canary and
+  `LD_PRELOAD` marker address read from gdb under ASLR-off; safe-input and
+  fixed-commit controls are clean. Witness W385 independently replayed all
+  three arms and directly observed the wire-supplied return address in RIP at
+  `benign_marker`, ESTABLISHED AS LABELED, grade-neutral. That pointer is not
+  wire-derived, so NO r5 and the ◐ cell stays limited at those lab conditions.
+  FalkorDB keeps no rung-4 claim; a live `BOLT_PORT` service remains UNKNOWN.
 - **Freerdp**: `lab/freerdp2shell-src/run.sh` clones tag 3.32.0 at
   `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1`, builds ASan and plain
   libraries with the pinned feature flags, and checks the source-built PoCs
@@ -21317,6 +21321,33 @@ object, R5 NOT CLAIMED; no full `taosd` SQL/wire path, listener or command.
 Operator admission landed 22:2xZ as the 223rd mind (`c16c1eaa`);
 independent witness replay landed as W377 (§22:4x–22:5xZ).
 
+## 2026-11-28 04:3xZ — Qt VectorImage W381 extracted-sink screen
+
+Sources, extracted blocks, harness and stable evidence are tracked under
+`lab/frontier/qtvectorimage2shell/`; `harness/gen/` and raw per-case logs are
+gitignored and regenerate with the commands below. No Qt build, SVG parser,
+GPU, listener or network is involved.
+
+```sh
+cd lab/frontier/qtvectorimage2shell
+sha256sum -c SHA256SUMS
+bash harness/build.sh
+bash harness/run-all.sh
+sha256sum -c evidence/SHA256SUMS
+```
+
+Expect `BUILD_OK` and `RUN_ALL_OK 16 PASS / 0 FAIL`. Vulnerable odd N=5
+reports ASan `heap-buffer-overflow`, `WRITE of size 10`, 0 bytes after a
+40-byte region; N=65535 reports `WRITE of size 131070`, 0 bytes after a
+131,100-byte region. Fixed odd, vulnerable even and 32-bit controls are clean.
+The plain slab arms read `victim=0x4141` / `0xffff` at the immediately
+following offset while controls retain `0xefef`. This confirms the verbatim
+pinned block against an exact-capacity stand-in, not a Qt process: SVG control
+of the final index, a real Qt neighbour and pointer/control-flow impact remain
+UNKNOWN. R4 is LIMITED to the synthetic victim, R5 NOT CLAIMED; the lane is
+screened, not staged or admitted. Full path:
+`reports/frontier-qtvectorimage2shell.md`.
+
 ## 2026-11-28 03:4xZ — FreeRADIUS live loopback replay
 
 Sources, peer, configs, installed trees and raw logs live under gitignored
@@ -21368,15 +21399,47 @@ plaintext was checked offline only. Witness W384 (`w384-gdb-kk.log:891-907`,
 read-only GDB) then observed chosen marker bytes in the live stack:
 `dst+144..169` equal `p[144:170]`, canary slot `dst+152` = `IUS2SHEL` and
 saved-RIP slot `dst+184` = `2SHELL-L` = `0x4c2d4c4c45485332`, the corrupted
-frame #2 PC. The canary aborts before `ret`: no control transfer, no command,
-and a lab key is required, so wire-only chosen-value control stays UNKNOWN,
-rung 4 remains harness-only and rung 5 was not attempted. The report's
-contrary "no chosen value ... in the live stack" sentence is a witness NIT
-for the author, not a grade change; detail is in
-`.mishe-tauftauf/artifacts/witness-w384/detail.md`. Raw logs/tickets/binaries
-are gitignored and regenerate with these commands; volatile addresses, PIDs
-and timing are not pinned. The exact fixed release tag stays UNKNOWN — the
-fix commit is the version boundary. Full path:
+frame #2 PC; that arm aborts before `ret`. The witness NIT on the report's
+contrary sentence was folded in `871460c9`. Raw logs/tickets/binaries
+regenerate with these commands; volatile addresses, PIDs and timing are not
+pinned. The exact fixed release tag stays UNKNOWN — the fix commit is the
+version boundary. Full path: `reports/freeradius2shell-status.md`.
+
+### Live chosen-pointer arm (`871460c9`)
+
+```sh
+cd lab/freeradius2shell-live
+bash r4l-run.sh key-known && bash r4l-run.sh key-unknown  # read-only gdb offsets
+bash r4l-marker-run.sh                                   # canary-preserving marker ticket
+LD_LIBRARY_PATH=$PWD/talloc-prefix/usr/lib/x86_64-linux-gnu \
+  install/sbin/radiusd -X -d install/etc/raddb -i 127.0.0.1 -p 18120 &
+pid=$!
+python3 peer-safe.py key-unknown --outdir logs/r4l-safe
+kill "$pid"; wait "$pid" || true
+bash r4l-fixed-run.sh                                    # recorded marker ticket, fixed build
+```
+
+Expect gdb-measured slots `opaque_plaintext` = `rbp-0xb0`, canary `rbp-0x18`
+(offset 152) and saved RIP `rbp+8` (offset 184) in
+`r4l-gdb-{key-known,key-unknown}.log:891-908`. A fresh marker ticket carries
+the same process's canary at 152 and the `LD_PRELOAD` marker address at 184;
+`r4l-marker-gdb.log:892-895` prints `R4L-LIVE-BENIGN-MARKER` and exits 052
+(octal 42), with no `__stack_chk_fail`. Safe input (`hdr.length=100`,
+`dlen=52`, ticket `4ecbf2a58b68…`) is rejected; the fixed commit rejects the
+marker ticket with `PAC is too long`. Thirteen new pins (marker peer scripts,
+marker source/`.so`, both gdb command files, three tickets and four logs) are
+in the report table and were recomputed from the committed files. The
+`a26dd3a58e48…` ticket digest is run-specific because it embeds the recorded
+canary; a fresh marker replay should not expect it, and the fixed script
+reproduces it only through its recorded default.
+
+Witness W385 replayed the unmodified marker, fixed and safe arms, then used a
+separate read-only GDB probe to break at `benign_marker`; RIP and the return
+slot held the wire-supplied address. Verdict: ESTABLISHED AS LABELED,
+grade-neutral. Conditions: exact vulnerable commit, EAP-FAST on, loopback
+peer, lab shared secret and 32-byte key, gdb-read per-process canary and
+marker address, ASLR off and `LD_PRELOAD` marker; no wire-only pointer
+derivation, no shell command, NO r5. Full path:
 `reports/freeradius2shell-status.md`.
 
 ## 2026-11-28 00:0xZ — gimpjif W361 larger wrapped geometry
