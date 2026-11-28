@@ -18,12 +18,17 @@ rejected before decrypt with `PAC is too long` and no abort
 (`radiusd-fixed.log:872-874`). Pins: `peer.py` `69ff0272…`, tickets
 `f655d399…` / `94fd74f4…`, vulnerable/fixed `radiusd` `abce05d2…` /
 `ca397146…`. Live key-unknown plaintext is not choosable (GCM keystream);
-the key-known chosen plaintext was verified offline only. No chosen value was
-observed in the live stack and its layout is unmeasured, so R4 stays
-harness-only and R5 is unclaimed. This fold updates the admission passage,
-current task limb, lane row, caveat and recipe; README/results are
-re-rendered from the same manifest boundary text. No grade, rung cell,
-`established` flag or count moved by this edit.
+the key-known chosen plaintext was verified offline. Witness W384 replayed
+the live claim ESTABLISHED AS LABELED, grade-neutral, NO r5, and observed
+chosen marker bytes in the live stack under read-only GDB (`dst+144..169`,
+canary slot `dst+152`, saved-RIP slot `dst+184` = `0x4c2d4c4c45485332`),
+with the canary abort before `ret` and no control transfer. That contradicts
+the report's "no chosen value in the live stack" sentence; the NIT is routed
+to the author and is not a grade change. Wire-only chosen-value control stays
+UNKNOWN, R4 stays harness-only and R5 is unclaimed. This fold updates the
+admission passage, current task limb, lane row, caveat and recipe;
+README/results are re-rendered from the same manifest boundary text. No
+grade, rung cell, `established` flag or count moved by this edit.
 
 ## 2026-11-28 00:2xZ — W382 closes the Tasmota replay (established 155 → 156)
 

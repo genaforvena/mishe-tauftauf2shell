@@ -410,12 +410,16 @@ vulnerable/fixed commits, public diff, no hardware gate and unauthenticated
 network framing make a rung-4 attempt plausible. A 2026-11-28 live replay
 closed the loopback/live-process unknown: a real `radiusd` at `3f802d74`
 with EAP-FAST explicitly enabled aborts under its canary on key-known and
-key-unknown tickets and fixed `064567a08f3b` rejects before decrypt. Rung 4
-stays harness-only — the live stack layout and chosen-value control are
-UNKNOWN, as is reachability outside that explicitly configured loopback
-build. Evidence: `reports/frontier-freeradius2shell.md` (commit `2d708ec`,
-witness replay tape #227 for the harness) and
-`reports/freeradius2shell-status.md` (commit `db0e3163`, live replay). The
+key-unknown tickets and fixed `064567a08f3b` rejects before decrypt. Witness
+W384 independently replayed those rungs and found chosen key-known marker
+bytes in the live stack under read-only GDB (canary and saved-RIP slots), with
+the canary abort before `ret`, so R4 stays harness-only and NO r5. The
+report's contrary "no chosen value in the live stack" sentence is a witness
+NIT for the author; wire-only chosen-value control and reachability outside
+that explicitly configured loopback build stay UNKNOWN. Evidence:
+`reports/frontier-freeradius2shell.md` (commit `2d708ec`, witness tape #227
+for the harness), `reports/freeradius2shell-status.md` (commit `db0e3163`,
+live replay) and `.mishe-tauftauf/artifacts/witness-w384/detail.md`. The
 dedicated `freeradius2shell` mind owns this lane; details in
 `.mishe-tauftauf/charters/freeradius2shell.md`.
 
@@ -16485,17 +16489,23 @@ text; the harness rung-4 grade and NO r5 stand.
   `peer.py` `69ff0272…`, ticket `f655d399…`, vulnerable `radiusd`
   `abce05d2…`, fixed `ca397146…`, installed `eap` `4fbb8bfb…`.
   Key-unknown plaintext bytes are not choosable (GCM keystream from the
-  secret key); the key-known chosen plaintext was verified offline only.
-  No chosen value was observed in the live stack and its layout is
-  unmeasured: rung 4 stays harness-only (standalone chosen
+  secret key). Witness W384 ESTABLISHED the live claim AS LABELED,
+  grade-neutral, NO r5: read-only GDB with the key-known ticket found chosen
+  marker bytes in the live stack (`dst+144..169 = p[144:170]`, canary slot
+  `dst+152 = IUS2SHEL`, saved-RIP slot `dst+184 = 2SHELL-L` =
+  `0x4c2d4c4c45485332`, the corrupted frame #2 PC). The canary aborts before
+  `ret`, so no control transfer or command; the lab key is required and
+  wire-only chosen-value control stays UNKNOWN. The report's "no chosen
+  value ... in the live stack" sentence is a witness NIT for the author, not
+  a grade change. Rung 4 stays harness-only (standalone chosen
   `verify_marker()` rc 42, witness #227), NO r5. Conditions: explicit
   EAP-FAST config, known A-ID, lab shared secret and the exact vulnerable
   commit; no off-loopback probe.
 
-Next: the target mind owns the live chosen-offset/control-flow question.
-What would change this: a chosen value at a measured live stack offset, a
-wire-only benign-command side effect with vulnerable/fixed/safe controls,
-a witness verdict on the live replay, or a checker RED on committed HEAD.
+Next: the target mind owns the live chosen-offset/control-flow question and
+the report NIT. What would change this: a wire-only chosen stack value, a
+control transfer or benign-command side effect with vulnerable/fixed/safe
+controls, the author's NIT fold, or a checker RED on committed HEAD.
 
 ## 2026-11-28 00:2xZ — W382 closes the Tasmota replay; established 155 → 156 (historical)
 
