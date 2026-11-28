@@ -16497,11 +16497,44 @@ Grade unchanged: one request still reaches one fold, no chosen address, marker
 or command; R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at
 its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
-Next: W372's charset-tagged JSON/form bodies (`charset=ISO-8859-1`, raw 0xDF
-keys and values) on both apps. Prediction: `JSON.parse` forces UTF-8, no fold.
-Falsifier: an odd-0xDF operand reaching `case_map` with a vulnerable write and
-fixed zero. What would change this: a measured stock second-fold caller, a
-patched write, a witness contradiction, or a checker RED on committed HEAD.
+## 2026-11-28 08:0xZ — Ruby W372 closes charset-tagged JSON/form bodies
+
+Fold of the W372 falsifiable experiment; the client change is committed in
+`lab/repro/ruby2shell-w371-wire.py` and raw logs stay gitignored under
+`lab/build/evidence/casemap-chain/w369/`. No grade, rung cell, count, manifest
+entry or `established` flag moved by this edit; the "Next: W372 ..." item above
+is closed here.
+
+- **Falsifier not met.** Four request shapes with `charset=ISO-8859-1` and raw
+  0xDF keys/values (`json-charset-{val,key}`, `form-charset-{val,key}`) were sent
+  to unmodified 3.4.12 apps under the all-fold hook with the boot control off.
+  Sinatra logged 423 folds, 0 odd / 0 suspect operands (all HTTP 404); full
+  Rails logged 2824 folds (2665 `downcase`, 82 `capitalize`, 74 `upcase`,
+  1 `casecmp?`), 0 odd / 0 suspect (HTTP 404/500/404/404; the JSON-key 500 is a
+  parse error). No wire 0xDF operand reached a case fold.
+- **No second caller.** The opt-in `method-odd` plus `form-charset-method`
+  controls on the same full app yielded exactly two odd operands, both
+  `upcase` at `rack/method_override.rb:36`: one ISO-8859-1 multipart, one
+  UTF-8-tagged urlencoded `_method`. Valgrind wrote 0 bytes for the urlencoded
+  one — UTF-8 with raw 0xDF closes the `case_map` gate (W365/W366) — so that is
+  the known sink on a second wire encoding, not a second writable fold.
+- **Controls.** Valgrind on the four new shapes alone (vuln rails-full) and on
+  the urlencoded `_method` alone (vuln rails-full) gave 0 invalid writes /
+  0 reads / 0 `case_map` frames. Bootable patched stock `rails new` 3.4.13
+  (Rack 3.2.8) with all four shapes and both `_method` controls gave 0/0/0 and
+  the same JSON-key 500 (safe-input parity). Fixed Sinatra 3.4.13 and
+  full-Rack 3.4.13 cannot boot; their zeros stay UNTESTED, not passes.
+
+Grade unchanged: one writable wire fold, no chosen address, marker or command;
+R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at its labeled
+scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next: W373, a grade-neutral mechanism check on the one anomaly — why a
+UTF-8-tagged invalid-0xDF `_method` reaches `upcase` but writes nothing.
+Falsifier: any non-ISO-8859-1 tag, or any patched 3.4.13 arm, writes.
+What would change the grade: a stock second-fold caller with a patched write,
+a wire-only leak of heap and libc/code bases, a survivor serving a second
+command, or a witness contradiction.
 
 ## 2026-11-28 06:2xZ — Ruby W370 closes Rack boundary token and header tagging
 

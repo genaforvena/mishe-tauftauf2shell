@@ -10045,3 +10045,74 @@ rung 5 remains **NOT ACHIEVED**. Next named experiment W372: charset-tagged
 JSON/form bodies (`charset=ISO-8859-1`) with raw 0xDF keys and values on both
 apps. Prediction: `JSON.parse` forces UTF-8, so no fold. Falsifier: any
 odd-0xDF operand reaching `case_map` with a vulnerable write and fixed zero.
+
+## 2026-11-28 08:05Z — W372: charset-tagged JSON/form bodies CLOSED, no second fold
+
+W372 ran the named follow-up from W371: add the one untested request family —
+`charset=ISO-8859-1` JSON and urlencoded bodies carrying raw 0xDF keys and
+values — to `lab/repro/ruby2shell-w371-wire.py`, and ask whether a charset tag
+turns a wire body into a second odd-sharp-s case-fold caller. Four shapes were
+added: `json-charset-val`, `json-charset-key`, `form-charset-val`,
+`form-charset-key`; an opt-in `form-charset-method` sends an urlencoded
+`_method` as a liveness/encoding control. All requests are ordinary HTTP/1.1
+on loopback to unmodified stock apps; the all-fold preload only logs.
+
+**Prediction and falsifier.** Prediction: `JSON.parse` forces UTF-8, so no fold;
+if a charset-tagged form value reaches the known `_method` upcase, its call
+site will identify it. Falsifier: a non-`_method` odd-0xDF operand reaching
+`case_map` with a vulnerable write and a fixed zero.
+
+**Trace, vulnerable 3.4.12, all-fold hook, boot control off.** Stock Sinatra
+(`.../trace-sinatra-vuln/w372-charset-sinatra.trace`): 423 folds, 0 odd / 0
+suspect operands, all four requests HTTP 404. Full `rails new` (Rack 3.2.9,
+`.../trace-rails-full-vuln/w372-charset-railsfull.trace`): 2824 folds (2665
+`downcase`, 82 `capitalize`, 74 `upcase`, 1 `casecmp?`), 0 odd / 0 suspect;
+HTTP 404 / 500 / 404 / 404. The JSON-key 500 is a parse error, not a fold. No
+wire 0xDF operand reached any case operation on either app.
+
+**Liveness and the one anomaly.** With `RUBY2SHELL_W371_CONTROL=1` on the same
+vulnerable full app (`.../trace-rails-full-vuln/w372-charset-ctrl-railsfull.trace`,
+2846 folds) exactly two odd operands appeared, both `upcase` at
+`rack/method_override.rb:36`: the ISO-8859-1 multipart `_method` and a
+UTF-8-tagged urlencoded `_method` carrying raw 0xDF. The second is the known
+sink on a different wire encoding, not a second caller; valgrind
+(`.../valgrind-rails-full-vuln/w372-formmethod-railsfull-vuln.out`) showed 0
+invalid writes / 0 reads / 0 `case_map` frames for it, because UTF-8 with
+non-7-bit bytes closes the fold gate (W365/W366). The hook's `odd=true` label
+again proves only a case operation, not an expansion.
+
+**Valgrind controls.** Four charset shapes alone on vulnerable rails-full
+(`.../valgrind-rails-full-vuln/w372-charset-railsfull-vuln.out`): 0/0/0.
+Bootable patched stock `rails new` 3.4.13 (Rack 3.2.8) with all four shapes
+plus both `_method` controls
+(`.../valgrind-rails-fixed/w372-charset-railsfixed.out`): 0/0/0, with the same
+JSON-key HTTP 500 as the vulnerable build (safe-input parity). Every arm was
+`ready=YES` and alive after its requests. Fixed Sinatra 3.4.13 and full-Rack
+3.4.13 still cannot boot on this host; their zero counts remain UNTESTED,
+never passes.
+
+Reproduce, one loopback app per command; free ports required:
+
+```
+SURF=json-charset-val,json-charset-key,form-charset-val,form-charset-key
+RUBY2SHELL_W369_PORT=4610 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W371_SURFACES="$SURF" \
+  RUBY2SHELL_W369_TAG=w372-doc-trace bash lab/repro/ruby2shell-w369-pair.sh trace rails-full vuln
+RUBY2SHELL_W369_PORT=4611 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$SURF" RUBY2SHELL_W369_TAG=w372-doc-vg \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+RUBY2SHELL_W369_PORT=4612 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_CONTROL=1 RUBY2SHELL_W371_SURFACES="$SURF" \
+  RUBY2SHELL_W369_TAG=w372-doc-fixed bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+```
+
+Conclusion: W372 is closed on the tested builds. The falsifier was not met —
+no non-`_method` odd operand, no vulnerable write from any new shape, no
+fixed-write divergence. Rung 4 remains witness-COMPLETE and harness-condition
+rung 5 witness-ESTABLISHED at its labeled scope; full stock/oracle-free/
+persistent rung 5 remains **NOT ACHIEVED**. Next named experiment W373: a
+grade-neutral mechanism check of the UTF-8-tagged invalid-0xDF `upcase`
+anomaly (W365 tag-matrix driver extended with an `upcase` mode, N=21/20, both
+builds, valgrind). Prediction: only ISO-8859-1 on 3.4.12 writes; falsifier: any
+non-ISO-8859-1 tag or any 3.4.13 arm writes.

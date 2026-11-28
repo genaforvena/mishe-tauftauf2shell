@@ -21360,6 +21360,50 @@ four odd operands: three `downcase` calls on a raw 0xDF `Content-Type` at
 invalid write and one read, proving the harness is live. Full path:
 `reports/ruby2shell-investigation.md` (W371 tail).
 
+## 2026-11-28 08:0xZ — Ruby W372 charset-tagged JSON/form CLOSED
+
+The W371 client now also sends four charset-tagged shapes with raw 0xDF keys
+or values (`json-charset-{val,key}`, `form-charset-{val,key}`) and an opt-in
+urlencoded `_method` control (`form-charset-method`). It reuses the W369
+runner's wire/hook overrides; raw logs remain gitignored under
+`lab/build/evidence/casemap-chain/w369/`. Use free loopback ports.
+
+```sh
+cd /home/mesh-home/mishe-tauftauf2shell
+SURF=json-charset-val,json-charset-key,form-charset-val,form-charset-key
+RUBY2SHELL_W369_PORT=4614 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W371_SURFACES="$SURF" \
+  RUBY2SHELL_W369_TAG=docs-w372-sinatra \
+  bash lab/repro/ruby2shell-w369-pair.sh trace sinatra vuln
+RUBY2SHELL_W369_PORT=4615 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W371_SURFACES="$SURF" \
+  RUBY2SHELL_W369_TAG=docs-w372-railsfull \
+  bash lab/repro/ruby2shell-w369-pair.sh trace rails-full vuln
+RUBY2SHELL_W369_PORT=4616 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$SURF" RUBY2SHELL_W369_TAG=docs-w372-railsfull-vg \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+RUBY2SHELL_W369_PORT=4617 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=form-charset-method \
+  RUBY2SHELL_W369_TAG=docs-w372-formmethod \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+RUBY2SHELL_W369_PORT=4618 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_CONTROL=1 RUBY2SHELL_W371_SURFACES="$SURF" \
+  RUBY2SHELL_W369_TAG=docs-w372-rails-fixed \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+```
+
+Expect 423 folds on Sinatra and 2824 on full Rails with 0 odd / 0 suspect
+operands; the JSON-key request is HTTP 500 (parse error) on both vulnerable
+and patched builds. Expect 0 invalid writes / 0 reads / 0 `case_map` frames in
+all three valgrind arms. With `RUBY2SHELL_W371_CONTROL=1`, the fold hook shows
+two odd operands, both `upcase` at `rack/method_override.rb:36`; the urlencoded
+one is UTF-8-tagged raw 0xDF and writes 0 under valgrind. Fixed Sinatra 3.4.13
+and full-Rack 3.4.13 cannot boot on this host; their zeros are UNTESTED.
+Full path: `reports/ruby2shell-investigation.md` (W372 tail).
+
+
 ## 2026-11-28 06:2xZ — Ruby W370 Rack boundary token and header tagging CLOSED
 
 Affected/fixed: Ruby 3.4.12 vulnerable, 3.4.13 fixed; pinned gems include
