@@ -16564,6 +16564,47 @@ grade remains a stock second-fold caller with a patched write, a wire-only
 heap+libc/code leak, a survivor serving a second command, or a witness
 contradiction.
 
+## 2026-11-28 08:4xZ — Ruby W374 alternate charset `_method` folds CLOSED
+
+Current research limb for a reader arriving now. Client change is committed in
+`lab/repro/ruby2shell-w371-wire.py`; raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w369/` and `.../w374/`. No grade, rung cell,
+manifest entry or `established` flag moved; the "Next: W374" item above is
+closed here.
+
+- **Operator prediction falsified.** Multipart `_method` carrying `a` + 21 raw
+  0xDF bytes tagged `ISO-8859-15` or `windows-1252` reaches
+  `rack/method_override.rb:36` on unmodified 3.4.12 Sinatra and full Rails and
+  writes one byte past a 66-byte heap block. Valgrind frames:
+  `case_map iso_8859_15.c:267` and `case_map windows_1252.c:224`, both via
+  `rb_str_casemap string.c:7839` ← `rb_str_upcase string.c:8017`, plus one
+  copy-out read. Full rails alt arm: 2 writes / 1 read / 2 `case_map`; Sinatra
+  alt arm the same; `method-odd` control 1 write / 1 read (harness live).
+- **Reachability proved by fold trace**, not inferred: Sinatra 407 folds with
+  three odd `upcase` operands (ISO-8859-1, ISO-8859-15, Windows-1252); full
+  Rails 2820 folds / 73 `upcase` with the same three. One earlier Rails arm
+  used the wrong hook (casecmp-only) and logged 4 folds / 0 `upcase`; preserved
+  negative, not a pass.
+- **Fixed control clean.** Bootable patched `rails new` 3.4.13 (Rack 3.2.8)
+  with all three charsets: 0 invalid writes / 0 reads / 0 `case_map`, HTTP 404
+  on every request. Fixed Sinatra 3.4.13 and full-Rack 3.4.13 cannot boot;
+  their zeros remain UNTESTED.
+- **Correction to W373.** The writable set is not one encoding: the upstream
+  fix changes `to < to_end` to `to_end - to > 1` in all 14 single-byte
+  SHARP_s case maps (ISO-8859-1/2/3/4/9/10/13/14/15/16,
+  Windows-1250/1252/1254/1257). W373's result was scoped to its four tags.
+- **Full writable set measured directly.** All 14 case maps from the same fix
+  commit were driven with the same odd operand under valgrind (28 arms,
+  `.../w374/encoding-set-direct.txt`): 14/14 write once and read once on
+  3.4.12, 14/14 clean on 3.4.13. Three of them are wire-confirmed here.
+
+Grade unchanged: three wire-confirmed writable folds through one caller, no
+chosen address, marker or command; R4 witness-COMPLETE, harness-condition R5
+witness-ESTABLISHED at its labeled scope, full stock/oracle-free/persistent R5
+NOT ACHIEVED. Next: W375, wire-verify the other eleven tags from the same fix
+commit; prediction all write on 3.4.12 with fixed zero, falsifier any
+vulnerable tag clean or any fixed tag writes.
+
 ## 2026-11-28 06:2xZ — Ruby W370 closes Rack boundary token and header tagging
 
 Current research limb for a reader arriving now. Docs-only fold of `d3bc12a4`,

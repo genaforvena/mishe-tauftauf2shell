@@ -10168,3 +10168,87 @@ W374: send the multipart `_method` under `charset=ISO-8859-15` and
 `charset=windows-1252` to the stock apps under valgrind; prediction — no
 writable fold; falsifier — any non-ISO-8859-1 tag writes on 3.4.12 while the
 fixed control stays zero.
+
+## 2026-11-28 08:4xZ — W374: alternate charset `_method` folds CLOSED, prediction falsified
+
+W374 ran operator #7200's named wire experiment. `lab/repro/ruby2shell-w371-wire.py`
+gained two opt-in multipart shapes — `method-iso8859-15` and
+`method-windows-1252` — which post `_method` as `a` + 21 raw 0xDF bytes with
+the part's `Content-Type: text/plain; charset=ISO-8859-15` or
+`charset=windows-1252`. Rack's `tag_multipart_encoding`
+(`parser.rb:618-645`, `find_encoding` at :654-669) force-tags the part body
+from that wire charset; `rack/method_override.rb:36` calls
+`method.to_s.upcase` on it.
+
+Prediction: no writable fold (only ISO-8859-1 expands 0xDF). Falsifier: any
+non-ISO-8859-1 tag writes on 3.4.12 while the fixed control stays zero.
+**Falsifier met on two new encodings**, so the prediction is rejected.
+
+- All-fold hook, `CASE_PAIR_CONTROL=0`, vulnerable 3.4.12: Sinatra (Rack
+  3.2.8) logged 407 folds with exactly three odd operands, all `upcase` at
+  `method_override.rb:36`, tagged ISO-8859-1, ISO-8859-15 and Windows-1252.
+  Full Rails (Rack 3.2.9) logged 2820 folds (73 `upcase`) with the same three
+  odd operands. All six requests returned HTTP 404 and the processes survived.
+  A first Rails arm used the old casecmp-only hook (env typo
+  `RUBY2HELL_W369_HOOK`) and logged 4 folds / 0 `upcase`; it is preserved as a
+  negative instrument run, not a pass. The corrected arm used the all-fold
+  hook from `w374-trace-railsfull2.trace`.
+- Valgrind, vulnerable 3.4.12 rails-full, the two new shapes alone: two
+  `Invalid write of size 1` frames — `case_map (iso_8859_15.c:267)` and
+  `case_map (windows_1252.c:224)` — both via `rb_str_casemap (string.c:7839)`
+  and `rb_str_upcase (string.c:8017)`, plus one `Invalid read of size 1` in
+  `memmove` via `rb_str_casemap (string.c:7857)`. Each access is 0 bytes after
+  a 66-byte block. The same two writes reproduce on vulnerable Sinatra.
+  An `method-odd` arm on the same rails-full build wrote once and read once,
+  so valgrind was live.
+- Bootable patched control (`rails new`, 3.4.13, Rack 3.2.8) with all three
+  `_method` charsets: HTTP 404 on each request, 0 invalid writes, 0 invalid
+  reads, 0 `case_map` frames; `ready=YES` and alive after the requests.
+  Fixed Sinatra 3.4.13 and full-Rack 3.4.13 still cannot boot here, so their
+  zeros remain UNTESTED, not passes.
+- Direct plain-Ruby valgrind (`"a"` + 21 raw 0xDF, `upcase`) confirms the
+  labels: ISO-8859-1, ISO-8859-15, Windows-1252 and its CP1252 alias each
+  write once and read once on 3.4.12 (43-byte result ending `53 53`) and are
+  clean on 3.4.13. W373's "only ISO-8859-1" was scoped to the four tags that
+  matrix tested, not to the encoding family.
+- The source diff explains the family: vulnerable 3.4.12 has
+  `while (*pp < end && to < to_end)` in the 14 single-byte `case_map`
+  implementations that expand SHARP_s (ISO-8859-1/2/3/4/9/10/13/14/15/16 and
+  Windows-1250/1252/1254/1257); 3.4.13 changes all 14 to
+  `while (*pp < end && to_end - to > 1)`.
+- Direct valgrind then checked every one of those 14 encodings with the same
+  odd-count operand on both builds (28 arms, log
+  `lab/build/evidence/casemap-chain/w374/encoding-set-direct.txt`): all 14
+  write once and read once on 3.4.12 with a 43-byte result, all 14 are 0/0 on
+  3.4.13. So the source-derived family prediction holds for every fixed case
+  map; only three encodings have been confirmed through the wire so far.
+
+Reproduce with free loopback ports (raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w369/` and `.../w374/`):
+
+```sh
+SURF=method-odd,method-iso8859-15,method-windows-1252
+RUBY2SHELL_W369_PORT=4622 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W369_HOOK=lab/repro/ruby2shell-w370-casemap-trace.rb \
+  CASE_PAIR_CONTROL=0 RUBY2SHELL_W371_SURFACES="$SURF" \
+  RUBY2SHELL_W369_TAG=w374-trace-railsfull2 \
+  bash lab/repro/ruby2shell-w369-pair.sh trace rails-full vuln
+RUBY2SHELL_W369_PORT=4623 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-iso8859-15,method-windows-1252 \
+  RUBY2SHELL_W369_TAG=w374-vg-railsfull-alt \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails-full vuln
+RUBY2SHELL_W369_PORT=4626 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES="$SURF" RUBY2SHELL_W369_TAG=w374-vg-rails-fixed \
+  bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+```
+
+Conclusion: W374 closes the alternate-charset question on the tested builds.
+The writable set is three wire-confirmed encodings through one stock caller,
+not one encoding; it still adds no chosen address, marker or command. Rung 4
+remains witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED at its
+labeled scope, and full stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+Next named experiment W375: wire-verify the other eleven fixed-in-the-same-
+commit single-byte tags (ISO-8859-2/3/4/9/10/13/14/16, Windows-1250/1254/1257)
+through multipart `_method` on both stock apps under valgrind; prediction — all
+write on 3.4.12 and none on 3.4.13; falsifier — any vulnerable tag clean or any
+fixed tag writes.

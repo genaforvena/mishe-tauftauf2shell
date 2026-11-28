@@ -6,6 +6,20 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 08:4xZ — Ruby W374 falsifies the single-encoding prediction
+
+Commit added two opt-in multipart `_method` shapes (`charset=ISO-8859-15`,
+`charset=windows-1252`) to `lab/repro/ruby2shell-w371-wire.py` plus the W374
+report tail and matching task/reproducibility sections. On unmodified 3.4.12
+Sinatra and full Rails the wire-tagged operands reach
+`rack/method_override.rb:36` and valgrind observes one-byte heap writes in
+`case_map iso_8859_15.c:267` and `case_map windows_1252.c:224` (0 bytes after
+a 66-byte block), while bootable patched Rails 3.4.13 stays clean. The fix
+changes the same guard in all 14 SHARP_s single-byte case maps; W373's
+"only ISO-8859-1" was scoped to the tags it tested. No grade moved: R4
+COMPLETE, harness R5 ESTABLISHED, full stock/oracle-free/persistent R5 NOT
+ACHIEVED.
+
 ## 2026-11-28 08:2xZ — Ruby W373 closes the upcase encoding-tag matrix
 
 Commit `c097903f` added five `upcase_*` modes to

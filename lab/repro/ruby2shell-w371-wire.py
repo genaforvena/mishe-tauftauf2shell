@@ -14,6 +14,7 @@ Odd sharp-s count = 21 in every variant, with no raw 0xDF in the request
 target (percent-encoded there) so the server parses the request at all.
 W372 adds charset-tagged (ISO-8859-1) JSON and urlencoded bodies with raw 0xDF
 keys/values; the opt-in form-charset-method is the known `_method` sink.
+W374 adds opt-in multipart `_method` shapes tagged ISO-8859-15 / windows-1252.
 """
 
 import os
@@ -96,10 +97,15 @@ def build(surface):
                 headers + [(b"Content-Type",
                             b"multipart/form-data; boundary=" + BOUNDARY)],
                 body)
-    if surface == "method-odd":
+    if surface in ("method-odd", "method-iso8859-15", "method-windows-1252"):
+        charset = {
+            "method-odd": b"ISO-8859-1",
+            "method-iso8859-15": b"ISO-8859-15",
+            "method-windows-1252": b"windows-1252",
+        }[surface]
         body = (b"--" + BOUNDARY + b"\r\n"
                 b'Content-Disposition: form-data; name="_method"\r\n'
-                b"Content-Type: text/plain; charset=ISO-8859-1\r\n\r\n"
+                b"Content-Type: text/plain; charset=" + charset + b"\r\n\r\n"
                 + ODD + b"\r\n--" + BOUNDARY + b"--\r\n")
         return (b"POST", PATH,
                 headers + [(b"Content-Type",
