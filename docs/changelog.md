@@ -6,6 +6,21 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 11:1xZ — Ruby W382 second-request post length CLOSED
+
+Operator #7273's named experiment: new committed runner
+`lab/repro/ruby2shell-w382-postlen-abort.sh` and an opt-in SIGABRT backtrace
+in `ruby2shell-w379-wire-watch.gdb` (default off). With the first post-field
+fixed at 64, the second length in fresh N=27 plain Sinatra processes selected
+a repeatable layout family: 1024 survived 4/4 with the size LSB rewritten,
+64 and 256 aborted 4/4, and all nine captured aborts had an `unlink_chunk`
+frame at exactly the corrupted byte. One 4096 arm with no folds is preserved
+as UNKNOWN and excluded. Safe-20 and patched-Rails valgrind controls 0/0/0.
+Wire-only layout-dependent DoS; no second command; grade unchanged R4
+witness-COMPLETE / harness R5 witness-ESTABLISHED / full stock R5 NOT ACHIEVED.
+Raw evidence gitignored under `lab/build/evidence/casemap-chain/w382/`; docs
+sections and next W383 named in the report.
+
 ## 2026-11-28 11:1xZ — Docs fold of Ruby W381
 
 Docs-only fold of `dc2895dc`. The author wrote all three docs sections; the

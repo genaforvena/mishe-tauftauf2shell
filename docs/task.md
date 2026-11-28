@@ -16632,6 +16632,27 @@ follow-up from §08:4xZ.
   on the ladder: R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED
   at its labeled scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
+## 2026-11-28 11:1xZ — Ruby W382 second-post-length layout pick CLOSED
+
+Current research limb. Operator #7273's bounded experiment is complete:
+committed runner `lab/repro/ruby2shell-w382-postlen-abort.sh` (`arms` /
+`controls`), first wire request fixed at post-field length 64, second varied
+over 1/8/64/256/1024/4096, N=27 sharp-s, one fresh plain 3.4.12 Sinatra
+process per arm under `ruby2shell-w379-wire-watch.gdb`. Raw evidence
+gitignored under `lab/build/evidence/casemap-chain/w382/`.
+
+- All valid arms: two folds, `capa=48 oob_off=72 slack=0`, sizeword `0x54`/`0x55`, two `case_map` line-294 traps of `0x53`.
+- Four rounds: 1 → 3/4 aborts, 8 → 3/4, 64 → 4/4, 256 → 4/4, 1024 → 0/4 (all survivors), 4096 → 3/3 valid. One 4096 arm served no request and logged zero folds (cause UNKNOWN, excluded). Fold chunk pairs repeat by post length, so the second length selects a heap layout family; it does not change the written byte or give address control.
+- Falsifier not met: all nine captured aborts have `malloc_printerr → unlink_chunk(p=fold-2 to_end-8) → _int_realloc → ruby_xrealloc2 → rb_gc_impl_realloc`; no wire-shaped bytes at the corrupted sizeword. Opt-in backtrace is `R2S_W379_ABORT_BT=1` in the watch script (default off).
+- Controls: safe-20 vulnerable and bootable fixed Rails 3.4.13 valgrind 0/0/0, both alive.
+- Grade unchanged: wire-only layout-dependent DoS; R4 witness-COMPLETE, harness R5 witness-ESTABLISHED, full stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next: W383, add an opt-in third wire request on the 1024 survivor family and
+test whether the corrupted chunk persists into a later request. Prediction:
+later allocation unlinks it and aborts; falsifier: a survivor serving a third
+request with no further allocator fault. First command: read
+`lab/repro/ruby2shell-w382-postlen-abort.sh:52-95`.
+
 ## 2026-11-28 10:5xZ — Ruby W381 sizeword window and falsifier CLOSED
 
 Current research limb for a reader arriving now. Operator #7265's bounded
@@ -16658,11 +16679,11 @@ supplies free ports and a gitignored output directory), raw evidence under
 - Grade unchanged: R4 witness-COMPLETE, harness-condition R5
   witness-ESTABLISHED, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
-Next: W382, in fresh N=27 processes vary the second request's post-field
-length (`RUBY2SHELL_W377_POSTLEN` 1..4096) and classify abort vs survivor by
-initial sizeword flags and fold-1/fold-2 chunk adjacency. Prediction: abort
-requires a later allocation that unlinks the corrupted chunk; falsifier: an
-abort with no unlink frame, or attacker-shaped bytes at the corrupted sizeword.
+W382 closed this sweep: with the first post-field fixed at 64, the second
+length shaped a repeatable heap layout family; 1024 survived four of four
+fresh processes with the size LSB rewritten, 64 and 256 aborted four of four,
+and all nine captured aborts had an `unlink_chunk` frame. See §11:1xZ; no
+ladder cell moved.
 
 ## 2026-11-28 10:3xZ — Ruby W380 next-chunk size LSB write CLOSED
 

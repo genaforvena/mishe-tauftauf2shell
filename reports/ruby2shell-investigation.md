@@ -10318,6 +10318,70 @@ across vulnerable, fixed and safe-input arms. Prediction: no response-byte
 difference, one write per odd request; falsifier: any response change or crash
 attributable to the write.
 
+## 2026-11-28 11:1xZ — W382: the second post-field length selects a repeatable layout family CLOSED
+
+Operator #7273's bounded follow-up to W381's met falsifier. W381 established
+that N=27 rewrites the next glibc chunk's size LSB in every two-request arm,
+yet only 7 of 10 arms aborted. The question here: does changing ONLY the
+second request's post-field length change the outcome, and does the abort
+carry a real allocator unlink frame? Committed runner
+`lab/repro/ruby2shell-w382-postlen-abort.sh` (`arms` / `controls`) drives two
+separate `ruby2shell-w371-wire.py` invocations against ONE fresh plain
+3.4.12 Sinatra process, first request at `RUBY2SHELL_W377_POSTLEN=64`, second
+at 1, 8, 64, 256, 1024 or 4096, both with `RUBY2SHELL_W380_COUNT=27`, under
+the committed hardware-write watch `ruby2shell-w379-wire-watch.gdb`. The
+watch script gained an opt-in `R2S_W379_ABORT_BT=1` native backtrace at
+SIGABRT; default-off keeps older evidence unchanged. Reproduction:
+
+```
+bash lab/repro/ruby2shell-w382-postlen-abort.sh arms 4820 lab/build/evidence/casemap-chain/w382/arms
+bash lab/repro/ruby2shell-w382-postlen-abort.sh controls 4830 lab/build/evidence/casemap-chain/w382/controls
+```
+
+Four arm rounds on verified-free loopback ports 4820-4825, 4840-4845,
+4850-4855 and 4870-4875; raw evidence is gitignored under
+`lab/build/evidence/casemap-chain/w382/{arms,arms-bt,arms-bt2,arms-bt3,controls}/`.
+Every valid arm folds twice with `capa=48 oob_off=72 slack=0`, sizeword
+`0x54` or `0x55`, and exactly two `case_map` line-294 WRITE traps of byte
+`0x53`. Surviving arms return the usual 650-byte 404 digest
+`1e07f7bb…c961f` on both requests; aborted arms return the 404 on request 1
+and an empty response on request 2.
+
+Abort counts per second post-field length (rounds 1-4): 1 → 3/4; 8 → 3/4;
+64 → 4/4; 256 → 4/4; 1024 → **0/4 survivors**; 4096 → 3/3 valid. One first
+4096 arm (port 4825) booted but served no request and logged zero folds;
+cause UNKNOWN, excluded from the count and preserved. These are outcome
+counts, not a measured rate estimate: n is small and the fold addresses
+repeat by length. Postlen 64 repeats fold chunks `0x7fffc8087590` /
+`0x7fffc803f290` and aborts in two separate rounds; 4096 repeats
+`0x7fffc8087150` / `0x7fffc8063e60` and aborts in three; 1024 survived in
+three rounds with `0x7fffc8042b20` / `0x7fffc808fc50` and in a fourth with a
+different pair. The wire-chosen post length therefore selects a heap layout
+family that decides whether the already-corrupted chunk is later unlinked.
+
+Falsifier check, not met: all nine aborts captured with the opt-in backtrace
+show `#6 malloc_printerr("corrupted size vs. prev_size") → #7
+unlink_chunk(p=<fold-2 to_end - 8>) → #8 _int_realloc(oldp=<fold-2 chunk>,
+oldsize=80, nb=144) → ruby_xrealloc2 → rb_gc_impl_realloc`; the unlinked
+chunk's size LSB is exactly the byte written by the fold. No arm wrote a
+wire-shaped byte at that address — the byte is always the `0x53` case-map
+result, and the `postfield-marker` is at `none`, `+4688` or similarly distant
+offsets, never at the write. Safe-20 vulnerable Sinatra and bootable patched
+Rails 3.4.13 valgrind controls each logged 0 invalid writes / 0 invalid reads
+/ 0 `case_map` errors and stayed alive.
+
+Grade unchanged: wire-only, layout-dependent DoS on an unmodified app; no
+chosen address, no marker, no second command. R4 witness-COMPLETE,
+harness-condition R5 witness-ESTABLISHED at its labeled scope, full
+stock/oracle-free/persistent R5 NOT ACHIEVED.
+
+Next W383: on the 1024 survivor family, add an opt-in third wire request and
+test whether the corrupted chunk persists into a later request or whether
+the process keeps serving 404s. Prediction: the later allocation unlinks the
+corrupted chunk and aborts; falsifier: a survivor serving a third request
+with no further allocator fault. First command: read
+`lab/repro/ruby2shell-w382-postlen-abort.sh:52-95`.
+
 ## 2026-11-28 10:5xZ — W381: the sizeword window is one odd count, and the abort is layout-dependent CLOSED
 
 W381 ran operator #7265's named follow-up: sweep wire-chosen sharp-s count

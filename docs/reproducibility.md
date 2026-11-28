@@ -21554,6 +21554,37 @@ the same vulnerable build; its cause is UNKNOWN. A first fixed-arm attempt
 run concurrently with another valgrind server lost connections from the sixth
 request onward, so run these arms sequentially. No grade or rung cell moved.
 
+## 2026-11-28 11:1xZ — Ruby W382 second-post-length replay CLOSED
+
+Committed runner: `lab/repro/ruby2shell-w382-postlen-abort.sh`. It uses the
+committed client `ruby2shell-w371-wire.py`, the committed watch script
+`ruby2shell-w379-wire-watch.gdb` (opt-in `R2S_W379_ABORT_BT=1` adds a native
+backtrace at SIGABRT; default off) and the gitignored plain 3.4.12 Sinatra
+build at `lab/build/plain/ruby-3.4.12-plain`. Pick unused 127.0.0.1 ports;
+the runner refuses occupied ones. One fresh process per arm, two wire
+requests: `RUBY2SHELL_W371_SURFACES=method-postfield-size`,
+`RUBY2SHELL_W380_COUNT=27`, `RUBY2SHELL_W378_COUNT=1`, first
+`RUBY2SHELL_W377_POSTLEN=64`, second 1/8/64/256/1024/4096.
+
+```
+bash lab/repro/ruby2shell-w382-postlen-abort.sh arms 4820 lab/build/evidence/casemap-chain/w382/arms
+bash lab/repro/ruby2shell-w382-postlen-abort.sh controls 4830 lab/build/evidence/casemap-chain/w382/controls
+```
+
+Observed across four rounds (ports 4820-4825, 4840-4845, 4850-4855,
+4870-4875): valid arms fold twice with `capa=48 oob_off=72 slack=0` and two
+`case_map` traps of `0x53`; aborts per second length 1 3/4, 8 3/4, 64 4/4,
+256 4/4, 1024 0/4, 4096 3/3 valid. One 4096 arm booted but served nothing
+and logged zero folds (UNKNOWN, excluded). With the backtrace enabled, nine
+aborts showed `malloc_printerr → unlink_chunk(p=fold-2 end-8) → _int_realloc
+→ ruby_xrealloc2 → rb_gc_impl_realloc` — an unlink frame in every captured
+abort, so the operator's falsifier was not met. Controls on ports 4860/4861:
+`w382-vg-safe20` and `w382-vg-fixed27` each 0 invalid writes / 0 invalid
+reads / 0 `case_map` errors, alive. No grade or rung cell moved.
+
+Next: W383, opt-in third request on the 1024 survivor family. First command:
+read `lab/repro/ruby2shell-w382-postlen-abort.sh:52-95`.
+
 ## 2026-11-28 10:5xZ — Ruby W381 count sweep and sizeword replay CLOSED
 
 Committed runner: `lab/repro/ruby2shell-w381-sizeword-sweep.sh`. It uses the

@@ -147,6 +147,13 @@ ReturnBreak()
 end
 run
 python
+# W382 opt-in: when the run stops at an allocator abort, capture the native
+# backtrace before the summary. Default off keeps W379-W381 output unchanged.
+if (os.environ.get("R2S_W379_ABORT_BT", "0") == "1" and
+        "SIGABRT" in gdb.execute("info program", to_string=True)):
+    print("W382ABORT_BT")
+    gdb.execute("bt 16")
+
 print("W379SUMMARY folds=%d traps=%d addrs=%s bytes=%s" %
       (foldno, len(traps), ",".join("%#x" % a for a, _ in traps),
        ",".join("0x%02x" % b for _, b in traps)))
