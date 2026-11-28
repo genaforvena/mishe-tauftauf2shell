@@ -9789,3 +9789,90 @@ folds — search the pinned default Sinatra/Rails trees for a request path
 whose `casecmp?` folds two attacker-controlled operands, replay one
 loopback request under valgrind and record whether two distinct addresses
 are written. Falsifier: no stock caller with both operands wire-controlled.
+
+## 2026-11-28 06:12Z — W369: two-operand `casecmp?` wire reach FALSIFIED
+
+The named follow-up tested whether one stock loopback request can fold two
+independent attacker-controlled operands through `rb_str_casecmp_p`. It cannot
+on the pinned default stacks. The stated falsifier — no stock caller with both
+operands wire-controlled — was met, statically and dynamically. Grade unchanged.
+
+**Static enumeration.** `bash lab/repro/ruby2shell-w369-callers.sh` greps the
+pinned gem trees actually used by the two stock apps (output preserved at
+`lab/build/evidence/casemap-chain/w369/static-callers.txt`). Direct
+`String#casecmp?` sites: Rack 3.2.9 `multipart/parser.rb:157`
+(`name.casecmp?("boundary")`: one wire token against a literal), Rails
+`action_controller/metal/rendering.rb:232` (response Vary value against
+framework constants from `mime_negotiation.rb:218-225`), and ActionMailbox
+`router/route.rb:21` (configured address vs inbound recipient, not a default
+HTTP request path). Rack 3.2.8 and Puma 8.1.2 `urlmap.rb` define a private
+helper named `casecmp?`, but its body calls `String#casecmp`
+(`rb_str_casecmp`/`str_casecmp`, `string.c:4262-4327`), which uses `TOLOWER`
+and never reaches the folding `str_casecmp_p` (`string.c:4352-4377`). Those
+URLMaps are also not instantiated by the stock `run`-only config.ru files.
+Sinatra, rack-protection, WEBrick and both generated apps have no caller.
+No stock `downcase(:fold)`/`upcase(:fold)` call exists either. An independent
+read-only scout reached the same verdict.
+
+**One-request replay.** `lab/repro/ruby2shell-w369-pair-wire.py` sends one
+POST to 127.0.0.1 with two ISO-8859-1 multipart values (`"a"` + 0xDF×21 and
+0xDF×23 — odd counts, W368's overflow geometry), an ISO-8859-1 `_method`,
+binary `X-HTTP-Method-Override`, `Accept-Language` and a binary Content-Type
+parameter name. `lab/repro/ruby2shell-w369-pair.sh` boots an unmodified app
+and sends that single request. Two request-shape defects were found and fixed
+during the experiment, both preserved: a target without a leading `/` drew
+Puma's `Invalid HTTP format ... Bad path` (400), and a raw-0xDF `Host` drew
+403 from stock HostAuthorization before multipart parsing; `Host` is now ASCII
+and the sharp-s bytes remain on the other surfaces. Final arms returned
+HTTP 404 (full Rack 3.2.9 Rails returned 500 on the malformed Content-Type
+parameter) with the process alive.
+
+**Dynamic operand trace.** `lab/repro/ruby2shell-w369-casecmp-trace.rb` is a
+`RUBYOPT` observability preload that logs both operands of every `casecmp?`
+and `casecmp`, with encoding, length, leading bytes and sharp-s parity. It
+has one boot-only liveness control (a deliberate pair of ISO-8859-1 21/23
+sharp-s strings) so a zero-hit result cannot mean an inert hook; that control
+is identified by its preload file in the stack, never by request traffic.
+- Stock Sinatra 3.4.12: 1 logged `casecmp?` in total — the boot control.
+- Stock `rails new` 3.4.12 and 3.4.13: 2 total — the boot control plus
+  `rendering.rb:232` comparing UTF-8 `"Accept"` against UTF-8
+  `"X-Requested-With"` (both fixed ASCII constants).
+- Full `rails new` (Rack 3.2.9) 3.4.12: 3 total — the above plus
+  `parser.rb:157` comparing ASCII-8BIT `"boundary"` against UTF-8
+  `"boundary"`. Neither operand carries the wire's 0xDF bytes.
+Evidence: `lab/build/evidence/casemap-chain/w369/trace-*/final.out` and
+`trace-rails-full-vuln/rack329.out`. The summary counter `both-suspect=1` in
+each arm is the labeled boot control, not a request observation.
+
+**Valgrind replay.** One request against stock `rails new` under
+`valgrind --error-limit=no`: vulnerable 3.4.12 logged exactly one invalid
+1-byte write and one copy-out invalid read; the write stack is
+`case_map (iso_8859_1.c:293) -> rb_str_casemap (string.c:7839) ->
+rb_str_upcase (string.c:8017)`, zero bytes past a 66-byte block — the known
+`Rack::MethodOverride` `_method` sink, not a `casecmp?` frame. No second
+write from the two `left`/`right` operands appeared. Fixed 3.4.13 with the
+same request logged zero invalid writes and zero invalid reads. The Ruby
+process's overall `ERROR SUMMARY` is noisy under valgrind, so the per-class
+`Invalid write`/`Invalid read` counts are the claim. Evidence:
+`lab/build/evidence/casemap-chain/w369/valgrind-rails-{vuln,fixed}/*.out`
+and `vuln2.valgrind`. Two failed arms are preserved as negatives: an editor
+change while a background runner was being read caused a shell syntax error,
+and a stale `server.pid` prevented one vulnerable valgrind boot; both were
+re-run successfully with the final request shape.
+
+Conclusion: W369 is closed on the tested builds. The two-fold write remains
+an in-process observation (W367/W368); stock HTTP reaches one fold through
+`_method` and no two-operand fold. Rung 4 remains witness-COMPLETE and
+harness-condition rung 5 witness-ESTABLISHED at its labeled scope; full
+stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
+
+Next named experiment W370: exercise the one remaining live `casecmp?` call
+site — Rack 3.2.9 `parser.rb:157` on the full `rails new` app — with a
+Content-Type parameter name that Rack actually scans as a token while
+tagged with an expanding single-byte encoding if any header-tagging path
+exists. Prediction: the receiver stays ASCII-8BIT (as measured here) or the
+other operand stays the literal `"boundary"`, so no fold. Falsifier: a
+request-tagged operand with odd 0xDF count reaches `case_map` under valgrind.
+First command: `RUBY2SHELL_W369_PORT=4594 bash
+lab/repro/ruby2shell-w369-pair.sh trace rails-full vuln` with the W370
+Content-Type variant; keep `--again 300`.
