@@ -10,6 +10,8 @@ real path needs a special embedded GPU and the vendor rates the issue
 availability-only. Harness `lab/frontier/qtvectorimage2shell`, commands
 `bash harness/build.sh && bash harness/run-all.sh`, result
 `RUN_ALL_OK 16 PASS / 0 FAIL`.
+Clean `git archive` replay at `80dac20d` also returned `BUILD_OK` and
+`RUN_ALL_OK 16 PASS / 0 FAIL` (archive SHA-256 `b5c04b9c…`).
 
 ## Verified ground truth
 

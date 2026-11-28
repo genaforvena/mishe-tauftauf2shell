@@ -88,6 +88,11 @@ Observed on GCC 13.3.0, `-O0 -g`, host ASan:
 - `RUN_ALL_OK 16 PASS / 0 FAIL`. Stable logs and their hashes are under
   `evidence/`; raw PID/address-specific logs are gitignored.
 
+Clean `git archive` replay at commit `80dac20d` (archive SHA-256
+`b5c04b9ce9af2be5eaefc917b0865625504b49b39ad5c5b6f184390e113c2d1a`)
+in a fresh `/tmp` directory reproduced `BUILD_OK` and `RUN_ALL_OK 16 PASS /
+0 FAIL` with no file outside the archive.
+
 ## Evidence boundary
 
 R3 is confirmed only for the verbatim extracted block against the exact-size
