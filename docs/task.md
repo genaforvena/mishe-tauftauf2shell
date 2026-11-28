@@ -16456,10 +16456,35 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
-## 2026-11-28 00:0xZ — gimpjif W361 refutes the compression-cap blocker
+## 2026-11-28 00:2xZ — W382 closes the Tasmota replay; established 155 → 156
 
-Current limb for a reader arriving now. It answers the `idx`-independent map
-item in §23:0x–23:1xZ with a bounded negative, and leaves the Tasmota lanes in
+Current limb for a reader arriving now. Peer fold `a4ce62a1` regenerated
+README.md and docs/results.md from `research-manifest.json` (established
+155 → 156) and updated `reports/tasmotadg2shell-status.md`; this docs fold
+repairs the prose passages that still called the replay owed. No grade,
+rung cell, count or lab evidence moved by a docs edit: ESTABLISHED is the
+witness's verdict at the labeled scope, not a grade promotion.
+
+- **TasmotaDeviceGroups2Shell W382 — ESTABLISHED AS LABELED, grade-neutral.**
+  Independent replay of the `a5968fd3` clean archive (TAR `7cbba5a6…`)
+  matched 2/2 source pins against parent `1cb7ebca` and fix `e97e1e4`,
+  2/2 extracted-body and 5/5 evidence pins, with `BUILD_OK` and unmodified
+  `run-all.sh` `18 PASS / 0 FAIL`. Own loopback ASan saw N=63 `WRITE of size 1`
+  at pinned 454 and N=65 vulnerable and fixed `WRITE of size 11` at pinned
+  378; read-only GDB saw eight chosen `0x44` bytes at heap offsets 516..523
+  with `log_remaining=-3`. No pointer, call, wire-chosen byte or command:
+  rung cells ✓/✓/✓/◐/— and R1/R2/R3 wire / R4 LIMITED host-shim / R5 NO
+  stand unchanged. `a4ce62a1` moved the generated count 155 → 156; the fix
+  leaves host N=65 faulting and the released fixed version stays UNKNOWN.
+
+Next: the admitted mind still owns the ESP/newlib, heap-adjacency and
+released-fix lanes. What would change this: a checker RED on committed HEAD,
+a new witness verdict, or a commit contradicting the folded scopes.
+
+## 2026-11-28 00:0xZ — gimpjif W361 refutes the compression-cap blocker (historical)
+
+Historical limb. It answered the `idx`-independent map
+item in §23:0x–23:1xZ with a bounded negative, and left the Tasmota lanes in
 §23:3x–23:4xZ with that admitted mind. Docs-only fold of `30b7fd92`: lab
 artifacts and the two gimpjif reports moved; no grade, rung cell,
 `established` flag, count or lab evidence moved by this edit. Recipe in
@@ -16492,7 +16517,7 @@ fixed/safe controls on the new geometry; a witness replay of the W361
 negatives; or a chosen-address store. The admitted Tasmota mind still owns
 its ESP/newlib, heap-adjacency and released-fix lanes.
 
-## 2026-11-27 23:3x–23:4xZ — Tasmota Device Groups admitted; witness replay owed
+## 2026-11-27 23:3x–23:4xZ — Tasmota Device Groups admitted; W382 replay closed
 
 Historical limb for the Tasmota lanes; the plant-wide current limb is
 §00:0xZ above. Docs-only fold of `585a9eb9` (the operator's admission of the
@@ -16512,14 +16537,20 @@ reports). No grade, rung cell, count or lab evidence moved by this docs edit.
   plain-build GDB reads eight chosen `0x44` bytes at heap offsets 516..523
   with `log_remaining=-3`. Safe N=1/62 and fixed wire N=63 are clean.
   R1/R2/R3 on the real loopback wire, R4 LIMITED to chosen bytes in the host
-  shim's heap store, R5 NOT CLAIMED; `established:false` and independent
-  witness replay owed. The fix commit does not close N=65 in this host build
-  and no released fixed version was identified (UNKNOWN). Generated counts
+  shim's heap store, R5 NOT CLAIMED. W382 replayed the `a5968fd3` clean
+  archive (TAR `7cbba5a6…`) independently: 2/2 source pins, 2/2 body and 5/5
+  evidence pins, `BUILD_OK` and `RUN_ALL_OK 18 PASS / 0 FAIL`, the same ASan
+  and GDB bytes; verdict ESTABLISHED AS LABELED at that R4 ◐ host-shim scope,
+  grade-neutral, NO r5, no replay owed. `a4ce62a1` moved the generated
+  established count 155 → 156; no docs edit moved a grade, rung cell, count
+  or lab evidence. The fix commit does not close N=65 in this host build and
+  no released fixed version was identified (UNKNOWN). Generated counts
   224/221/221/155 → 225/222/222/155 by `585a9eb9`; rung cells ✓/✓/✓/◐/—
   unchanged.
 
 Next: the admitted mind owns the ESP/newlib, heap-adjacency and released-fix
-lanes; a witness verdict or a grade change moves the presentation.
+lanes; W382 closed the replay, so only a new measurement or grade change
+moves the presentation.
 
 ## 2026-11-27 23:0x–23:1xZ — W367 finds two writes where oracles report one; WLA DX admitted (historical)
 

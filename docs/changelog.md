@@ -6,6 +6,23 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 00:2xZ — W382 closes the Tasmota replay (established 155 → 156)
+
+Peer fold `a4ce62a1` regenerated README.md and docs/results.md from
+`research-manifest.json` (established 155 → 156), updated the tasmota row,
+basis and boundary, and recorded the verdict in
+`reports/tasmotadg2shell-status.md`: ESTABLISHED AS LABELED, grade-neutral,
+NO r5, no replay owed. The independent replay rechecked the `a5968fd3` clean
+archive (TAR `7cbba5a6…`), 2/2 source pins against parent `1cb7ebca` and fix
+`e97e1e4`, 2/2 extracted-body and 5/5 evidence pins, `BUILD_OK` and
+`RUN_ALL_OK 18 PASS / 0 FAIL`; it reproduced wire N=63 ASan `WRITE of size 1`
+at pinned 454, N=65 vulnerable and fixed `WRITE of size 11` at pinned 378,
+and read-only GDB's eight chosen `0x44` at heap offsets 516..523 with
+`log_remaining=-3`. No pointer, wire-chosen byte, call or command. This
+docs fold only removes the stale "witness replay owed" wording from
+`docs/task.md` and `docs/reproducibility.md`; rung cells ✓/✓/✓/◐/—, grades,
+reports and lab evidence are unchanged, and the count moved in `a4ce62a1`.
+
 ## 2026-11-28 00:0xZ — gimpjif W361 refutes the compressed-cap blocker
 
 Scoped docs-only fold of `30b7fd92`: it changed only
