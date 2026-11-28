@@ -9721,3 +9721,71 @@ an even sharp-s count, a byte other than 0x73, or both traps at the
 same address. First command:
 `gdb -q -batch -x lab/repro/ruby2shell-twofold-watch-all.gdb lab/build/plain/ruby-3.4.12-plain/bin/ruby`
 (the watch-all script is to be added in W368).
+
+## 2026-11-28 05:45Z — W368: odd-count threshold confirmed; stale watchpoints counterfeit writes
+
+W368 ran the named watch-all experiment from message #7147. New committed
+scripts: `lab/repro/ruby2shell-twofold-watch-all.gdb` (a Python `gdb.Breakpoint`
+watch on **every** `rb_str_casemap` `to_end`, gated to its own active
+`case_map` call by a return breakpoint at `string.c:7850`) and
+`lab/repro/ruby2shell-twofold-watch-all.sh` (gdb/valgrind/plain matrix).
+Raw evidence, gitignored under `lab/build/evidence/casemap-chain/w368/`:
+`matrix-v2.txt` is the final result; `matrix-v1.txt` preserves the failed
+first instrumentation and its counterfeit traps.
+
+Run from the repository root:
+
+```
+R2S_N1=21 R2S_N2=22 gdb -q -batch \
+  -x lab/repro/ruby2shell-twofold-watch-all.gdb \
+  lab/build/plain/ruby-3.4.12-plain/bin/ruby
+lab/repro/ruby2shell-twofold-watch-all.sh
+```
+
+Result (17 gdb arms, 14 valgrind arms, 28 plain reruns; every arm rc=0,
+no glibc diagnostic in any plain rerun). On vulnerable 3.4.12, traps
+occur **exactly for odd sharp-s counts**: n ∈ {17, 19, 20, 22} produce
+zero traps in every pairing, n ∈ {21, 23} produce one per odd operand.
+The positive control (27, 43) produces two traps at distinct addresses
+(`0x…c98` and `0x…81188`), both with byte `0x73` inside `case_map`
+(`iso_8859_1.c:293`, or `:272` where the optimized line table merges
+the two sharp-s stores). Patched 3.4.13 produces zero traps in all six
+gdb arms, zero valgrind writes/reads in all seven patched valgrind arms.
+Valgrind independently agrees at the threshold: n=21/23/21:22 each show
+one invalid write plus one copy-out read, at blocks of size 66/68/66;
+n=17/19/20/22 show none. The stated falsifier — a trap on an even count
+or a byte other than 0x73 — was not observed.
+
+Mechanism, derived from `string.c:7830` and `enc/iso_8859_1.c:267-293`
+and confirmed by the sweep: with the driver's leading `'a'`,
+`capa = n + 21` and the fold writes `1 + 2n` bytes. The loop enters
+while `to < to_end`; the final two-byte sharp-s store straddles the end
+iff `capa` is even, i.e. iff n is odd. Even counts stop exactly at
+`to_end`. The fix (`to_end - to > 1`) keeps two bytes free. An earlier
+checkpoint in this wake predicted a threshold of `n >= 21` without the
+parity argument; n=22 (zero traps, zero valgrind writes) falsified that
+prediction.
+
+Instrumentation artifact, preserved rather than erased: in the first
+matrix the watchpoints stayed armed after their own `case_map` returned.
+When the next fold reused the same heap address, its ordinary in-bounds
+write triggered the stale watchpoint and was counted as a second OOB
+write (17:21 reported two traps at `0x…c8e`/`0x…c92`; 20:23 reported
+two at `0x…c91`/`0x…c94`). Gating each watchpoint on `active_call`
+turned those into `LATE` lines; the corrected matrix gives one trap for
+each of those pairs, at the odd-count operand's address. Equal-length
+odd pairs (21:21, 23:23) still show one trap only: both folds reuse one
+buffer address and GDB reports one watchpoint hit there. That collapse
+is an oracle limit, not a retraction of W367's direct observation of the
+second, independently addressed write at (27, 43).
+
+Grade unchanged: this is still the same fixed-byte one-byte write class;
+no wire request, chosen address, marker or command was exercised. Rung 4
+remains witness-COMPLETE; harness-condition rung 5 witness-ESTABLISHED at
+its labeled scope; full stock/oracle-free/persistent rung 5 NOT ACHIEVED.
+
+Next named experiment W369: wire reachability of two independent odd-count
+folds — search the pinned default Sinatra/Rails trees for a request path
+whose `casecmp?` folds two attacker-controlled operands, replay one
+loopback request under valgrind and record whether two distinct addresses
+are written. Falsifier: no stock caller with both operands wire-controlled.
