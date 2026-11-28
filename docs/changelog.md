@@ -6,6 +6,32 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 08:2xZ — Ruby W373 closes the upcase encoding-tag matrix
+
+Commit `c097903f` added five `upcase_*` modes to
+`lab/repro/ruby2shell-rung3-utf8-tag.rb` and a 20-arm odd/clean matrix to
+`lab/repro/ruby2shell-utf8-tag-matrix.sh`, plus the W373 report tail; the
+author also updated the matching `docs/task.md` and
+`docs/reproducibility.md` sections. This answers W372's named anomaly check:
+across 3.4.12 / 3.4.13 × five tags × N=21 (odd) / N=20 (clean), exactly one
+arm writes — ISO-8859-1-tagged raw 0xDF `upcase` on vulnerable 3.4.12 at
+N=21, one invalid 1-byte write at `case_map (iso_8859_1.c:293)` via
+`rb_str_upcase` and one copy-out read, 0 bytes after a 66-byte block. N=20
+and all ten fixed 3.4.13 arms are clean. W372's mechanism claim is refined:
+a UTF-8-tagged raw 0xDF operand raises `ArgumentError: input string invalid`
+with no `case_map` frame, so it never reaches the fold. Docs replayed the
+committed recipe on the pinned plain builds: syntax checks passed and all 40
+valgrind arms returned rc 0 — 3.4.12 `latin_arg` N=27/43 and `upcase_latin`
+N=21 each wrote once and read once, the last at `case_map (iso_8859_1.c:293)`
+via `rb_str_casemap (string.c:7839)` / `rb_str_upcase (string.c:8017)`, 0 bytes
+after a 66-byte block with output `A`+42 `S`; N=20, every other tag on both
+builds and all ten 3.4.13 arms were 0/0, and UTF-8-invalid operands raised
+`ArgumentError`. Raw logs stay gitignored under
+`lab/build/evidence/casemap-chain/w373/`. Grade unchanged: one writable wire
+fold, no chosen address, marker or command; no rung cell, count, manifest
+entry or `established` flag moved. Recipe in `docs/reproducibility.md`
+§08:2xZ.
+
 ## 2026-11-28 08:0xZ — Ruby W372 closes charset-tagged JSON/form bodies
 
 Commit `d31e335c` added four `charset=ISO-8859-1` JSON/form request shapes with

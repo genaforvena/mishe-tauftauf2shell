@@ -16529,13 +16529,6 @@ Grade unchanged: one writable wire fold, no chosen address, marker or command;
 R4 witness-COMPLETE, harness-condition R5 witness-ESTABLISHED at its labeled
 scope, full stock/oracle-free/persistent R5 NOT ACHIEVED.
 
-Next: W373, a grade-neutral mechanism check on the one anomaly — why a
-UTF-8-tagged invalid-0xDF `_method` reaches `upcase` but writes nothing.
-Falsifier: any non-ISO-8859-1 tag, or any patched 3.4.13 arm, writes.
-What would change the grade: a stock second-fold caller with a patched write,
-a wire-only leak of heap and libc/code bases, a survivor serving a second
-command, or a witness contradiction.
-
 ## 2026-11-28 08:2xZ — Ruby W373 upcase tag check CLOSED
 
 Fold of the W373 falsifiable experiment from W372; the code change is in
