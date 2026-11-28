@@ -66,7 +66,7 @@ into `install-fixed/`, same config copied over. The identical ticket
 
 The fixed server stayed up and sent Access-Reject; no canary abort. The guard
 is `if ((size_t)length > sizeof(*opaque) - sizeof(opaque->hdr))` (cap 148),
-`freeradius-fixed/.../rlm_eap_fast.c:322`.
+`freeradius-fixed/.../rlm_eap_fast.c:321` (line 322 assigns the errmsg).
 
 Pinned digests (`lab/freeradius2shell-live/logs/live-digests.txt`):
 
@@ -136,7 +136,11 @@ SessionTicket extension`, `ERROR: PAC failed to decrypt`, then
 `R4L-LIVE-BENIGN-MARKER` and
 `[Inferior 1 (process 2444170) exited with code 052]` (octal 42). No
 `__stack_chk_fail` line fired: the preserved canary let the function return
-into the wire-supplied pointer. Ticket `sha256 a26dd3a5…` on both builds.
+into the wire-supplied pointer. The committed marker ticket has
+`sha256 a26dd3a5…` on both builds; that digest is run-specific because it
+embeds the per-process canary. A fresh `r4l-marker-run.sh` reads a new canary
+and produces a different ticket; `r4l-fixed-run.sh` reproduces this digest
+only through its recorded `R4L_CANARY` default.
 
 Controls: **safe input** (`hdr.length=100`, `dlen=52`,
 `logs/r4l-safe/ticket.bin` `sha256 4ecbf2a5…`) got Access-Reject with `PAC
@@ -170,6 +174,9 @@ New digests (`lab/freeradius2shell-live/`):
 | `r4l-marker-gdb.log` | `b1fdb191e9e40b81b20f08aaeb0a296d09cb32f9d17f8be7fbb7b9396911fd4a` |
 | `r4l-fixed-marker-radiusd.log` | `2e74bed1e46a54fc79477af13045c2d8006a001cfbf2abc21cbc818076d00e14` |
 
+The marker-ticket row above is pinned to the recorded canary; a fresh replay
+should not expect that digest to match.
+
 ## Honest rung ladder after this wake
 
 - **Rung 1 (trigger): PASS, live.** Crafted 260-byte ticket drives a real
@@ -196,6 +203,23 @@ explicitly enabled, loopback client with the lab shared secret, configured
 per-process canary and marker address (no writes), ASLR off and an
 `LD_PRELOAD` benign function. No off-loopback probe, no scan, no external
 target, no process memory or register written by the debugger.
+
+## Independent witness replays
+
+Witness W384 (03:28–03:36Z, `.mishe-tauftauf/artifacts/witness-w384/detail.md`)
+replayed the live rungs 1/2/3 claim: 7/7 live digests recomputed equal, both
+worktree HEADs confirmed, canary abort on key-known and key-unknown tickets,
+fixed build rejects with `PAC is too long`. Its read-only GDB replay observed
+chosen key-known bytes at `dst+144..169`, canary slot `dst+152` and saved-RIP
+slot `dst+184` (`0x4c2d4c4c45485332`) in the live stack.
+Witness W385 (03:50–03:53Z, `.mishe-tauftauf/artifacts/witness-w385/detail.md`)
+replayed the rung-4 claim: all 13 report-table digests recomputed equal, the
+unmodified `r4l-marker-run.sh` produced the marker/exit-42 window, the fixed
+and safe arms stayed clean, and a separate read-only GDB probe broke at
+`benign_marker` with `$rip` and the return slot holding the wire-supplied
+address. Both verdicts: **ESTABLISHED AS LABELED**, grade-neutral, NO r5.
+The W384 "no chosen value observed" NIT and W385's digest-specificity and
+fix-guard line-citation NITs are folded above; rung 4 stays live but lab-only.
 
 ## Reproduce
 
