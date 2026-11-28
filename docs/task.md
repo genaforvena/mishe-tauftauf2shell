@@ -16698,10 +16698,10 @@ raw logs and runners are gitignored under
   R5 NOT ACHIEVED. The two-request survivor condition fails: the process
   aborts instead of serving a second command.
 
-Next: W381, sweep wire sharp-s counts 22–28 and map `capa`/`oob_off` to
-slack → prev_size → size LSB → upper sizeword bytes; replay two requests for
-each sizeword-hitting count. Prediction: abort only when the byte reaches
-the next chunk's sizeword.
+W381 closed this sweep: on plain 3.4.12 only N=27 puts the byte on the next
+chunk's size LSB (`oob_off=72 slack=0`), and in two-request arms some
+processes survived with that sizeword rewritten while others aborted — the
+abort is layout-dependent, not deterministic. See §10:5xZ; no ladder cell moved.
 
 ## 2026-11-28 10:1xZ — Ruby W379 second byte recipient CLOSED
 

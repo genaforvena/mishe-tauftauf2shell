@@ -21582,6 +21582,45 @@ the byte was written in every arm. Safe-20 and bootable patched Rails 3.4.13
 valgrind controls are in `lab/build/evidence/casemap-chain/w381/valgrind-summary.txt`
 and both report 0/0/0. No grade or rung cell moved.
 
+Docs replay, 11:08–11:10Z, on the pinned plain 3.4.12 / 3.4.13 builds with
+free loopback ports and gitignored output under
+`lab/build/evidence/casemap-chain/w381/docs-w381-*`. A `python3 -m py_compile`
+check of `lab/repro/ruby2shell-w371-wire.py` passed; a fresh checkout can run
+the committed sweep runner and the three direct pair arms (no gitignored
+`run-vg.sh` needed):
+
+```sh
+bash lab/repro/ruby2shell-w381-sizeword-sweep.sh one 4930 lab/build/evidence/casemap-chain/w381/docs-w381-one-rerun
+bash lab/repro/ruby2shell-w381-sizeword-sweep.sh two 4940 lab/build/evidence/casemap-chain/w381/docs-w381-two
+RUBY2SHELL_W369_PORT=4950 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W380_COUNT=27 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=docs-w381-odd27 bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4951 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size-safe RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W380_COUNT=20 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=docs-w381-safe20 bash lab/repro/ruby2shell-w369-pair.sh valgrind sinatra vuln
+RUBY2SHELL_W369_PORT=4952 RUBY2SHELL_W369_WIRE=lab/repro/ruby2shell-w371-wire.py \
+  RUBY2SHELL_W371_SURFACES=method-postfield-size RUBY2SHELL_W377_POSTLEN=64 \
+  RUBY2SHELL_W380_COUNT=27 RUBY2SHELL_W376_RESPONSE=1 \
+  RUBY2SHELL_W369_TAG=docs-w381-fixed27 bash lab/repro/ruby2shell-w369-pair.sh valgrind rails fixed
+```
+
+Observed on the clean `one` rerun: N=22/24/26/28 `folds=1 traps=0`; N=23/25/27
+exactly one `W379TRAP` with byte `0x53` at `to_end`; `capa=N+21`,
+`oob_off=67/68/69/70/71/72` for N=22..27 and N=28 (`sizeword=0x65 usable=88`,
+`oob_off=73 slack=15`); all seven arms returned the 650-byte 404 digest
+`1e07f7bb…c961f` and stayed alive. On `two`: N=23/25 served two 404s and
+survived; N=27 aborted in one arm on the first request (sizeword before
+`0x54`, empty response) and survived in the other with two traps and the size
+LSB rewritten to `0x53` — the falsifier is met in this replay too. The three
+valgrind arms, run sequentially, gave 1 invalid write / 1 read / 1 `case_map`
+error for vulnerable N=27 and 0/0/0 for even-N safe and bootable patched
+Rails 3.4.13 (Rails' 404 is its 40682-byte error page). A first `one` pass on
+ports 4820-4826 is preserved as a negative: port 4824 was busy at the N=26
+arm, and N=27 logged an extra unlogged GET, two folds/traps and an abort
+instead of the clean single fold; cause UNKNOWN. No grade or rung cell moved.
+
 ## 2026-11-28 10:3xZ — Ruby W380 size-LSB write CLOSED
 
 The committed change is one opt-in environment variable in

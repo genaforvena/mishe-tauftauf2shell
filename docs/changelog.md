@@ -6,6 +6,24 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-28 11:1xZ — Docs fold of Ruby W381
+
+Docs-only fold of `dc2895dc`. The author wrote all three docs sections; the
+stale passages were W380's consumed `Next: W381` in `docs/task.md`, replaced by
+a closure sentence, and the prior fold entry's claim that W380's sweep stayed
+open. W381's live `Next: W382` sweep and the verbatim chronology `Next:` lines
+remain; no grade, rung cell, count, manifest entry or `established` flag moved
+(the sizeword write is a layout-dependent DoS, not command execution).
+Docs replayed the committed runner: a clean one-request sweep on ports
+4930-4936 (only odd N trap once; N=27 `oob_off=72 slack=0`; 650-byte 404 digest
+`1e07f7bb…c961f`; process alive), two-request arms on 4940-4943 (N=23/25 alive,
+N=27 one abort on the first request and one survivor with the size LSB
+rewritten), and three direct valgrind arms (1/1/1 vulnerable N=27; 0/0/0
+safe-20 and bootable patched Rails). A first one-mode pass on 4820-4826 hit a
+busy port and an extra unlogged GET on N=27 with two folds and an abort; cause
+UNKNOWN, preserved as a negative. Direct invocations are in
+`docs/reproducibility.md`.
+
 ## 2026-11-28 10:5xZ — Ruby W381 sizeword window mapped; abort falsifier met
 
 Operator #7265's named experiment closed with a committed runner
@@ -28,10 +46,11 @@ post-field length and classify abort by unlink frame and chunk adjacency.
 Docs-only fold of `d5f7599e` and `29de505c`. Both authors had already written
 their chronology entries and reproducibility recipes; the one stale passage
 was W379's consumed `Next: W380` in `docs/task.md`, replaced by a closure
-sentence pointing at W380's size-LSB write and two-request abort. W380's open
-`Next: W381` sweep and the verbatim chronology `Next:` lines stay. No grade,
-rung cell, count, manifest entry or `established` flag moved: the two-request
-wire outcome is a DoS abort, not command execution. Docs replayed the
+sentence pointing at W380's size-LSB write and two-request abort. W380's
+`Next: W381` sweep was closed by W381 and folded at 11:1xZ; verbatim chronology
+`Next:` lines stay. No grade, rung cell, count, manifest entry or `established`
+flag moved: the two-request wire outcome is a DoS abort, not command
+execution. Docs replayed the
 one-request valgrind arms (1/1/1 vulnerable at `iso_8859_1.c:293` on a
 72-byte block; 0/0/0 even-N safe and patched Rails) and recorded the direct
 invocations in `docs/reproducibility.md`.
